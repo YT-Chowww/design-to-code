@@ -28,6 +28,22 @@ if ! command -v claude &> /dev/null; then
   exit 1
 fi
 
+# 确保 .d2c/preview 目录存在
+if [ ! -d .d2c/preview ]; then
+  echo "Initializing .d2c/preview from templates..."
+  mkdir -p .d2c/preview/src/components
+  mkdir -p .d2c/preview/src/assets
+  TMPL=".claude/skills/d2c-init/templates/preview"
+  cp "$TMPL/package.json" .d2c/preview/
+  cp "$TMPL/vite.config.ts" .d2c/preview/
+  cp "$TMPL/tsconfig.json" .d2c/preview/
+  cp "$TMPL/tsconfig.node.json" .d2c/preview/
+  cp "$TMPL/index.html" .d2c/preview/
+  cp "$TMPL/src/main.ts" .d2c/preview/src/
+  cp "$TMPL/src/App.vue" .d2c/preview/src/
+  cp "$TMPL/src/env.d.ts" .d2c/preview/src/
+fi
+
 echo "=== E2E Test: SimpleCard generate → validate ==="
 echo ""
 
@@ -35,42 +51,42 @@ echo ""
 SPEC=$(cat tests/fixtures/simple-card-spec.md)
 
 echo "--- Step 1: Generate code from fixture ---"
-claude -p "使用 /d2c-generate skill，根据以下设计规格生成代码到 templates/vite-preview/src/components/ 目录：
+claude -p "使用 /d2c-generate skill，根据以下设计规格生成代码到 .d2c/preview/src/components/ 目录：
 
 $SPEC" --max-turns 5 > tests/results/e2e-generate.log 2>&1
 
 assert "SimpleCard.vue 已生成" \
-  "[ -f templates/vite-preview/src/components/SimpleCard.vue ]"
+  "[ -f .d2c/preview/src/components/SimpleCard.vue ]"
 
-if [ -f templates/vite-preview/src/components/SimpleCard.vue ]; then
+if [ -f .d2c/preview/src/components/SimpleCard.vue ]; then
   assert "使用 script setup" \
-    "grep -q 'script setup' templates/vite-preview/src/components/SimpleCard.vue"
+    "grep -q 'script setup' .d2c/preview/src/components/SimpleCard.vue"
   assert "使用 scoped style" \
-    "grep -q 'style scoped' templates/vite-preview/src/components/SimpleCard.vue"
+    "grep -q 'style scoped' .d2c/preview/src/components/SimpleCard.vue"
   assert "不包含 any 类型" \
-    "! grep -q ': any' templates/vite-preview/src/components/SimpleCard.vue"
+    "! grep -q ': any' .d2c/preview/src/components/SimpleCard.vue"
   assert "不包含内联样式" \
-    "! grep -q 'style=\"' templates/vite-preview/src/components/SimpleCard.vue"
+    "! grep -q 'style=\"' .d2c/preview/src/components/SimpleCard.vue"
 fi
 
 # Step 2: 运行校验
 echo ""
 echo "--- Step 2: Validate generated code ---"
-if [ -d templates/vite-preview/node_modules ]; then
+if [ -d .d2c/preview/node_modules ]; then
   echo "  node_modules exists, skipping install"
 else
   echo "  Installing dependencies..."
-  (cd templates/vite-preview && npm install --loglevel=error 2>&1)
+  (cd .d2c/preview && npm install --loglevel=error 2>&1)
 fi
 
 assert "TypeScript 检查通过" \
-  "(cd templates/vite-preview && npx vue-tsc --noEmit 2>&1)"
+  "(cd .d2c/preview && npx vue-tsc --noEmit 2>&1)"
 
 assert "Vite 构建成功" \
-  "(cd templates/vite-preview && npx vite build 2>&1)"
+  "(cd .d2c/preview && npx vite build 2>&1)"
 
 # 清理生成的组件（不影响其他测试）
-rm -f templates/vite-preview/src/components/SimpleCard.vue
+rm -f .d2c/preview/src/components/SimpleCard.vue
 
 echo ""
 echo "================================"

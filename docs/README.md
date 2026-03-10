@@ -27,10 +27,10 @@
    }
    ```
 
-2. 根据你的项目填写 `context/` 目录下的配置文件：
-   - `context/design-system.md` — 设计 token（颜色、字体、间距等）
-   - `context/component-library.md` — 业务组件库文档
-   - `context/project-config.md` — 目标项目配置
+2. 运行 `/d2c-init` 初始化工作目录，然后编辑 `.d2c/context/` 下的配置文件：
+   - `.d2c/context/design-system.md` — 设计 token（颜色、字体、间距等）
+   - `.d2c/context/component-library.md` — 业务组件库文档
+   - `.d2c/context/project-config.md` — 目标项目配置
 
 ### 使用
 

@@ -23,12 +23,20 @@ cd design-to-code
 
 获取 Figma API Key：Figma → Settings → Personal access tokens → Generate new token
 
-### 3. 配置上下文文件
-根据你的项目填写 `context/` 目录下的文件：
+### 3. 初始化 D2C 工作目录
+在 Claude Code 中运行：
+```bash
+/d2c-init
+```
 
-- **`context/design-system.md`**：填入项目的设计 token
-- **`context/component-library.md`**：填入可用的业务组件
-- **`context/project-config.md`**：填入目标项目的配置信息
+这会创建 `.d2c/` 目录并初始化预览项目和上下文配置文件。
+
+### 4. 配置上下文文件
+根据你的项目填写 `.d2c/context/` 目录下的文件：
+
+- **`.d2c/context/design-system.md`**：填入项目的设计 token
+- **`.d2c/context/component-library.md`**：填入可用的业务组件
+- **`.d2c/context/project-config.md`**：填入目标项目的配置信息
 
 ### 4. 确保 Chrome 已安装
 视觉验证需要 Chrome 浏览器。确保系统已安装 Chrome。

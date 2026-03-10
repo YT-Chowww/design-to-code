@@ -8,7 +8,7 @@
       "Bash(npx prettier*)",
       "Bash(lsof -i*)",
       "Bash(kill *)",
-      "Bash(cd templates/vite-preview*)",
+      "Bash(cd .d2c/preview*)",
       "Bash(ls *)",
       "Bash(mkdir *)",
       "Bash(cp *)",

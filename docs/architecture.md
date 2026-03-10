@@ -7,7 +7,7 @@ D2C 采用 **主编排 + 子 Skill** 的架构，通过 Claude Code Skill 系统
 ```
 ┌─────────────────────────────────────────────┐
 │              /d2c (主编排器)                  │
-│  加载上下文 → 协调子 skill → 管理迭代循环      │
+│  初始化检查 → 协调子 skill → 管理迭代循环      │
 └────────┬────────────────────────────────────┘
          │
     ┌────┴────┬──────────┬──────────┬─────────┐
@@ -20,9 +20,9 @@ D2C 采用 **主编排 + 子 Skill** 的架构，通过 Claude Code Skill 系统
     │         │          │          │
     ▼         ▼          ▼          ▼
 ┌────────┐┌────────┐┌─────────┐┌────────┐
-│Figma   ││context/││Vite     ││Chrome  │
-│MCP     ││规范文件 ││Preview  ││DevTools│
-│Server  ││        ││Project  ││MCP     │
+│Figma   ││.d2c/   ││.d2c/    ││Chrome  │
+│MCP     ││context/││preview/ ││DevTools│
+│Server  ││        ││         ││MCP     │
 └────────┘└────────┘└─────────┘└────────┘
 ```
 
@@ -41,13 +41,13 @@ D2C 采用 **主编排 + 子 Skill** 的架构，通过 Claude Code Skill 系统
 ## 上下文系统
 
 ```
-context/
+.d2c/context/
 ├── design-system.md        # 设计 token（颜色、字体、间距、断点）
 ├── component-library.md    # 业务组件库（import 路径、props、用法）
 └── project-config.md       # 目标项目配置（技术栈、目录结构、命名约定）
 ```
 
-CLAUDE.md 通过 `@context/` 引用自动加载这些文件，为所有 skill 提供统一上下文。
+由 `/d2c-init` 创建，各 skill 按需读取。
 
 ## 验证循环
 
@@ -77,7 +77,7 @@ CLAUDE.md 通过 `@context/` 引用自动加载这些文件，为所有 skill �
 使用最小化 Vite + Vue 3 项目模板进行代码预览和验证：
 
 ```
-templates/vite-preview/
+.d2c/preview/
 ├── package.json          # 依赖声明
 ├── vite.config.ts        # Vite 配置
 ├── tsconfig.json         # TypeScript 配置
@@ -86,6 +86,8 @@ templates/vite-preview/
     ├── main.ts           # 应用入口
     └── App.vue           # 根组件
 ```
+
+由 `/d2c-init` 从 `.claude/skills/d2c-init/templates/preview/` 模板创建。
 
 生成的代码写入 `src/` 目录，通过 Vite 开发服务器实时预览。
 

@@ -32,7 +32,8 @@ echo "Working directory: $WORK_DIR"
 echo ""
 
 # 复制模板到临时目录
-cp -r templates/vite-preview/* "$WORK_DIR/"
+TMPL=".claude/skills/d2c-init/templates/preview"
+cp -r "$TMPL"/* "$WORK_DIR/"
 cd "$WORK_DIR"
 
 echo "--- npm install ---"

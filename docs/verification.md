@@ -11,7 +11,7 @@
 **预期结果**：
 - 成功调用 Figma MCP 获取数据
 - 输出包含：组件层级、布局结构、颜色/字体/间距值、图片资源列表
-- 交叉引用 context/ 文件映射 token
+- 交叉引用 `.d2c/context/` 文件映射 token
 - 无 MCP 时给出降级提示
 
 ### d2c-generate 验证
@@ -20,7 +20,7 @@
 /d2c-generate
 ```
 **预期结果**：
-- 生成 `.vue` SFC 文件到 `templates/vite-preview/src/`
+- 生成 `.vue` SFC 文件到 `.d2c/preview/src/`
 - 文件使用 `<script setup lang="ts">` 语法
 - 包含 TypeScript 接口定义
 - Scoped CSS 样式

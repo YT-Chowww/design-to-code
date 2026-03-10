@@ -12,6 +12,6 @@ run_eval \
 1. [SimpleCard] 按钮背景色应为 #3B82F6，当前为 #2563EB
    → 修改 .card-button 的 background-color
 
-请根据偏差报告对 templates/vite-preview/src/components/SimpleCard.vue 做针对性修改，不要全量重写。" \
+请根据偏差报告对 .d2c/preview/src/components/SimpleCard.vue 做针对性修改，不要全量重写。" \
   "320px|#3B82F6|修改|fix|update|针对|specific|Edit" \
   "根据偏差报告做针对性修改而非全量重写"

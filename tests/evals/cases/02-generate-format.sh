@@ -1,7 +1,7 @@
 # 测试：给定设计规格后，d2c-generate 是否生成正确格式的 Vue 3 代码
 run_eval \
   "generate-format" \
-  "使用 /d2c-generate skill，根据以下设计规格生成代码并写入 templates/vite-preview/src/components/ 目录：
+  "使用 /d2c-generate skill，根据以下设计规格生成代码并写入 .d2c/preview/src/components/ 目录：
 
 ## Design Specification
 - 组件名：SimpleCard

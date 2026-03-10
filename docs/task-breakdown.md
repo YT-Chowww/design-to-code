@@ -13,8 +13,8 @@
 - [ ] 创建完整目录结构
 - [ ] 编写 `CLAUDE.md`（项目级指令）
 - [ ] 编写 `.mcp.json`（MCP 服务器配置）
-- [ ] 创建 `templates/vite-preview/` 预览项目模板
-- [ ] 创建 `context/` 模板文件
+- [ ] 创建 `.claude/skills/d2c-init/templates/` 预览项目模板
+- [ ] 创建 `.d2c/context/` 模板文件（通过 `/d2c-init`）
 - [ ] 创建 `.claude/rules/` 规则文件
 
 ## Phase 2: 核心 Skill
