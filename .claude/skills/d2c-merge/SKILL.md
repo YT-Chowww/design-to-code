@@ -6,22 +6,25 @@ description: Merge generated Vue 3 components into a target project directory. A
 # D2C Merge — 合入项目代码
 
 ## 输入
-- 参数：目标项目目录路径（如 `/path/to/my-project`）
-- 已验证通过的生成代码（位于 `templates/vite-preview/src/`）
+- 参数：目标项目目录路径（可选，默认为当前工作目录 CWD）
+- 已验证通过的生成代码（位于 `.d2c/preview/src/`）
 
 ## 流程
 
-### Step 1: 验证目标项目
+### Step 1: 确定目标目录
 
-1. 确认目标目录存在且是一个有效的前端项目：
-   ```bash
-   ls <target-directory>/package.json
-   ls <target-directory>/src/
-   ```
+1. 如果提供了目标目录参数，使用该路径
+2. 如果未提供参数，默认合入当前工作目录（CWD）
 
-2. 如果目标目录不存在或不是有效项目：
-   - 提示用户检查目录路径
-   - 中止合并流程
+确认目标目录存在且是一个有效的前端项目：
+```bash
+ls <target-directory>/package.json
+ls <target-directory>/src/
+```
+
+如果目标目录不存在或不是有效项目：
+- 提示用户检查目录路径
+- 中止合并流程
 
 ### Step 2: 分析目标项目结构
 
@@ -41,7 +44,7 @@ description: Merge generated Vue 3 components into a target project directory. A
    - `.eslintrc.*` / `eslint.config.*` — ESLint 配置
    - `.prettierrc.*` — Prettier 配置
 
-3. **读取 `context/project-config.md`** 获取用户声明的项目约定
+3. **读取 `.d2c/context/project-config.md`** 获取用户声明的项目约定
 
 ### Step 3: 制定合并方案
 
@@ -54,10 +57,16 @@ description: Merge generated Vue 3 components into a target project directory. A
 - 全局样式 → `src/assets/styles/` 或 `src/styles/`
 - 图片资源 → `src/assets/images/`
 
+**自合并保护**：当目标目录为 CWD（即合入业务项目自身）时：
+- **不复制** `App.vue` 和 `main.ts`（这些是预览项目的入口文件，不应覆盖业务项目的入口）
+- 只合并 `components/` 目录下的组件文件和样式文件
+- 图片资源从 `.d2c/assets/` 复制到 `src/assets/images/`
+
 **向用户展示合并方案**：
 ```
 === Merge Plan ===
-Source: templates/vite-preview/src/
+Source: .d2c/preview/src/
+Target: <target-directory>
 
 Files to merge:
   components/Header.vue      → <target>/src/components/Header.vue
@@ -65,6 +74,10 @@ Files to merge:
   components/FeatureList.vue → <target>/src/components/FeatureList.vue
   components/Footer.vue      → <target>/src/components/Footer.vue
   style.css                  → <target>/src/assets/styles/d2c-generated.css
+
+Skipped (self-merge protection):
+  App.vue   — target project entry file
+  main.ts   — target project entry file
 
 Proceed with merge? (Waiting for confirmation)
 ```
@@ -89,7 +102,7 @@ Proceed with merge? (Waiting for confirmation)
    - 不覆盖已存在的同名文件（提示用户确认）
 
 4. **复制资源文件**：
-   - 图片、图标等静态资源复制到 `src/assets/` 对应目录
+   - 图片、图标等静态资源从 `.d2c/assets/` 复制到 `src/assets/` 对应目录
    - 更新代码中的资源引用路径
 
 ### Step 5: 配置路由（如适用）
@@ -153,3 +166,4 @@ Suggested next steps:
 | 路径别名未知 | 使用相对路径，添加 TODO 注释 |
 | lint/format 失败 | 报告错误但不阻塞合并 |
 | 无写入权限 | 提示权限问题 |
+| 自合并时 App.vue/main.ts | 自动跳过，不覆盖业务项目入口 |

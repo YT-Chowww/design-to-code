@@ -6,29 +6,181 @@ description: Validate generated Vue 3 code with TypeScript checking, ESLint, and
 # D2C Validate — 代码校验与运行
 
 ## 输入
-- 已生成的 Vue 3 代码（位于 `templates/vite-preview/src/`）
+- 已生成的 Vue 3 代码（位于 `.d2c/preview/src/`）
 
 ## 流程
 
-### Step 1: 确保预览项目就绪
+### Step 0: 确保预览项目存在
 
-检查预览项目是否存在且依赖已安装：
+检查 `.d2c/preview/package.json` 是否存在：
 
 ```bash
-# 检查 node_modules 是否存在
-ls templates/vite-preview/node_modules
+ls .d2c/preview/package.json
+```
+
+如果不存在，自动从内联模板创建预览项目骨架：
+
+1. 创建目录：
+```bash
+mkdir -p .d2c/preview/src/components
+mkdir -p .d2c/preview/src/assets
+```
+
+2. 创建以下文件（使用 Write 工具）：
+
+**`.d2c/preview/package.json`**:
+```json
+{
+  "name": "d2c-preview",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5173",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext .vue,.js,.jsx,.ts,.tsx",
+    "type-check": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "vue": "^3.4.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.0",
+    "typescript": "~5.6.0",
+    "vite": "^6.0.0",
+    "vue-tsc": "^2.1.0",
+    "eslint": "^9.0.0",
+    "@eslint/js": "^9.0.0",
+    "eslint-plugin-vue": "^9.28.0",
+    "typescript-eslint": "^8.0.0"
+  }
+}
+```
+
+**`.d2c/preview/vite.config.ts`**:
+```ts
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import { fileURLToPath, URL } from 'node:url'
+
+export default defineConfig({
+  plugins: [vue()],
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url))
+    }
+  },
+  server: {
+    port: 5173,
+    open: false
+  }
+})
+```
+
+**`.d2c/preview/tsconfig.json`**:
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "preserve",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}
+```
+
+**`.d2c/preview/tsconfig.node.json`**:
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "composite": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["vite.config.ts"]
+}
+```
+
+**`.d2c/preview/index.html`**:
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>D2C Preview</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
+```
+
+**`.d2c/preview/src/main.ts`**:
+```ts
+import { createApp } from 'vue'
+import App from './App.vue'
+
+createApp(App).mount('#app')
+```
+
+**`.d2c/preview/src/env.d.ts`**:
+```ts
+/// <reference types="vite/client" />
+
+declare module '*.vue' {
+  import type { DefineComponent } from 'vue'
+  const component: DefineComponent<Record<string, unknown>, Record<string, unknown>, unknown>
+  export default component
+}
+```
+
+### Step 1: 确保预览项目就绪
+
+检查预览项目依赖是否已安装：
+
+```bash
+ls .d2c/preview/node_modules
 ```
 
 如果 `node_modules` 不存在：
 ```bash
-cd templates/vite-preview && npm install
+cd .d2c/preview && npm install
 ```
 
 ### Step 2: TypeScript 检查
 
 运行 TypeScript 类型检查：
 ```bash
-cd templates/vite-preview && npx vue-tsc --noEmit
+cd .d2c/preview && npx vue-tsc --noEmit
 ```
 
 **如果失败**：
@@ -44,7 +196,7 @@ cd templates/vite-preview && npx vue-tsc --noEmit
 
 运行 ESLint 代码规范检查：
 ```bash
-cd templates/vite-preview && npx eslint src/ --ext .vue,.ts,.tsx
+cd .d2c/preview && npx eslint src/ --ext .vue,.ts,.tsx
 ```
 
 **如果失败**：
@@ -59,7 +211,7 @@ cd templates/vite-preview && npx eslint src/ --ext .vue,.ts,.tsx
 
 运行 Vite 构建验证代码可以正确打包：
 ```bash
-cd templates/vite-preview && npx vite build
+cd .d2c/preview && npx vite build
 ```
 
 **如果失败**：
@@ -76,7 +228,7 @@ lsof -i :5173
 
 如果已占用，先停止已有进程。然后启动 Vite 开发服务器：
 ```bash
-cd templates/vite-preview && npx vite --port 5173 &
+cd .d2c/preview && npx vite --port 5173 &
 ```
 
 等待服务器启动就绪（检查输出包含 `Local:` URL）。
@@ -110,6 +262,7 @@ Some validations failed. See errors above.
 
 | 错误 | 处理方式 |
 |------|----------|
+| `.d2c/preview/` 不存在 | Step 0 自动创建预览项目 |
 | `node_modules` 不存在 | 运行 `npm install` |
 | TypeScript 错误修复 2 次仍失败 | 添加 `@ts-ignore` + TODO |
 | ESLint 配置缺失 | 跳过 ESLint 检查 |

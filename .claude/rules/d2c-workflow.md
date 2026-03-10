@@ -6,7 +6,7 @@
 - TypeScript 错误修复上限：2 次（超过后降级处理）
 
 ## 文件操作规则
-- 生成代码写入 `templates/vite-preview/src/` 目录
+- 生成代码写入 `.d2c/preview/src/` 目录
 - 迭代修改时做针对性修改，不要全量重写
 - 合并到目标项目时保留目标项目的格式规范
 
@@ -26,6 +26,6 @@
 - 子组件间通过 props/emits 通信
 
 ## 预览项目
-- 预览项目使用 `templates/vite-preview/` 模板
+- 预览项目位于 `.d2c/preview/`（由 `/d2c-init` 创建）
 - Vite 开发服务器使用端口 5173
 - 每次验证前确保开发服务器运行

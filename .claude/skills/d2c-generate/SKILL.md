@@ -14,9 +14,14 @@ description: Generate Vue 3 + TypeScript code from a design specification. Use a
 ### Step 1: 加载上下文
 
 读取以下文件获取编码规范和项目配置：
-- `context/design-system.md` — 设计 token 定义
-- `context/component-library.md` — 可复用业务组件
-- `context/project-config.md` — 项目配置与约定
+- `.d2c/context/design-system.md` — 设计 token 定义
+- `.d2c/context/component-library.md` — 可复用业务组件
+- `.d2c/context/project-config.md` — 项目配置与约定
+
+如果 `.d2c/context/` 目录不存在或文件缺失，使用以下默认值并提示用户运行 `/d2c-init`：
+- 默认设计 token：使用通用 CSS 变量命名（`--color-primary`, `--spacing-4` 等）
+- 默认组件库：无业务组件，全部使用原生 HTML
+- 默认项目配置：Vue 3 + TypeScript + Vite + Scoped CSS
 
 ### Step 2: 组件分解策略
 
@@ -123,10 +128,10 @@ const emit = defineEmits<{
 
 ### Step 5: 写入文件
 
-将生成的文件写入 `templates/vite-preview/src/` 目录：
-- 组件文件：`templates/vite-preview/src/components/ComponentName.vue`
-- 更新 `templates/vite-preview/src/App.vue` 导入并使用所有组件
-- 如有 CSS 变量需要全局定义，写入 `templates/vite-preview/src/style.css`
+将生成的文件写入 `.d2c/preview/src/` 目录：
+- 组件文件：`.d2c/preview/src/components/ComponentName.vue`
+- 更新 `.d2c/preview/src/App.vue` 导入并使用所有组件
+- 如有 CSS 变量需要全局定义，写入 `.d2c/preview/src/style.css`
 
 **App.vue 更新规则**：
 ```vue
@@ -175,3 +180,55 @@ import HeroSection from './components/HeroSection.vue'
 - 设计规格缺失：提示先运行 `/d2c-extract`
 - 组件库组件不存在：使用原生 HTML 元素替代，添加 TODO 注释
 - 设计 token 无匹配：使用具体值并添加注释标记
+- `.d2c/context/` 不存在：使用默认值，提示运行 `/d2c-init`
+
+---
+
+## 编码规范参考
+
+### 组件文件格式
+- 使用 Single File Component (SFC) 格式 `.vue`
+- 顺序：`<script setup lang="ts">` → `<template>` → `<style scoped>`
+
+### Script 规范
+- 必须使用 `<script setup lang="ts">`
+- 使用 Composition API（`ref`, `computed`, `watch`, `onMounted` 等）
+- Props 使用 `defineProps<T>()` 配合 TypeScript 接口
+- Emits 使用 `defineEmits<T>()`
+- 组件名使用 PascalCase
+
+### TypeScript 规范
+- 所有 props 和 emits 必须有类型定义
+- 使用 `interface` 定义复杂类型
+- 避免使用 `any`，优先使用具体类型
+- Ref 类型：`const count = ref<number>(0)`
+
+### 模板规范
+- 属性绑定使用简写：`:prop` 而非 `v-bind:prop`
+- 事件绑定使用简写：`@event` 而非 `v-on:event`
+- 条件渲染：`v-if` / `v-else-if` / `v-else`
+- 列表渲染：`v-for` 必须配合 `:key`
+- 自闭合组件：`<MyComponent />`
+
+### 样式规范
+- 默认使用 `<style scoped>` 防止样式泄漏
+- CSS 属性按以下顺序排列：
+  1. 布局（display, position, flex, grid）
+  2. 盒模型（width, height, margin, padding）
+  3. 排版（font, color, text-align）
+  4. 视觉（background, border, shadow, opacity）
+  5. 动画（transition, animation）
+- 使用 CSS 变量引用设计 token
+- 响应式使用 media query 或 CSS 容器查询
+
+### 命名约定
+- 组件文件名：PascalCase（`UserProfile.vue`）
+- CSS 类名：kebab-case（`.user-profile`）
+- 事件名：kebab-case（`@update-value`）
+- Props 名：camelCase（`userName`）
+
+### 组件拆分策略
+- 单一职责：每个组件负责一个明确的 UI 区域
+- 复杂设计（>5 个独立区域）应分解为子组件
+- 纯展示组件与逻辑组件分离
+- 可复用组件提取到独立文件

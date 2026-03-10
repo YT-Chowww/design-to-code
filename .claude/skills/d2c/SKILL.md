@@ -8,26 +8,50 @@ description: Main orchestrator for the Design-to-Code workflow. Converts a Figma
 ## 输入
 - 参数格式：`<figma-url> [target-directory]`
 - `figma-url`：Figma 设计稿链接（必需）
-- `target-directory`：目标项目目录路径（可选，不提供则跳过合并步骤）
+- `target-directory`：目标项目目录路径（可选，不提供则默认合入当前工作目录 CWD）
 
 ## 配置
-- 最大迭代次数：3（可在 `.claude/rules/d2c-workflow.md` 中修改）
+- 最大迭代次数：3
 - 视觉验证通过阈值：90%
 
+## 代码质量规则
+- 不允许使用 `any` 类型（除非降级处理）
+- 不允许内联样式（必须使用 scoped CSS）
+- 设计中超过 5 个独立区域时，必须分解为子组件
+- 迭代修改时做针对性修改，不要全量重写
+- TypeScript 错误修复上限：2 次（超过后降级处理）
+
+## MCP 降级策略
+- Figma MCP 不可用：提示用户手动提供设计信息（截图 + 描述）
+- Chrome DevTools MCP 不可用：跳过视觉验证，仅做静态校验，输出警告
+
 ## 主流程
+
+### Pre-flight Check: 初始化检查
+
+检查 `.d2c/` 目录是否存在且结构完整：
+
+```bash
+ls .d2c/preview/package.json
+ls .d2c/context/design-system.md
+```
+
+如果 `.d2c/` 不存在或结构不完整：
+- 自动调用 `/d2c-init` 初始化工作目录
+- 等待初始化完成后继续
 
 ### 初始化
 
 1. **解析参数**：
    - 提取 Figma URL 和目标目录路径
    - 验证 Figma URL 格式（应包含 `figma.com`）
-   - 如果提供了目标目录，验证其存在
+   - 目标目录：如果提供了路径，验证其存在；如果未提供，默认为 CWD
 
 2. **输出流程概览**：
 ```
 === D2C: Design to Code ===
 Figma URL: <url>
-Target: <directory or "Preview only">
+Target: <directory or CWD>
 Max iterations: 3
 
 Starting design-to-code conversion...
@@ -52,7 +76,7 @@ Starting design-to-code conversion...
 ```
 
 - 传入设计规格（来自 Step 1）
-- 生成 Vue 3 SFC 文件到 `templates/vite-preview/src/`
+- 生成 Vue 3 SFC 文件到 `.d2c/preview/src/`
 
 ### Step 3/5: 代码校验
 
@@ -118,24 +142,17 @@ while iteration <= MAX_ITERATIONS:
 
 ### Step 5/5: 合入项目代码
 
-仅在以下条件满足时执行：
-- 视觉验证通过（PASSED）或跳过（SKIPPED）
-- 用户提供了目标目录路径
+仅在视觉验证通过（PASSED）或跳过（SKIPPED）时执行。
 
 调用 `/d2c-merge` skill：
 ```
-[Step 5/5] Merging into target project...
+[Step 5/5] Merging into project...
 ```
 
-- 传入目标目录路径
+- 如果提供了目标目录路径，传入该路径
+- 如果未提供目标目录，默认合入 CWD（当前业务项目）
 - 执行代码合并
 - 输出合并报告
-
-如果未提供目标目录：
-```
-[Step 5/5] Skipped (no target directory specified)
-Preview available at: http://localhost:5173
-```
 
 ### 最终输出
 
@@ -162,6 +179,7 @@ Preview: http://localhost:5173
 
 | 阶段 | 错误 | 处理 |
 |------|------|------|
+| Pre-flight | `.d2c/` 不存在 | 自动调用 `/d2c-init` |
 | 初始化 | Figma URL 格式无效 | 提示正确格式并中止 |
 | Extract | Figma MCP 不可用 | 降级到手动输入 |
 | Extract | 设计数据为空 | 提示检查 node-id 并中止 |
@@ -176,6 +194,6 @@ Preview: http://localhost:5173
 ## 中止与恢复
 
 - 任何步骤可以通过用户中断停止
-- 已生成的代码保留在 `templates/vite-preview/src/` 中
+- 已生成的代码保留在 `.d2c/preview/src/` 中
 - 可通过单独调用子 skill 继续中断的步骤
 - 开发服务器可能需要手动停止：`lsof -i :5173` 然后 `kill <PID>`

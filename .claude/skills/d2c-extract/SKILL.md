@@ -49,20 +49,31 @@ description: Extract design information from a Figma URL. Use when you need to a
 
 **图片资源**：
 - 识别需要导出的图片/图标
-- 调用 `download_figma_images` 下载资源
+- 调用 `download_figma_images` 下载资源到 `.d2c/assets/` 目录
 - 记录资源文件名和用途
 
 ### Step 4: 交叉引用上下文
 
-读取 `context/design-system.md`：
+读取 `.d2c/context/design-system.md`：
 - 将 Figma 中的颜色值映射到设计 token（如 `#3B82F6` → `var(--color-primary)`）
 - 将字体值映射到排版 token
 - 将间距值映射到间距 token
 
-读取 `context/component-library.md`：
+如果 `.d2c/context/design-system.md` 不存在，使用以下内嵌默认 token 映射，并提示用户运行 `/d2c-init` 配置完整的设计系统：
+- `#3B82F6` → `var(--color-primary)`
+- `#1F2937` → `var(--color-text-primary)`
+- `#6B7280` → `var(--color-text-secondary)`
+- `#FFFFFF` → `var(--color-background)`
+- `#E5E7EB` → `var(--color-border)`
+- 间距：4/8/12/16/20/24/32/40/48/64px → `var(--spacing-1)` ~ `var(--spacing-16)`
+- 字号：12/14/16/18/20/24/30/36px → `var(--font-size-xs)` ~ `var(--font-size-4xl)`
+
+读取 `.d2c/context/component-library.md`：
 - 检查设计中是否有可复用的现有组件
 - 标记哪些部分应使用业务组件库中的组件
 - 记录需要传递的 props
+
+如果 `.d2c/context/component-library.md` 不存在，跳过组件映射，全部使用原生 HTML 元素。
 
 ### Step 5: 输出设计规格
 
@@ -116,3 +127,4 @@ description: Extract design information from a Figma URL. Use when you need to a
 - Figma URL 无效：提示用户检查 URL 格式
 - MCP 连接失败：降级到手动输入模式
 - 设计数据为空：提示用户检查 node-id 参数
+- `.d2c/context/` 不存在：使用内嵌默认值，提示运行 `/d2c-init`

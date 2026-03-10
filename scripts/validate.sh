@@ -2,10 +2,11 @@
 # validate.sh - Run ESLint + TypeScript checks on the preview project
 set -e
 
-PREVIEW_DIR="${1:-templates/vite-preview}"
+PREVIEW_DIR="${1:-.d2c/preview}"
 
 if [ ! -d "$PREVIEW_DIR" ]; then
   echo "Error: Preview directory not found: $PREVIEW_DIR"
+  echo "Run /d2c-init to create the preview project"
   exit 1
 fi
 
