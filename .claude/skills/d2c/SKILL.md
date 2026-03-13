@@ -175,6 +175,66 @@ Generated files:
 Preview: http://localhost:5173
 ```
 
+## 文档记录
+
+每次完整 D2C 流程执行完成后，将整体会话记录保存到 `.d2c/docs/sessions/` 目录。此文档汇总所有步骤的执行概要，串联各子 skill 的产出。
+
+**文件命名**：`<YYYY-MM-DD>-<design-name>.md`
+- 日期使用当天日期
+- `<design-name>` 从 Figma 设计稿名称或 Frame 名称派生，使用 kebab-case
+
+**文档内容模板**：
+
+```markdown
+# D2C 会话记录：<设计稿名称>
+
+## 基本信息
+- **日期**：<YYYY-MM-DD>
+- **Figma URL**：<url>
+- **目标目录**：<target-directory or CWD>
+- **最大迭代次数**：3
+- **视觉验证阈值**：90%
+
+## 执行概要
+| 步骤 | Skill | 状态 | 耗时 | 备注 |
+|------|-------|------|------|------|
+| Pre-flight | — | OK/WARN | — | <.d2c/ 状态> |
+| 1/5 Extract | d2c-extract | OK/ERROR | — | <N 个组件, N 个资源> |
+| 2/5 Generate | d2c-generate | OK | — | <N 个文件生成> |
+| 3/5 Validate | d2c-validate | OK/WARN | — | <校验结果摘要> |
+| 4/5 Verify | d2c-verify | PASSED/FAILED/SKIPPED | — | <得分 / 迭代次数> |
+| 5/5 Merge | d2c-merge | OK/SKIPPED | — | <N 个文件合并> |
+
+## 组件清单
+| 组件名 | 文件路径 | 说明 |
+|--------|----------|------|
+| <PascalCase> | src/components/<name>.vue | <组件职责> |
+
+## 迭代历史
+| 迭代 | 操作 | 验证得分 | 关键修改 |
+|------|------|----------|----------|
+| 1 | 首次生成 + 验证 | <N>% | — |
+| 2 | 偏差修复 + 重新验证 | <N>% | <修改摘要> |
+
+## 最终统计
+- **组件数量**：<N>
+- **迭代次数**：<N/3>
+- **最终得分**：<N>%
+- **合并文件数**：<N>
+- **预览地址**：http://localhost:5173
+
+## 关联文档
+- 设计规格：[.d2c/docs/design-specs/<file>](../design-specs/<file>)
+- 生成记录：[.d2c/docs/generation-logs/<file>](../generation-logs/<file>)
+- 校验报告：[.d2c/docs/validation-reports/<file>](../validation-reports/<file>)
+- 验证报告：[.d2c/docs/verification-reports/<file>](../verification-reports/<file>)
+- 合并报告：[.d2c/docs/merge-reports/<file>](../merge-reports/<file>)
+```
+
+**写入时机**：在最终输出（`=== D2C Complete ===`）之后，使用 Write 工具将文档写入 `.d2c/docs/sessions/<YYYY-MM-DD>-<design-name>.md`。
+
+确保先检查 `.d2c/docs/sessions/` 目录存在（如不存在则创建）。
+
 ## 错误处理汇总
 
 | 阶段 | 错误 | 处理 |

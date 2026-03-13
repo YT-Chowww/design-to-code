@@ -157,6 +157,76 @@ Suggested next steps:
 === Merge Complete ===
 ```
 
+## 文档记录
+
+每次执行完成后，将合并过程记录到 `.d2c/docs/merge-reports/` 目录。
+
+**文件命名**：`<YYYY-MM-DD>-<design-name>.md`
+- 日期使用当天日期
+- `<design-name>` 从当前任务的设计稿名称派生，使用 kebab-case
+
+**文档内容模板**：
+
+```markdown
+# 合并报告：<设计稿名称>
+
+## 基本信息
+- **日期**：<YYYY-MM-DD>
+- **目标目录**：<target-directory or CWD>
+- **自合并保护**：<是/否>
+
+## 目标项目分析
+- **组件目录**：<src/components/ 等>
+- **页面目录**：<src/views/ 等>
+- **样式目录**：<src/assets/styles/ 等>
+- **路径别名**：<@ → src/>
+- **格式化工具**：<Prettier + ESLint 等>
+
+## 合并方案
+| 源文件 | 目标路径 | 操作 |
+|--------|----------|------|
+| components/<name>.vue | <target>/src/components/<name>.vue | 新建/覆盖/跳过 |
+| style.css | <target>/src/assets/styles/d2c-generated.css | 新建 |
+
+## 适配记录
+### 导入路径适配
+| 原路径 | 适配后路径 |
+|--------|------------|
+| ./components/Header.vue | @/components/Header.vue |
+
+### Token 映射
+| 原 Token | 目标 Token |
+|----------|------------|
+| var(--color-primary) | var(--brand-blue) |
+
+### Tailwind 转换（如适用）
+| CSS 属性 | Tailwind 类 |
+|----------|-------------|
+| display: flex | class="flex" |
+
+## 资源文件
+| 源文件 | 目标路径 | 状态 |
+|--------|----------|------|
+| .d2c/assets/<name> | src/assets/images/<name> | OK |
+
+## 路由建议（如适用）
+```typescript
+{
+  path: '<path>',
+  name: '<name>',
+  component: () => import('<import-path>')
+}
+```
+
+## 格式化结果
+- **Prettier**：<执行/跳过> — <结果>
+- **ESLint --fix**：<执行/跳过> — <结果>
+```
+
+**写入时机**：在 Step 7 输出合并报告后，使用 Write 工具将文档写入 `.d2c/docs/merge-reports/<YYYY-MM-DD>-<design-name>.md`。
+
+确保先检查 `.d2c/docs/merge-reports/` 目录存在（如不存在则创建）。
+
 ## 错误处理
 
 | 场景 | 处理方式 |

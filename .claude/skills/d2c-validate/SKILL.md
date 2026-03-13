@@ -258,6 +258,64 @@ All validations passed. Ready for visual verification.
 Some validations failed. See errors above.
 ```
 
+## 文档记录
+
+每次执行完成后，将校验结果记录到 `.d2c/docs/validation-reports/` 目录。
+
+**文件命名**：`<YYYY-MM-DD>-<design-name>.md`
+- 日期使用当天日期
+- `<design-name>` 从当前任务的设计稿名称派生，使用 kebab-case
+- 同一设计的多次校验（迭代）更新同一文件（追加记录）
+
+**文档内容模板**：
+
+```markdown
+# 校验报告：<设计稿名称>
+
+## 基本信息
+- **日期**：<YYYY-MM-DD>
+- **校验轮次**：<第 N 次校验>
+- **预览项目状态**：<已存在/自动创建>
+- **依赖安装**：<已就绪/重新安装>
+
+## TypeScript 检查
+- **状态**：PASSED / DEGRADED / FAILED
+- **错误数量**：<N>
+- **修复尝试**：<N/2>
+- **修复详情**：
+  1. <文件:行号> — <错误描述> → <修复方式>
+- **降级处理**（如有）：
+  1. <文件:行号> — 添加 @ts-ignore（原因：<描述>）
+
+## ESLint 检查
+- **状态**：PASSED / PARTIAL / SKIPPED
+- **错误数量**：<N>
+- **自动修复**：<N 项>
+- **剩余问题**：
+  1. <文件:行号> — <规则名> — <描述>
+
+## Vite 构建
+- **状态**：PASSED / FAILED
+- **构建耗时**：<ms>
+- **产出大小**：<KB>
+- **缺失依赖安装**（如有）：<包名>
+
+## 开发服务器
+- **状态**：Running / Failed
+- **地址**：http://localhost:5173
+- **端口处理**：<空闲直接启动/停止已有进程后重启>
+
+## 综合结果
+- TypeScript: <PASSED/DEGRADED/FAILED>
+- ESLint: <PASSED/PARTIAL/SKIPPED>
+- Vite build: <PASSED/FAILED>
+- Dev server: <Running/Failed>
+```
+
+**写入时机**：在 Step 6 输出验证结果后，使用 Write 工具将文档写入 `.d2c/docs/validation-reports/<YYYY-MM-DD>-<design-name>.md`。多次校验时，读取已有文件并追加新一轮的校验记录。
+
+确保先检查 `.d2c/docs/validation-reports/` 目录存在（如不存在则创建）。
+
 ## 错误处理
 
 | 错误 | 处理方式 |

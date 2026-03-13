@@ -123,6 +123,52 @@ description: Extract design information from a Figma URL. Use when you need to a
 
 将此规格保存到对话上下文中，供 `d2c-generate` 使用。
 
+## 文档记录
+
+每次执行完成后，将设计规格和执行过程记录到 `.d2c/docs/design-specs/` 目录。
+
+**文件命名**：`<YYYY-MM-DD>-<design-name>.md`
+- 日期使用当天日期
+- `<design-name>` 从 Figma 设计稿名称或 Frame 名称派生，使用 kebab-case
+
+**文档内容模板**：
+
+```markdown
+# 设计规格：<设计稿名称>
+
+## 基本信息
+- **日期**：<YYYY-MM-DD>
+- **Figma URL**：<url>
+- **Page/Frame**：<名称>
+- **尺寸**：<宽 x 高>
+- **MCP 状态**：<Figma MCP 可用/不可用（手动输入模式）>
+
+## 组件树
+<从 Step 3 解析出的组件层级结构>
+
+## 组件详情
+<每个组件的 Role、Layout、Size、Styles、Children>
+
+## 设计 Token 映射
+| Figma 值 | CSS 变量 | 类型 |
+|----------|----------|------|
+| <hex>    | <token>  | 颜色/字体/间距 |
+
+## 资源清单
+| 文件名 | 用途 | 下载状态 |
+|--------|------|----------|
+| <name> | <desc> | OK/FAILED |
+
+## 组件库匹配
+| 设计区域 | 匹配组件 | Props |
+|----------|----------|-------|
+| <area>   | <component or 原生 HTML> | <props> |
+```
+
+**写入时机**：在 Step 5 输出设计规格完成后，使用 Write 工具将文档写入 `.d2c/docs/design-specs/<YYYY-MM-DD>-<design-name>.md`。
+
+确保先检查 `.d2c/docs/design-specs/` 目录存在（如不存在则创建）。
+
 ## 错误处理
 - Figma URL 无效：提示用户检查 URL 格式
 - MCP 连接失败：降级到手动输入模式

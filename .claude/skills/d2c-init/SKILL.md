@@ -35,6 +35,13 @@ mkdir -p .d2c/preview/src/components
 mkdir -p .d2c/preview/src/assets
 mkdir -p .d2c/context
 mkdir -p .d2c/assets
+mkdir -p .d2c/docs/reference
+mkdir -p .d2c/docs/design-specs
+mkdir -p .d2c/docs/generation-logs
+mkdir -p .d2c/docs/validation-reports
+mkdir -p .d2c/docs/verification-reports
+mkdir -p .d2c/docs/merge-reports
+mkdir -p .d2c/docs/sessions
 ```
 
 ### Step 3: 复制预览项目文件
@@ -104,7 +111,15 @@ Created:
   │   ├── design-system.md
   │   ├── component-library.md
   │   └── project-config.md
-  └── assets/           # Figma 图片资源
+  ├── assets/           # Figma 图片资源
+  └── docs/             # 执行文档记录
+      ├── reference/             # 参考文档
+      ├── design-specs/          # 设计规格记录
+      ├── generation-logs/       # 代码生成记录
+      ├── validation-reports/    # 校验报告
+      ├── verification-reports/  # 视觉验证报告
+      ├── merge-reports/         # 合并报告
+      └── sessions/              # 完整会话记录
 
 Next steps:
   1. 编辑 .d2c/context/design-system.md 填入你的设计 token

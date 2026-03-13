@@ -4,7 +4,7 @@
 # 依赖：claude CLI 已安装且可用
 set -e
 
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 
 RESULTS_DIR="tests/results/$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$RESULTS_DIR"

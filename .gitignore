@@ -1,3 +1,5 @@
 ./context
 ./.mcp.json
 templates/vite-preview
+.d2c/*
+tests/results/*

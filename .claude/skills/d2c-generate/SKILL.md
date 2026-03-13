@@ -176,6 +176,59 @@ import HeroSection from './components/HeroSection.vue'
    - 使用 Edit 工具做精确修改
 4. **记录修改**：列出所有修改内容
 
+## 文档记录
+
+每次执行完成后，将代码生成过程记录到 `.d2c/docs/generation-logs/` 目录。
+
+**文件命名**：`<YYYY-MM-DD>-<design-name>.md`
+- 日期使用当天日期
+- `<design-name>` 从设计规格中的名称派生，使用 kebab-case
+- 迭代修改时更新同一文件（追加迭代记录），不创建新文件
+
+**文档内容模板**：
+
+```markdown
+# 代码生成记录：<设计稿名称>
+
+## 基本信息
+- **日期**：<YYYY-MM-DD>
+- **设计规格来源**：d2c-extract 对话上下文
+- **迭代次数**：<首次生成 / 第 N 次迭代>
+- **Context 加载状态**：
+  - design-system.md：<已加载/使用默认值>
+  - component-library.md：<已加载/使用默认值>
+  - project-config.md：<已加载/使用默认值>
+
+## 组件分解方案
+| 组件名 | 职责 | 文件路径 | 子组件 |
+|--------|------|----------|--------|
+| <PascalCase> | <描述> | .d2c/preview/src/components/<name>.vue | <子组件列表> |
+
+## 生成文件清单
+| 文件路径 | 类型 | 状态 |
+|----------|------|------|
+| .d2c/preview/src/components/<name>.vue | 组件 | 新建/更新 |
+| .d2c/preview/src/App.vue | 根组件 | 更新 |
+| .d2c/preview/src/style.css | 全局样式 | 新建/更新 |
+
+## Token 使用情况
+| CSS 变量 | 使用位置 | 来源 |
+|----------|----------|------|
+| var(--color-primary) | Header.vue .logo | design-system.md |
+| 16px | HeroSection.vue .title | 无匹配 token（TODO） |
+
+## 迭代修改记录
+### 迭代 N（仅迭代修改时记录）
+- **偏差来源**：d2c-verify 偏差报告
+- **修改项**：
+  1. <文件名> — <修改内容描述>
+  2. <文件名> — <修改内容描述>
+```
+
+**写入时机**：在 Step 5 文件写入完成后（或 Step 6 迭代修改完成后），使用 Write 工具将文档写入 `.d2c/docs/generation-logs/<YYYY-MM-DD>-<design-name>.md`。迭代修改时，读取已有文件并追加「迭代修改记录」章节。
+
+确保先检查 `.d2c/docs/generation-logs/` 目录存在（如不存在则创建）。
+
 ## 错误处理
 - 设计规格缺失：提示先运行 `/d2c-extract`
 - 组件库组件不存在：使用原生 HTML 元素替代，添加 TODO 注释
