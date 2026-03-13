@@ -1,6 +1,6 @@
 ---
 name: d2c-merge
-description: Merge generated Vue 3 components into a target project directory. Adapts imports, design tokens, and file placement to match the target project's conventions. Use after visual verification passes.
+description: Merge generated frontend components into a target project directory. Adapts imports, design tokens, file placement, and routing suggestions to match the target project's framework and conventions. Use after visual verification passes.
 ---
 
 # D2C Merge — 合入项目代码
@@ -28,6 +28,8 @@ ls <target-directory>/src/
 
 ### Step 2: 分析目标项目结构
 
+读取 `.d2c/context/project-config.md`，获取检测到的技术栈（`framework`、`cssStrategy` 等）。
+
 读取目标项目的关键配置，理解其约定：
 
 1. **目录结构**：
@@ -40,7 +42,7 @@ ls <target-directory>/src/
 
 2. **读取项目配置**（如存在）：
    - `tsconfig.json` — 路径别名配置
-   - `vite.config.ts` / `vue.config.js` — 构建配置
+   - `vite.config.ts` / `next.config.*` / `angular.json` — 构建配置
    - `.eslintrc.*` / `eslint.config.*` — ESLint 配置
    - `.prettierrc.*` — Prettier 配置
 
@@ -50,6 +52,16 @@ ls <target-directory>/src/
 
 根据分析结果，确定每个文件的目标位置：
 
+**文件扩展名对照**（按 framework）：
+
+| 框架 | 组件扩展名 | 入口文件（跳过合并） |
+|------|-----------|-------------------|
+| vue3 | `.vue` | `App.vue`, `main.ts` |
+| react | `.tsx` / `.jsx` | `App.tsx`, `main.tsx` |
+| svelte | `.svelte` | `App.svelte`, `main.ts` |
+| angular | `.component.ts` + `.component.html` + `.component.css` | `app.component.*` |
+| vanilla | `.js` + `.css` | `main.js`, `index.html` |
+
 **文件分类规则**：
 - 通用展示组件 → `src/components/` （或 `src/components/common/`）
 - 业务组件 → `src/components/business/` （如目录存在）
@@ -58,7 +70,7 @@ ls <target-directory>/src/
 - 图片资源 → `src/assets/images/`
 
 **自合并保护**：当目标目录为 CWD（即合入业务项目自身）时：
-- **不复制** `App.vue` 和 `main.ts`（这些是预览项目的入口文件，不应覆盖业务项目的入口）
+- **不复制**入口文件（`App.*`、`main.*`、`index.html`）——这些是预览项目的入口文件，不应覆盖业务项目的入口
 - 只合并 `components/` 目录下的组件文件和样式文件
 - 图片资源从 `.d2c/assets/` 复制到 `src/assets/images/`
 
@@ -67,17 +79,18 @@ ls <target-directory>/src/
 === Merge Plan ===
 Source: .d2c/preview/src/
 Target: <target-directory>
+Framework: <framework>
 
 Files to merge:
-  components/Header.vue      → <target>/src/components/Header.vue
-  components/HeroSection.vue → <target>/src/components/HeroSection.vue
-  components/FeatureList.vue → <target>/src/components/FeatureList.vue
-  components/Footer.vue      → <target>/src/components/Footer.vue
-  style.css                  → <target>/src/assets/styles/d2c-generated.css
+  components/Header.<ext>      → <target>/src/components/Header.<ext>
+  components/HeroSection.<ext> → <target>/src/components/HeroSection.<ext>
+  components/FeatureList.<ext> → <target>/src/components/FeatureList.<ext>
+  components/Footer.<ext>      → <target>/src/components/Footer.<ext>
+  style.css                    → <target>/src/assets/styles/d2c-generated.css
 
 Skipped (self-merge protection):
-  App.vue   — target project entry file
-  main.ts   — target project entry file
+  App.<ext>   — target project entry file
+  main.<ext>  — target project entry file
 
 Proceed with merge? (Waiting for confirmation)
 ```
@@ -90,6 +103,8 @@ Proceed with merge? (Waiting for confirmation)
    - 根据目标项目的路径别名更新 import 语句
    - 例如：`./components/Header.vue` → `@/components/Header.vue`
    - 更新组件间的相对导入路径
+   - React：适配 `.tsx` 导入（可能省略扩展名）
+   - Angular：适配 standalone imports
 
 2. **替换设计 token**：
    - 如果目标项目使用不同的 CSS 变量名，做映射替换
@@ -107,18 +122,34 @@ Proceed with merge? (Waiting for confirmation)
 
 ### Step 5: 配置路由（如适用）
 
-如果目标项目使用 Vue Router 且生成的是页面级组件：
+根据框架和路由库建议路由配置：
 
-1. 读取路由配置文件（`src/router/index.ts`）
-2. 建议添加的路由条目：
-   ```typescript
-   {
-     path: '/new-page',
-     name: 'NewPage',
-     component: () => import('@/views/NewPage.vue')
-   }
-   ```
-3. 向用户展示建议，由用户决定是否添加
+#### Vue Router（vue3 + vue-router）
+读取路由配置文件（`src/router/index.ts`），建议添加：
+```typescript
+{
+  path: '/new-page',
+  name: 'NewPage',
+  component: () => import('@/views/NewPage.vue')
+}
+```
+
+#### React Router（react + react-router-dom）
+建议在路由配置中添加：
+```tsx
+<Route path="/new-page" element={<NewPage />} />
+```
+
+#### Angular Router（angular + angular-router）
+建议在路由模块中添加：
+```typescript
+{ path: 'new-page', component: NewPageComponent }
+```
+
+#### Svelte（svelte + svelte-routing / SvelteKit）
+如果使用 SvelteKit，建议创建 `src/routes/new-page/+page.svelte`。
+
+向用户展示建议，由用户决定是否添加。
 
 ### Step 6: 运行目标项目的格式化工具
 
@@ -126,10 +157,10 @@ Proceed with merge? (Waiting for confirmation)
 cd <target-directory>
 
 # 运行 Prettier（如配置存在）
-npx prettier --write "src/components/Header.vue" "src/components/HeroSection.vue" ...
+npx prettier --write "src/components/Header.<ext>" "src/components/HeroSection.<ext>" ...
 
 # 运行 ESLint fix（如配置存在）
-npx eslint --fix "src/components/Header.vue" "src/components/HeroSection.vue" ...
+npx eslint --fix "src/components/Header.<ext>" "src/components/HeroSection.<ext>" ...
 ```
 
 ### Step 7: 输出合并报告
@@ -137,11 +168,12 @@ npx eslint --fix "src/components/Header.vue" "src/components/HeroSection.vue" ..
 ```
 === D2C Merge Report ===
 
+Framework: <framework>
 Files merged:
-  ✓ src/components/Header.vue (new)
-  ✓ src/components/HeroSection.vue (new)
-  ✓ src/components/FeatureList.vue (new)
-  ✓ src/components/Footer.vue (new)
+  ✓ src/components/Header.<ext> (new)
+  ✓ src/components/HeroSection.<ext> (new)
+  ✓ src/components/FeatureList.<ext> (new)
+  ✓ src/components/Footer.<ext> (new)
   ✓ src/assets/styles/d2c-generated.css (new)
 
 Adaptations:
@@ -173,6 +205,7 @@ Suggested next steps:
 ## 基本信息
 - **日期**：<YYYY-MM-DD>
 - **目标目录**：<target-directory or CWD>
+- **技术栈**：<framework> + <language> + <cssStrategy>
 - **自合并保护**：<是/否>
 
 ## 目标项目分析
@@ -185,14 +218,14 @@ Suggested next steps:
 ## 合并方案
 | 源文件 | 目标路径 | 操作 |
 |--------|----------|------|
-| components/<name>.vue | <target>/src/components/<name>.vue | 新建/覆盖/跳过 |
+| components/<name>.<ext> | <target>/src/components/<name>.<ext> | 新建/覆盖/跳过 |
 | style.css | <target>/src/assets/styles/d2c-generated.css | 新建 |
 
 ## 适配记录
 ### 导入路径适配
 | 原路径 | 适配后路径 |
 |--------|------------|
-| ./components/Header.vue | @/components/Header.vue |
+| ./components/Header.<ext> | @/components/Header.<ext> |
 
 ### Token 映射
 | 原 Token | 目标 Token |
@@ -210,13 +243,7 @@ Suggested next steps:
 | .d2c/assets/<name> | src/assets/images/<name> | OK |
 
 ## 路由建议（如适用）
-```typescript
-{
-  path: '<path>',
-  name: '<name>',
-  component: () => import('<import-path>')
-}
-```
+<按框架输出对应路由代码片段>
 
 ## 格式化结果
 - **Prettier**：<执行/跳过> — <结果>
@@ -236,4 +263,4 @@ Suggested next steps:
 | 路径别名未知 | 使用相对路径，添加 TODO 注释 |
 | lint/format 失败 | 报告错误但不阻塞合并 |
 | 无写入权限 | 提示权限问题 |
-| 自合并时 App.vue/main.ts | 自动跳过，不覆盖业务项目入口 |
+| 自合并时入口文件 | 自动跳过，不覆盖业务项目入口 |

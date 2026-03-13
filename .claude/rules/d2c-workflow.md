@@ -15,17 +15,22 @@
 - Chrome DevTools MCP 不可用：跳过视觉验证，仅做静态校验，输出警告
 
 ## 代码质量要求
-- 所有生成代码必须通过 TypeScript 检查
-- 所有生成代码必须通过 ESLint 检查
+- 所有生成代码必须通过类型检查（TypeScript 项目）
+- 所有生成代码必须通过 ESLint 检查（如已配置）
 - 不允许使用 `any` 类型（除非降级处理）
-- 不允许内联样式（必须使用 scoped CSS）
+- 不允许内联样式（必须使用框架对应的样式隔离方案）
 
 ## 组件分解
 - 设计中超过 5 个独立区域时，必须分解为子组件
 - 每个子组件独立生成并组合
-- 子组件间通过 props/emits 通信
+- 子组件间通过框架标准通信机制交互（Vue: props/emits, React: props/callbacks, Svelte: props/events, Angular: @Input/@Output）
 
 ## 预览项目
 - 预览项目位于 `.d2c/preview/`（由 `/d2c-init` 创建）
-- Vite 开发服务器使用端口 5173
+- 开发服务器使用端口 5173
 - 每次验证前确保开发服务器运行
+
+## 技术栈配置
+- 技术栈信息存储在 `.d2c/context/project-config.md` 的「检测到的技术栈」章节
+- 所有 skill 应读取 `project-config.md` 中的 `framework` 字段来决定行为分支
+- 未检测到项目时默认使用 Vue 3 + TypeScript + Vite + Scoped CSS

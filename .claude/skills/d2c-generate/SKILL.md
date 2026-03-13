@@ -1,9 +1,9 @@
 ---
 name: d2c-generate
-description: Generate Vue 3 + TypeScript code from a design specification. Use after d2c-extract has produced a design spec, or when you have design information to convert to code.
+description: Generate frontend code from a design specification, adapting to the detected framework (Vue 3, React, Svelte, Angular, or Vanilla). Use after d2c-extract has produced a design spec, or when you have design information to convert to code.
 ---
 
-# D2C Generate — Vue 3 代码生成
+# D2C Generate — 代码生成
 
 ## 输入
 - 设计规格（由 `d2c-extract` 产出，存在于对话上下文中）
@@ -18,10 +18,15 @@ description: Generate Vue 3 + TypeScript code from a design specification. Use a
 - `.d2c/context/component-library.md` — 可复用业务组件
 - `.d2c/context/project-config.md` — 项目配置与约定
 
+**从 `project-config.md` 顶部「检测到的技术栈」章节提取以下关键字段**：
+- `framework`: vue3 | react | svelte | angular | vanilla
+- `language`: typescript | javascript
+- `cssStrategy`: scoped | css-modules | tailwind | styled-components | sass | less | vanilla
+
 如果 `.d2c/context/` 目录不存在或文件缺失，使用以下默认值并提示用户运行 `/d2c-init`：
-- 默认设计 token：使用通用 CSS 变量命名（`--color-primary`, `--spacing-4` 等）
-- 默认组件库：无业务组件，全部使用原生 HTML
-- 默认项目配置：Vue 3 + TypeScript + Vite + Scoped CSS
+- 默认框架：Vue 3
+- 默认语言：TypeScript
+- 默认 CSS 方案：Scoped CSS
 
 ### Step 2: 组件分解策略
 
@@ -35,10 +40,24 @@ description: Generate Vue 3 + TypeScript code from a design specification. Use a
 
 **命名规则**：
 - 组件名使用 PascalCase
-- 文件名与组件名一致：`ComponentName.vue`
-- 使用有语义的名称而非通用名（`HeroSection.vue` 而非 `Section1.vue`）
+- 文件名与组件名一致（扩展名按框架决定）
+- 使用有语义的名称而非通用名（`HeroSection` 而非 `Section1`）
 
-### Step 3: 生成 Vue 3 SFC 文件
+**文件扩展名对照**：
+
+| 框架 | 组件扩展名 | 入口文件 |
+|------|-----------|---------|
+| vue3 | `.vue` | `App.vue` |
+| react | `.tsx` / `.jsx` | `App.tsx` / `App.jsx` |
+| svelte | `.svelte` | `App.svelte` |
+| angular | `.component.ts` + `.component.html` + `.component.css` | `app.component.ts` |
+| vanilla | `.html` + `.css` + `.js` | `index.html` |
+
+### Step 3: 生成组件代码（按框架分支）
+
+---
+
+#### Vue 3（framework = vue3）
 
 对每个组件生成 `.vue` 文件，严格遵循以下模板结构：
 
@@ -106,33 +125,6 @@ const emit = defineEmits<{
 </style>
 ```
 
-### Step 4: 样式指南
-
-**优先使用设计 token**：
-- 颜色：`var(--color-primary)` 而非硬编码 `#3B82F6`
-- 字体：`var(--font-size-base)` 而非硬编码 `16px`
-- 间距：`var(--spacing-4)` 而非硬编码 `16px`
-- 只有在 design-system.md 中无匹配 token 时才使用具体值
-
-**布局实现**：
-- 优先使用 Flexbox（`display: flex`）
-- 复杂网格使用 CSS Grid（`display: grid`）
-- 避免使用 `float`、`position: absolute`（除非确实需要）
-- 响应式使用 media query
-
-**尺寸处理**：
-- 容器宽度优先使用 `max-width` + `width: 100%`
-- 固定尺寸元素使用 `px`
-- 字体使用 `px` 或设计 token
-- 间距使用设计 token 或 `px`
-
-### Step 5: 写入文件
-
-将生成的文件写入 `.d2c/preview/src/` 目录：
-- 组件文件：`.d2c/preview/src/components/ComponentName.vue`
-- 更新 `.d2c/preview/src/App.vue` 导入并使用所有组件
-- 如有 CSS 变量需要全局定义，写入 `.d2c/preview/src/style.css`
-
 **App.vue 更新规则**：
 ```vue
 <script setup lang="ts">
@@ -164,6 +156,241 @@ import HeroSection from './components/HeroSection.vue'
 </style>
 ```
 
+---
+
+#### React（framework = react）
+
+对每个组件生成 `.tsx`（TypeScript）或 `.jsx`（JavaScript）文件：
+
+```tsx
+import type { FC } from 'react'
+import styles from './ComponentName.module.css'
+import ChildComponent from './ChildComponent'
+
+interface ComponentNameProps {
+  title: string
+  items?: ItemType[]
+  onClick?: (id: string) => void
+}
+
+const ComponentName: FC<ComponentNameProps> = ({ title, items = [], onClick }) => {
+  return (
+    <div className={styles.componentName}>
+      <ChildComponent />
+    </div>
+  )
+}
+
+export default ComponentName
+```
+
+**CSS Modules 文件**（`ComponentName.module.css`）：
+```css
+.componentName {
+  display: flex;
+  padding: var(--spacing-4);
+  color: var(--color-text-primary);
+  background-color: var(--color-background);
+}
+```
+
+**如果 cssStrategy = tailwind**，则不生成 CSS Modules，直接在 JSX 中使用 Tailwind 类名：
+```tsx
+const ComponentName: FC<ComponentNameProps> = ({ title }) => {
+  return (
+    <div className="flex p-4 text-gray-900 bg-white">
+      {/* ... */}
+    </div>
+  )
+}
+```
+
+**App.tsx 更新规则**：
+```tsx
+import Header from './components/Header'
+import HeroSection from './components/HeroSection'
+
+function App() {
+  return (
+    <div className="app">
+      <Header />
+      <HeroSection />
+    </div>
+  )
+}
+
+export default App
+```
+
+---
+
+#### Svelte（framework = svelte）
+
+对每个组件生成 `.svelte` 文件：
+
+```svelte
+<script lang="ts">
+  // Props（Svelte 5 runes 语法）
+  interface Props {
+    title: string
+    items?: ItemType[]
+  }
+  let { title, items = [] }: Props = $props()
+
+  // 子组件导入
+  import ChildComponent from './ChildComponent.svelte'
+
+  // 响应式状态
+  // let count = $state(0)
+</script>
+
+<div class="component-name">
+  <ChildComponent />
+</div>
+
+<style>
+  /* Svelte 自动 scoped */
+  .component-name {
+    display: flex;
+    padding: var(--spacing-4);
+    color: var(--color-text-primary);
+    background-color: var(--color-background);
+  }
+</style>
+```
+
+**App.svelte 更新规则**：
+```svelte
+<script lang="ts">
+  import Header from './components/Header.svelte'
+  import HeroSection from './components/HeroSection.svelte'
+</script>
+
+<main class="app">
+  <Header />
+  <HeroSection />
+</main>
+
+<style>
+  :global(*) {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+</style>
+```
+
+---
+
+#### Angular（framework = angular）
+
+每个组件生成三个文件：
+
+**`component-name.component.ts`**：
+```typescript
+import { Component, Input, Output, EventEmitter } from '@angular/core'
+import { ChildComponent } from './child/child.component'
+
+@Component({
+  selector: 'app-component-name',
+  standalone: true,
+  imports: [ChildComponent],
+  templateUrl: './component-name.component.html',
+  styleUrl: './component-name.component.css'
+})
+export class ComponentNameComponent {
+  @Input() title = ''
+  @Input() items: ItemType[] = []
+  @Output() clicked = new EventEmitter<string>()
+}
+```
+
+**`component-name.component.html`**：
+```html
+<div class="component-name">
+  <app-child></app-child>
+</div>
+```
+
+**`component-name.component.css`**：
+```css
+.component-name {
+  display: flex;
+  padding: var(--spacing-4);
+  color: var(--color-text-primary);
+  background-color: var(--color-background);
+}
+```
+
+---
+
+#### Vanilla（framework = vanilla）
+
+生成纯 HTML + CSS + JS 文件：
+
+**`src/components/component-name.js`**（或 `.ts`）：
+```js
+export function createComponentName(container) {
+  container.innerHTML = `
+    <div class="component-name">
+      <!-- 结构 -->
+    </div>
+  `
+}
+```
+
+**`src/components/component-name.css`**：
+```css
+/* BEM 命名 */
+.component-name {
+  display: flex;
+  padding: var(--spacing-4);
+  color: var(--color-text-primary);
+  background-color: var(--color-background);
+}
+.component-name__title { /* ... */ }
+.component-name__content { /* ... */ }
+```
+
+**`src/main.js` 更新规则**：
+```js
+import './style.css'
+import './components/component-name.css'
+import { createComponentName } from './components/component-name.js'
+
+const app = document.getElementById('app')
+createComponentName(app)
+```
+
+---
+
+### Step 4: 样式指南
+
+**优先使用设计 token**：
+- 颜色：`var(--color-primary)` 而非硬编码 `#3B82F6`
+- 字体：`var(--font-size-base)` 而非硬编码 `16px`
+- 间距：`var(--spacing-4)` 而非硬编码 `16px`
+- 只有在 design-system.md 中无匹配 token 时才使用具体值
+
+**布局实现**：
+- 优先使用 Flexbox（`display: flex`）
+- 复杂网格使用 CSS Grid（`display: grid`）
+- 避免使用 `float`、`position: absolute`（除非确实需要）
+- 响应式使用 media query
+
+**尺寸处理**：
+- 容器宽度优先使用 `max-width` + `width: 100%`
+- 固定尺寸元素使用 `px`
+- 字体使用 `px` 或设计 token
+- 间距使用设计 token 或 `px`
+
+### Step 5: 写入文件
+
+将生成的文件写入 `.d2c/preview/src/` 目录：
+- 组件文件：`.d2c/preview/src/components/<ComponentName>.<ext>`
+- 更新入口组件（`App.vue` / `App.tsx` / `App.svelte` / `app.component.*` / `main.js`）导入并使用所有组件
+- 如有 CSS 变量需要全局定义，写入 `.d2c/preview/src/style.css`
+
 ### Step 6: 迭代修改（当有偏差报告时）
 
 如果输入中包含偏差报告（来自 `d2c-verify`）：
@@ -194,6 +421,7 @@ import HeroSection from './components/HeroSection.vue'
 - **日期**：<YYYY-MM-DD>
 - **设计规格来源**：d2c-extract 对话上下文
 - **迭代次数**：<首次生成 / 第 N 次迭代>
+- **技术栈**：<framework> + <language> + <cssStrategy>
 - **Context 加载状态**：
   - design-system.md：<已加载/使用默认值>
   - component-library.md：<已加载/使用默认值>
@@ -202,20 +430,20 @@ import HeroSection from './components/HeroSection.vue'
 ## 组件分解方案
 | 组件名 | 职责 | 文件路径 | 子组件 |
 |--------|------|----------|--------|
-| <PascalCase> | <描述> | .d2c/preview/src/components/<name>.vue | <子组件列表> |
+| <PascalCase> | <描述> | .d2c/preview/src/components/<name>.<ext> | <子组件列表> |
 
 ## 生成文件清单
 | 文件路径 | 类型 | 状态 |
 |----------|------|------|
-| .d2c/preview/src/components/<name>.vue | 组件 | 新建/更新 |
-| .d2c/preview/src/App.vue | 根组件 | 更新 |
+| .d2c/preview/src/components/<name>.<ext> | 组件 | 新建/更新 |
+| .d2c/preview/src/App.<ext> | 根组件 | 更新 |
 | .d2c/preview/src/style.css | 全局样式 | 新建/更新 |
 
 ## Token 使用情况
 | CSS 变量 | 使用位置 | 来源 |
 |----------|----------|------|
-| var(--color-primary) | Header.vue .logo | design-system.md |
-| 16px | HeroSection.vue .title | 无匹配 token（TODO） |
+| var(--color-primary) | Header .logo | design-system.md |
+| 16px | HeroSection .title | 无匹配 token（TODO） |
 
 ## 迭代修改记录
 ### 迭代 N（仅迭代修改时记录）
@@ -239,49 +467,4 @@ import HeroSection from './components/HeroSection.vue'
 
 ## 编码规范参考
 
-### 组件文件格式
-- 使用 Single File Component (SFC) 格式 `.vue`
-- 顺序：`<script setup lang="ts">` → `<template>` → `<style scoped>`
-
-### Script 规范
-- 必须使用 `<script setup lang="ts">`
-- 使用 Composition API（`ref`, `computed`, `watch`, `onMounted` 等）
-- Props 使用 `defineProps<T>()` 配合 TypeScript 接口
-- Emits 使用 `defineEmits<T>()`
-- 组件名使用 PascalCase
-
-### TypeScript 规范
-- 所有 props 和 emits 必须有类型定义
-- 使用 `interface` 定义复杂类型
-- 避免使用 `any`，优先使用具体类型
-- Ref 类型：`const count = ref<number>(0)`
-
-### 模板规范
-- 属性绑定使用简写：`:prop` 而非 `v-bind:prop`
-- 事件绑定使用简写：`@event` 而非 `v-on:event`
-- 条件渲染：`v-if` / `v-else-if` / `v-else`
-- 列表渲染：`v-for` 必须配合 `:key`
-- 自闭合组件：`<MyComponent />`
-
-### 样式规范
-- 默认使用 `<style scoped>` 防止样式泄漏
-- CSS 属性按以下顺序排列：
-  1. 布局（display, position, flex, grid）
-  2. 盒模型（width, height, margin, padding）
-  3. 排版（font, color, text-align）
-  4. 视觉（background, border, shadow, opacity）
-  5. 动画（transition, animation）
-- 使用 CSS 变量引用设计 token
-- 响应式使用 media query 或 CSS 容器查询
-
-### 命名约定
-- 组件文件名：PascalCase（`UserProfile.vue`）
-- CSS 类名：kebab-case（`.user-profile`）
-- 事件名：kebab-case（`@update-value`）
-- Props 名：camelCase（`userName`）
-
-### 组件拆分策略
-- 单一职责：每个组件负责一个明确的 UI 区域
-- 复杂设计（>5 个独立区域）应分解为子组件
-- 纯展示组件与逻辑组件分离
-- 可复用组件提取到独立文件
+代码生成应遵循 `.claude/rules/coding-conventions.md` 中对应框架的编码规范。

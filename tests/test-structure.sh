@@ -55,10 +55,13 @@ assert "CLAUDE.md 存在" "[ -f CLAUDE.md ]"
 
 echo ""
 echo "=== Rules ==="
-assert "vue3-conventions.md 存在" "[ -f .claude/rules/vue3-conventions.md ]"
+assert "coding-conventions.md 存在" "[ -f .claude/rules/coding-conventions.md ]"
+assert "coding-conventions.md 包含多框架" "grep -q 'React' .claude/rules/coding-conventions.md"
+assert "coding-conventions.md 包含 Vue 3 规范" "grep -q 'vue3' .claude/rules/coding-conventions.md"
 assert "d2c-workflow.md 存在" "[ -f .claude/rules/d2c-workflow.md ]"
 assert "工作流规则包含迭代上限" "grep -q '3' .claude/rules/d2c-workflow.md"
 assert "工作流规则包含通过阈值" "grep -q '90' .claude/rules/d2c-workflow.md"
+assert "工作流规则包含技术栈配置" "grep -q 'project-config.md' .claude/rules/d2c-workflow.md"
 
 echo ""
 echo "=== Context Templates ==="
@@ -68,6 +71,7 @@ assert "design-system.md 包含字体定义" "grep -q 'font' $TMPL/context/desig
 assert "design-system.md 包含间距定义" "grep -q 'spacing' $TMPL/context/design-system.md"
 assert "component-library.md 存在" "[ -f $TMPL/context/component-library.md ]"
 assert "project-config.md 存在" "[ -f $TMPL/context/project-config.md ]"
+assert "project-config.md 包含技术栈字段" "grep -q 'framework' $TMPL/context/project-config.md"
 
 echo ""
 echo "=== Documentation Generation ==="
@@ -88,6 +92,14 @@ assert "d2c-generate 记录到 generation-logs 目录" "grep -q 'generation-logs
 assert "d2c-validate 记录到 validation-reports 目录" "grep -q 'validation-reports/' '.claude/skills/d2c-validate/SKILL.md'"
 assert "d2c-verify 记录到 verification-reports 目录" "grep -q 'verification-reports/' '.claude/skills/d2c-verify/SKILL.md'"
 assert "d2c-merge 记录到 merge-reports 目录" "grep -q 'merge-reports/' '.claude/skills/d2c-merge/SKILL.md'"
+
+echo ""
+echo "=== Framework Adaptivity ==="
+assert "d2c-init 支持技术栈检测" "grep -q '检测项目技术栈' '.claude/skills/d2c-init/SKILL.md'"
+assert "d2c-generate 支持多框架" "grep -q 'framework = react' '.claude/skills/d2c-generate/SKILL.md'"
+assert "d2c-validate 支持多框架" "grep -q 'framework' '.claude/skills/d2c-validate/SKILL.md'"
+assert "d2c-merge 支持多框架" "grep -q 'framework' '.claude/skills/d2c-merge/SKILL.md'"
+assert "project-config 有技术栈检测区" "grep -q '检测到的技术栈' '$TMPL/context/project-config.md'"
 
 echo ""
 echo "=== Scripts ==="

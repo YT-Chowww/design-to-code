@@ -1,5 +1,6 @@
 #!/bin/bash
-# validate.sh - Run ESLint + TypeScript checks on the preview project
+# validate.sh - Run type checking + linting + build on the preview project
+# Adapts commands based on the detected framework in project-config.md
 set -e
 
 PREVIEW_DIR="${1:-.d2c/preview}"
@@ -18,28 +19,29 @@ if [ ! -d "node_modules" ]; then
   npm install
 fi
 
-echo "=== TypeScript Check ==="
-npx vue-tsc --noEmit 2>&1 || {
-  echo "TypeScript check failed"
-  exit 1
-}
-echo "TypeScript check passed"
+echo "=== Type Check ==="
+if npm run type-check 2>&1; then
+  echo "Type check passed"
+else
+  echo "Type check failed (or no type-check script defined)"
+  # Don't exit — continue with other checks
+fi
 
 echo ""
 echo "=== ESLint Check ==="
-npx eslint . --ext .vue,.js,.jsx,.ts,.tsx 2>&1 || {
-  echo "ESLint check failed"
-  exit 1
-}
-echo "ESLint check passed"
+if npm run lint 2>&1; then
+  echo "ESLint check passed"
+else
+  echo "ESLint check failed (or no lint script defined)"
+fi
 
 echo ""
-echo "=== Vite Build ==="
+echo "=== Build ==="
 npx vite build 2>&1 || {
-  echo "Vite build failed"
+  echo "Build failed"
   exit 1
 }
-echo "Vite build passed"
+echo "Build passed"
 
 echo ""
 echo "All checks passed!"

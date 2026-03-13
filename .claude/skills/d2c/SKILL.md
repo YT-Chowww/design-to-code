@@ -1,6 +1,6 @@
 ---
 name: d2c
-description: Main orchestrator for the Design-to-Code workflow. Converts a Figma design into Vue 3 + TypeScript code with visual verification. Takes a Figma URL and optional target directory as arguments.
+description: Main orchestrator for the Design-to-Code workflow. Converts a Figma design into production-ready frontend code with visual verification. Auto-detects the target project's framework (Vue 3, React, Svelte, Angular, or Vanilla). Takes a Figma URL and optional target directory as arguments.
 ---
 
 # D2C — 主编排器
@@ -16,7 +16,7 @@ description: Main orchestrator for the Design-to-Code workflow. Converts a Figma
 
 ## 代码质量规则
 - 不允许使用 `any` 类型（除非降级处理）
-- 不允许内联样式（必须使用 scoped CSS）
+- 不允许内联样式（必须使用框架对应的样式隔离方案）
 - 设计中超过 5 个独立区域时，必须分解为子组件
 - 迭代修改时做针对性修改，不要全量重写
 - TypeScript 错误修复上限：2 次（超过后降级处理）
@@ -47,11 +47,16 @@ ls .d2c/context/design-system.md
    - 验证 Figma URL 格式（应包含 `figma.com`）
    - 目标目录：如果提供了路径，验证其存在；如果未提供，默认为 CWD
 
-2. **输出流程概览**：
+2. **读取技术栈**：
+   - 读取 `.d2c/context/project-config.md` 中的「检测到的技术栈」
+   - 提取 `framework` 字段（将显示在输出中）
+
+3. **输出流程概览**：
 ```
 === D2C: Design to Code ===
 Figma URL: <url>
 Target: <directory or CWD>
+Framework: <framework>
 Max iterations: 3
 
 Starting design-to-code conversion...
@@ -68,15 +73,16 @@ Starting design-to-code conversion...
 - 获取结构化设计规格
 - 如果失败，中止流程并报告错误
 
-### Step 2/5: 生成 Vue 3 代码
+### Step 2/5: 生成代码
 
 调用 `/d2c-generate` skill：
 ```
-[Step 2/5] Generating Vue 3 code...
+[Step 2/5] Generating <framework> code...
 ```
 
 - 传入设计规格（来自 Step 1）
-- 生成 Vue 3 SFC 文件到 `.d2c/preview/src/`
+- d2c-generate 会读取 project-config.md 自动适配框架
+- 生成组件文件到 `.d2c/preview/src/`
 
 ### Step 3/5: 代码校验
 
@@ -85,9 +91,9 @@ Starting design-to-code conversion...
 [Step 3/5] Validating code...
 ```
 
-- TypeScript 检查
+- 类型检查（按框架适配命令）
 - ESLint 检查
-- Vite 构建
+- 构建验证
 - 启动开发服务器
 - 如果校验失败且无法自动修复，报告错误但继续到验证步骤
 
@@ -160,16 +166,17 @@ while iteration <= MAX_ITERATIONS:
 === D2C Complete ===
 
 Summary:
+- Framework: <framework>
 - Components generated: 4 (Header, HeroSection, FeatureList, Footer)
 - Iterations: 2/3
 - Final score: 93%
 - Files merged: 5
 
 Generated files:
-  ✓ src/components/Header.vue
-  ✓ src/components/HeroSection.vue
-  ✓ src/components/FeatureList.vue
-  ✓ src/components/Footer.vue
+  ✓ src/components/Header.<ext>
+  ✓ src/components/HeroSection.<ext>
+  ✓ src/components/FeatureList.<ext>
+  ✓ src/components/Footer.<ext>
   ✓ src/assets/styles/d2c-generated.css
 
 Preview: http://localhost:5173
@@ -192,6 +199,7 @@ Preview: http://localhost:5173
 - **日期**：<YYYY-MM-DD>
 - **Figma URL**：<url>
 - **目标目录**：<target-directory or CWD>
+- **技术栈**：<framework> + <language> + <cssStrategy>
 - **最大迭代次数**：3
 - **视觉验证阈值**：90%
 
@@ -208,7 +216,7 @@ Preview: http://localhost:5173
 ## 组件清单
 | 组件名 | 文件路径 | 说明 |
 |--------|----------|------|
-| <PascalCase> | src/components/<name>.vue | <组件职责> |
+| <PascalCase> | src/components/<name>.<ext> | <组件职责> |
 
 ## 迭代历史
 | 迭代 | 操作 | 验证得分 | 关键修改 |
@@ -217,6 +225,7 @@ Preview: http://localhost:5173
 | 2 | 偏差修复 + 重新验证 | <N>% | <修改摘要> |
 
 ## 最终统计
+- **框架**：<framework>
 - **组件数量**：<N>
 - **迭代次数**：<N/3>
 - **最终得分**：<N>%
