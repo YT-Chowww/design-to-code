@@ -6,6 +6,10 @@ set -e
 
 cd "$(dirname "$0")/../.."
 
+# 导出项目根目录供 eval cases 使用
+PROJECT_ROOT="$(pwd)"
+export PROJECT_ROOT
+
 RESULTS_DIR="tests/results/$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$RESULTS_DIR"
 

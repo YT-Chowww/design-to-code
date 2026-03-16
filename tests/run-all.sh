@@ -58,7 +58,8 @@ fi
 # 第 4 层：端到端测试（可选，依赖 claude CLI）
 if command -v claude &> /dev/null; then
   if [ "${RUN_E2E:-0}" = "1" ]; then
-    run_layer "E2E Test" "tests/e2e/test-simple-card.sh" "optional"
+    run_layer "E2E SimpleCard" "tests/e2e/test-simple-card.sh" "optional"
+    run_layer "E2E Figma Workflow" "tests/e2e/test-figma-workflow.sh" "optional"
   else
     echo ""
     echo "⚠ Skipping Layer 4 (set RUN_E2E=1 to enable)"
