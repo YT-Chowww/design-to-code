@@ -1,3 +1,0 @@
-# Test results (generated at runtime)
-tests/results/*
-!tests/results/.gitkeep
