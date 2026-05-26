@@ -31,19 +31,21 @@
 
 ## 总体阶段
 
+总体阶段状态汇总自下方阶段能力、Figma example 登记和自动验证 fixture。`[>]` 表示能力协议、脚本、报告结构或样例登记已落地，仍需真实 Figma E2E、目标项目 validate/merge 或浏览器视觉验证后才能升级为 `[x]`。
+
 | 状态 | 阶段 | 目标 | 主要验收 |
 | --- | --- | --- | --- |
 | `[>]` | 0. 流程基线设计 | 建立可恢复、可审计、可门禁的 D2C 主流程 | manifest 与阶段工件协议完整，所有阶段有状态和报告路径 |
 | `[>]` | 1. Init 初始化与上下文能力 | 初始化 `.d2c/` 工作区、检测目标项目、生成 preview 工程和 context | project-config、design-system、component-library、project-adapter 可供后续阶段读取 |
 | `[>]` | 2. 基础模板能力 | 支持不依赖组件库的普通页面生成 | Vue/React preview 可构建，raw value 视觉还原稳定 |
-| `[~]` | 3. 开源组件库能力 | 支持 Ant Design、Ant Design Vue、Element Plus 等组件映射 | componentMappings 与 styleFit 可解释，低匹配自动回退 |
-| `[~]` | 4. 业务组件库能力 | 支持项目自定义组件、样式契约和覆盖策略 | merge 后能可靠替换业务组件，并记录替换证据 |
-| `[~]` | 5. 复杂 UI 能力 | 支持表单、表格、弹窗、抽屉、状态页、组合布局 | 复杂页面组件拆分合理，target validate 通过 |
+| `[>]` | 3. 开源组件库能力 | 支持 Ant Design、Ant Design Vue、Element Plus 等组件映射 | componentMappings、open-source generation、merge report 和 styleFit 证据已落地，真实 target 验证待执行 |
+| `[>]` | 4. 业务组件库能力 | 支持项目自定义组件、样式契约和覆盖策略 | 业务组件生成、props contract、overridePolicy 和业务 merge report 协议已落地，真实业务项目替换待验证 |
+| `[>]` | 5. 复杂 UI 能力 | 支持表单、表格、弹窗、抽屉、状态页、组合布局 | 组件拆分、路由建议、冲突处理和 target validate 报告协议已落地，复杂页面真实运行待验证 |
 | `[>]` | 6. Token 与主题能力 | 支持 token candidates、tokenHints、resolvedTokens | 只在证据可靠时替换项目 token，否则保留 raw value |
-| `[~]` | 7. 图标与 iconfont 能力 | 支持 SVG、组件库 Icon、iconfont class 映射 | 图标资源来源清晰，target 可按项目约定接入 |
-| `[ ]` | 8. 图表能力 | 支持 chart pattern 识别与图表库代码生成 | 识别图表结构，生成 ECharts/Recharts 等配置 |
-| `[ ]` | 9. 响应式能力 | 支持多断点 frame 与响应式样式输出 | desktop/tablet/mobile 截图验证可执行 |
-| `[ ]` | 10. 交互与变体能力 | 支持 variants、hover、active、disabled、selected、open state | 状态映射为 props/class/state，关键状态可验证 |
+| `[>]` | 7. 图标与 iconfont 能力 | 支持 SVG、组件库 Icon、iconfont class 映射 | iconCandidates、iconMappings、iconMerges 和 SVG/image fallback 协议已落地，真实 Icon Toolbar 样例待补充验证 |
+| `[>]` | 8. 图表能力 | 支持 chart pattern 识别与图表库代码生成 | chartCandidates、图表生成、chart merge 和视觉验证 fixture 已落地，真实图表库接入待验证 |
+| `[>]` | 9. 响应式能力 | 支持多断点 frame 与响应式样式输出 | responsiveFrames、响应式生成、多断点 verify 和视觉回归 fixture 已落地，真实多 frame 样例待验证 |
+| `[>]` | 10. 交互与变体能力 | 支持 variants、hover、active、disabled、selected、open state | interactionStates、状态生成和状态验证报告协议已落地，真实交互截图待验证 |
 | `[>]` | 11. 自动验证体系 | 建立 fixture、mock、真实 Figma E2E 和视觉验证闭环 | 离线 fixture 与校验脚本已落地，真实 Figma/目标项目/视觉闭环待验证 |
 
 ## 0. 流程基线设计
