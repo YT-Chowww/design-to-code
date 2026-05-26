@@ -1,0 +1,85 @@
+{
+  "designId": "fixture_100-1",
+  "runId": "2026-05-26T00-00-00",
+  "source": {
+    "provider": "mock",
+    "mode": "structured"
+  },
+  "tokenHints": [
+    {
+      "nodeId": "100:1",
+      "rawValue": "#1677ff",
+      "semantic": "colorPrimary",
+      "confidence": 0.82,
+      "evidence": [
+        "normalized token candidate"
+      ]
+    }
+  ],
+  "generatedFiles": [
+    {
+      "path": ".d2c/preview/src/MockAnalyticsCard.tsx",
+      "kind": "component"
+    }
+  ],
+  "componentMappings": [
+    {
+      "nodeId": "100:1",
+      "source": "open-source-library",
+      "component": "Card",
+      "confidence": 0.84,
+      "evidence": [
+        "analytics-card maps to Card container"
+      ],
+      "styleFit": {
+        "score": 0.78,
+        "decision": "use component with local style override"
+      }
+    }
+  ],
+  "iconMappings": [
+    {
+      "nodeId": "100:3",
+      "source": "component-library-icon",
+      "name": "ReloadOutlined",
+      "confidence": 0.78,
+      "evidence": [
+        "icon candidate name match"
+      ]
+    }
+  ],
+  "chartMappings": [
+    {
+      "nodeId": "100:2",
+      "source": "open-source-library",
+      "chartType": "line",
+      "dataStatus": "static-preview-data",
+      "confidence": 0.81,
+      "evidence": [
+        "line chart candidate"
+      ]
+    }
+  ],
+  "responsiveRules": [
+    {
+      "frameNodeId": "100:1",
+      "strategy": "media-query",
+      "selector": ".mock-analytics-card",
+      "confidence": 0.8,
+      "evidence": [
+        "desktop frame has matched responsive frames"
+      ]
+    }
+  ],
+  "stateMappings": [
+    {
+      "nodeId": "100:4",
+      "state": "hover",
+      "strategy": "css-pseudo-class",
+      "confidence": 0.76,
+      "evidence": [
+        "hover variant maps to pseudo class"
+      ]
+    }
+  ]
+}

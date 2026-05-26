@@ -1,0 +1,12 @@
+{
+  "name": "Protocol Fixture",
+  "nodes": {
+    "100:1": {
+      "document": {
+        "id": "100:1",
+        "name": "Protocol Fixture",
+        "type": "FRAME"
+      }
+    }
+  }
+}

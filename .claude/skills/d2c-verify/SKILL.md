@@ -1,164 +1,210 @@
 ---
 name: d2c-verify
-description: Visually verify generated code by comparing a browser screenshot against the original Figma design. Uses Chrome DevTools MCP to capture screenshots and multimodal analysis for comparison. Use after d2c-validate has confirmed the code builds and runs.
+description: Visually verify preview or target-project code by comparing a browser screenshot against the original Figma design. Uses Chrome DevTools MCP to capture screenshots and reads design references from persisted D2C artifacts.
 ---
 
 # D2C Verify — 视觉验证
 
 ## 输入
-- Vite 开发服务器运行中（`http://localhost:5173`）
-- 原始 Figma 设计数据（来自 `d2c-extract` 的上下文）
+- `phase`：`preview` 或 `target`，默认为 `preview`
+- `previewUrl` 或 `targetUrl`：待验证页面地址
+- `targetDirectory`：`phase=target` 时用于定位合入文件和业务样式
+- `.d2c/docs/sessions/<runId>/manifest.json`
+- `.d2c/docs/design-specs/<designId>/<runId>-design-spec.md`
+- `.d2c/docs/reference/<designId>/<runId>-figma-raw.json`
+- `.d2c/docs/reference/<designId>/<runId>-assets.json`
+- `.d2c/docs/generation-logs/<designId>/<runId>.md`（用于读取 `styleFit` 决策，可选）
+- `.d2c/docs/merge-reports/<designId>/<runId>.md`（target 阶段用于读取 `resolvedTokens` 和合入路径）
 
 ## 流程
 
 ### Step 1: 检查 Chrome DevTools MCP 可用性
 
-尝试调用 Chrome DevTools MCP。如果不可用：
+优先从目标项目根目录读取 `.mcp.json` 并定位 Chrome DevTools MCP server：
+
+1. 解析 `mcpServers`，优先选择名称包含 `chrome`、`devtools`、`browser` 的 server
+2. 使用其 `command`、`args` 和 `env` 拉起 stdio MCP
+3. 发送 JSON-RPC `initialize`
+4. 调用 `tools/list` 并记录可用工具
+5. 按工具名识别 `navigate`、`resize`、`screenshot`、`evaluate`、`click` / `hover` 等能力
+
+报告中必须记录 `mcpProbe`：
+
+```json
+{
+  "configPath": ".mcp.json",
+  "serverName": "chrome-devtools",
+  "status": "AVAILABLE",
+  "tools": ["navigate", "screenshot", "resize", "evaluate"],
+  "missingTools": [],
+  "fallbackManualUrl": "http://localhost:5173"
+}
+```
+
+如果 `.mcp.json` 不存在、server 未配置、MCP 拉起失败或工具不完整：
 - 输出警告：`⚠ Chrome DevTools MCP 不可用，跳过视觉验证。仅依赖静态校验结果。`
-- 建议用户手动打开 `http://localhost:5173` 在浏览器中检查
-- 返回结果标记为 `SKIPPED`，允许流程继续
+- 建议用户手动打开当前阶段 URL 检查
+- 返回结果标记为 `SKIPPED`
+- `mcpProbe.status` 写为 `MISSING_CONFIG`、`MISSING_SERVER`、`FAILED` 或 `PARTIAL`
+- `mcpProbe.fallbackManualUrl` 必须写入待检查 URL
 
 ### Step 2: 获取设计稿参考
 
-从对话上下文中获取设计规格的尺寸信息：
-- 设计稿宽度和高度
-- 如果设计规格中没有明确尺寸，默认使用 1440x900（桌面端）
+优先从 `manifest.json` 和相关工件中获取：
+- 设计稿尺寸
+- page / frame 名称
+- 原始 Figma 节点信息
+- 已下载的设计图片资源
+- `source.provider`、`source.mode`、`source.providerAttempts` 和 `fieldSources`
+- `responsiveFrames` 和 `interactionStates`
 
-同时，获取 Figma 设计稿的截图作为对比参考：
-- 如果有通过 `download_figma_images` 下载的设计图片，使用该图片
-- 如果没有，尝试通过 Figma MCP 获取设计稿截图
-- 如果都不可用，依赖对话上下文中的设计规格文字描述进行对比
+参考优先级：
+1. `.d2c/docs/reference/<designId>/<runId>-assets.json` 中的设计参考图
+2. raw figma 中可用于截图或节点对比的信息
+3. `design-spec.md` 中的文字规格
+
+如果所有图像参考都不可用，仍可基于设计规格文字描述做弱校验，但要在报告中标记为 `PARTIAL REFERENCE`。
+
+如果 `source.provider` 是 `figma-image-fallback`，或 `source.mode` 是 `image-fallback`：
+
+- 设计参考图就是主要真值来源，优先使用 assets manifest 中的 PNG。
+- 报告必须标记 `DEGRADED REFERENCE`，并列出哪些字段来自 `image-vision-estimate`。
+- 可以基于页面截图与参考 PNG 做视觉评分，但不能声称已验证 Figma auto layout、组件实例、variants 或 constraints。
+- 如果没有实际截图对比或明确人工审核，状态只能是 `SKIPPED` 或 `FAILED`，不能因为 build 通过而写 `PASSED`。
 
 ### Step 3: 截取页面截图
 
-使用 Chrome DevTools MCP 执行以下操作：
+使用 Chrome DevTools MCP：
 
-1. **调整浏览器窗口尺寸**：
-   - 调用 `resize_page` 设置为设计稿尺寸（宽 x 高）
+1. 调整浏览器窗口尺寸到设计稿尺寸
+2. 导航到当前阶段 URL（preview 使用 `previewUrl`，target 使用 `targetUrl`）
+3. 等待页面加载完成
+4. 截取页面截图
 
-2. **导航到预览页面**：
-   - 调用 `navigate_page` 访问 `http://localhost:5173`
-   - 等待页面加载完成
+如果 normalized artifact 包含 `responsiveFrames`，必须按 `desktop`、`tablet`、`mobile` 或自定义 breakpoint 分别截图。缺少对应 frame 或 viewport 时写 `SKIPPED`，并说明原因；不能用单一 desktop 截图冒充多断点验证。
 
-3. **截取页面截图**：
-   - 调用 `take_screenshot` 截取全页面截图
+每个断点记录：
+
+```json
+{
+  "breakpoint": "mobile",
+  "viewport": { "width": 375, "height": 812 },
+  "referenceFrameId": "30:3",
+  "screenshotPath": ".d2c/docs/verification-reports/<designId>/screenshots/<runId>-preview-mobile.png",
+  "status": "PASSED"
+}
+```
+
+如果 normalized artifact 包含 `stateMappings` 或 `interactionStates`，必须对默认态和关键状态执行状态验证：
+
+- `hover`：优先用 MCP hover 工具；不可用时用 CSS pseudo/state class 的可复现方式触发
+- `disabled` / `selected` / `open`：优先通过组件 props、DOM attribute、query 参数或测试专用状态入口触发
+- 每个状态都要记录触发方式、截图路径、状态得分和是否回到默认态
+
+状态触发必须只用于验证截图，不应修改生产代码；如果目标页面没有可复现触发入口，状态项写 `SKIPPED` 并把需要人工检查的入口写入报告。
 
 ### Step 4: 多模态对比分析
 
-将截图与设计稿进行视觉对比，逐项评估以下维度：
+先读取生成日志中的 `styleFit`、`componentMappings` 和 `tokenHints`，把低分组件和 raw value 覆盖较多的区域作为重点检查对象。`styleFit` 是静态预估，截图对比结果是最终判定依据。
 
-#### 4.1 布局准确性（权重 30%）
-- 整体布局结构是否一致（flex/grid 方向、排列）
-- 元素位置是否正确（顶部、居中、底部对齐）
-- 元素间距是否匹配（gap、margin、padding）
-- 响应式行为是否合理
+`phase=target` 时同时读取 merge report：
+- 复核 `resolvedTokens` 对颜色、字号、间距、圆角和阴影的影响，重点检查 `currentValue` 与 Figma raw value 不一致、`matchType=name-only`、低 `confidence` 和 `fallback-raw` 项
+- 复核业务组件替换后的默认样式、全局 CSS 优先级和主题变量
+- 复核图片、图标、字体等资源迁移后的实际渲染
 
-#### 4.2 字体排版（权重 25%）
-- 字体大小是否匹配
-- 字重是否正确（normal、medium、bold）
-- 行高是否合理
-- 文字颜色是否正确
-- 文字对齐方式是否一致
+逐项评估：
 
-#### 4.3 颜色一致性（权重 25%）
-- 背景颜色是否匹配
-- 边框颜色是否正确
-- 按钮/链接颜色是否一致
-- 渐变色是否正确（如有）
+1. **布局准确性（30%）**
+   - 布局结构
+   - 元素位置
+   - 元素间距
+   - 响应式行为
 
-#### 4.4 组件渲染（权重 20%）
-- 所有组件是否正确渲染（无白屏、无报错）
-- 圆角是否匹配
-- 阴影效果是否正确
-- 图片/图标是否正确显示
-- 边框样式是否正确
+2. **字体排版（25%）**
+   - 字号
+   - 字重
+   - 行高
+   - 颜色
+   - 对齐方式
+
+3. **颜色一致性（25%）**
+   - 背景
+   - 边框
+   - 强调色 / 状态色
+   - 渐变色
+
+4. **组件渲染（20%）**
+   - 组件是否完整渲染
+   - 圆角 / 阴影
+   - 图片 / 图标
+   - 边框样式
+
+视觉 diff 必须输出可重复的阈值和定位信息：
+
+- `thresholds.pixelRatio`：默认 `0.02`
+- `thresholds.overallScore`：默认 `90`
+- `diffArtifacts.referenceImagePath`
+- `diffArtifacts.actualImagePath`
+- `diffArtifacts.diffImagePath`
+- `regions[]`：偏差区域边界、分类、严重度和建议
+
+偏差区域至少按 `layout`、`typography`、`color`、`component` 分类。没有生成 diff 图时，报告不能写 `PASSED`，除非 `humanReview.status=PASSED` 且记录 reviewer、时间和检查范围。
 
 ### Step 5: 评分与判定
 
-根据以上维度综合评分（0-100%）：
+综合分 = 布局×0.30 + 排版×0.25 + 颜色×0.25 + 组件×0.20
 
-**评分规则**：
-- 每个维度在自身范围内打分（0-100%）
-- 综合分 = 布局×0.30 + 排版×0.25 + 颜色×0.25 + 组件×0.20
 - **Pass**：综合分 ≥ 90%
 - **Fail**：综合分 < 90%
+- **Skipped**：Chrome MCP 不可用
 
-### Step 6: 输出结果
+多断点和状态验证会影响最终判定：
 
-#### Pass 输出格式：
-```
-=== D2C Visual Verification ===
-Status: ✓ PASSED
+- 任一必需断点 `FAILED`，整体为 `FAILED`
+- 任一必需状态 `FAILED`，整体为 `FAILED`
+- 所有截图均 `SKIPPED` 时整体只能为 `SKIPPED`
+- 存在部分断点或状态 `SKIPPED` 且主截图通过时整体为 `DEGRADED`
 
-Score: 93%
-- Layout accuracy:  95% (weight 30%)
-- Typography:       92% (weight 25%)
-- Color consistency: 90% (weight 25%)
-- Component render:  96% (weight 20%)
+### Step 6: 输出结果与偏差报告
 
-Visual verification passed. Ready for merge.
-```
+输出：
+- 状态：`PASSED / FAILED / SKIPPED`
+- 各维度得分
+- 偏差报告（仅 FAILED 时）
 
-#### Fail 输出格式：
-```
-=== D2C Visual Verification ===
-Status: ✗ FAILED
+偏差报告必须包含：
+1. 具体组件
+2. 偏差描述
+3. 设计预期与当前表现
+4. 修复建议
+5. 优先级
 
-Score: 78%
-- Layout accuracy:  85% (weight 30%)
-- Typography:       70% (weight 25%)
-- Color consistency: 75% (weight 25%)
-- Component render:  82% (weight 20%)
-
-=== Deviation Report ===
-
-### Layout Issues
-1. [Header] 顶部导航栏高度偏大，设计稿 64px，实际约 80px
-   → 修改 Header.vue 的 `.header` 高度为 64px
-
-2. [HeroSection] 左右内边距不足，设计稿 padding: 0 120px，实际约 padding: 0 40px
-   → 修改 HeroSection.vue 的 `.hero` padding
-
-### Typography Issues
-1. [Header] Logo 文字字重应为 700，当前为 400
-   → 修改 `.logo` 的 font-weight
-
-### Color Issues
-1. [HeroSection] 标题文字颜色应为 #1F2937，当前为 #000000
-   → 修改 `.hero-title` 的 color 为 var(--color-text-primary)
-
-### Component Issues
-1. [Footer] 底部链接图标未正确渲染
-   → 检查图标资源路径
-
-=== Suggested Fixes ===
-以上偏差将在下一次迭代中修正。
-```
+preview 阶段偏差报告传递给 `d2c-generate` 做下一轮最小修改。target 阶段偏差报告传递给合入修复流程，优先修改目标项目适配层、`resolvedTokens` 和业务组件包裹样式。
 
 ## 文档记录
 
-每次执行完成后，将视觉验证结果记录到 `.d2c/docs/verification-reports/` 目录。
+每次执行完成后，将视觉验证结果记录到：
 
-**文件命名**：`<YYYY-MM-DD>-<design-name>.md`
-- 日期使用当天日期
-- `<design-name>` 从当前任务的设计稿名称派生，使用 kebab-case
-- 同一设计的多次验证（迭代）更新同一文件（追加记录）
+```text
+.d2c/docs/verification-reports/<designId>/<runId>-<phase>.md
+.d2c/docs/verification-reports/<designId>/<runId>-<phase>.json
+```
 
-**文档内容模板**：
+建议模板：
 
 ```markdown
 # 视觉验证报告：<设计稿名称>
 
 ## 基本信息
-- **日期**：<YYYY-MM-DD>
-- **Chrome DevTools MCP**：<可用/不可用（SKIPPED）>
-- **设计稿参考**：<下载图片/MCP 截图/文字描述>
+- **Run ID**：<runId>
+- **Design ID**：<designId>
+- **验证阶段**：preview / target
+- **Chrome DevTools MCP**：<可用 / 不可用>
+- **设计稿参考**：<assets / raw figma / design spec>
 - **设计稿尺寸**：<宽 x 高>
-- **预览地址**：http://localhost:5173
+- **验证地址**：<previewUrl or targetUrl>
 
-## 验证结果（第 N 次迭代）
-
-### 评分
+## 评分
 | 维度 | 得分 | 权重 | 加权得分 |
 |------|------|------|----------|
 | 布局准确性 | <N>% | 30% | <N>% |
@@ -167,48 +213,103 @@ Score: 78%
 | 组件渲染 | <N>% | 20% | <N>% |
 | **综合得分** | | | **<N>%** |
 
-### 判定
+## 判定
 - **状态**：PASSED / FAILED / SKIPPED
 - **通过阈值**：90%
 
-### 偏差报告（FAILED 时记录）
+## styleFit 复核
+| 组件 | styleFit | 截图表现 | 结论 |
+|------|----------|----------|------|
 
-#### 布局问题
-1. [<组件>] <偏差描述>
-   → Fix: <修复建议>
+## Target 适配复核
+| 项 | 目标表达 | 匹配方式 / 当前值 | 截图表现 | 结论 |
+|----|----------|-----------------|----------|------|
+| resolvedTokens | <token / raw value / utility> | <matchType / currentValue> | <表现> | <结论> |
+| 业务组件样式 | <组件 / 包裹层> | <默认样式来源> | <表现> | <结论> |
 
-#### 字体问题
-1. [<组件>] <偏差描述>
-   → Fix: <修复建议>
+## MCP 探测
+| 配置 | Server | 状态 | 工具 | 人工检查地址 |
+|------|--------|------|------|--------------|
 
-#### 颜色问题
-1. [<组件>] <偏差描述>
-   → Fix: <修复建议>
+## 多断点验证
+| 断点 | Viewport | 截图 | 得分 | 状态 |
+|------|----------|------|------|------|
 
-#### 组件问题
+## 状态验证
+| 状态 | 触发方式 | 截图 | 得分 | 状态 |
+|------|----------|------|------|------|
+
+## 视觉 Diff
+| 阈值 | 参考图 | 实际图 | Diff 图 | Pixel Ratio |
+|------|--------|--------|---------|-------------|
+
+## 偏差报告
 1. [<组件>] <偏差描述>
-   → Fix: <修复建议>
+   - 预期：<值>
+   - 当前：<值>
+   - Fix：<修复建议>
 ```
 
-**写入时机**：在 Step 6 输出结果后，使用 Write 工具将文档写入 `.d2c/docs/verification-reports/<YYYY-MM-DD>-<design-name>.md`。多次迭代验证时，读取已有文件并追加「验证结果（第 N 次迭代）」章节。
+JSON 报告最小结构：
 
-确保先检查 `.d2c/docs/verification-reports/` 目录存在（如不存在则创建）。
+```json
+{
+  "designId": "<designId>",
+  "runId": "<runId>",
+  "phase": "preview",
+  "url": "http://localhost:5173",
+  "mcpProbe": {
+    "configPath": ".mcp.json",
+    "serverName": "chrome-devtools",
+    "status": "AVAILABLE",
+    "tools": ["navigate", "screenshot", "resize", "evaluate"],
+    "missingTools": [],
+    "fallbackManualUrl": "http://localhost:5173"
+  },
+  "thresholds": {
+    "pixelRatio": 0.02,
+    "overallScore": 90
+  },
+  "screenshots": [
+    {
+      "breakpoint": "desktop",
+      "viewport": { "width": 1440, "height": 900 },
+      "referenceImagePath": ".d2c/assets/reference.png",
+      "actualImagePath": ".d2c/docs/verification-reports/<designId>/screenshots/<runId>-preview-desktop.png",
+      "diffImagePath": ".d2c/docs/verification-reports/<designId>/screenshots/<runId>-preview-desktop-diff.png",
+      "score": 94,
+      "status": "PASSED"
+    }
+  ],
+  "stateChecks": [
+    {
+      "state": "hover",
+      "trigger": "mcp-hover",
+      "actualImagePath": ".d2c/docs/verification-reports/<designId>/screenshots/<runId>-preview-hover.png",
+      "score": 92,
+      "status": "PASSED"
+    }
+  ],
+  "diff": {
+    "status": "PASSED",
+    "pixelRatio": 0.01,
+    "regions": []
+  },
+  "overallStatus": "PASSED"
+}
+```
 
-## 偏差报告规范
+校验 JSON 报告：
 
-偏差报告必须包含：
-1. **具体组件**：标明哪个组件有问题
-2. **偏差描述**：描述设计稿预期值和实际值
-3. **修复建议**：具体到文件名、CSS 类名、属性名
-4. **优先级**：布局问题 > 颜色问题 > 字体问题 > 其他
-
-此偏差报告将传递给 `d2c-generate` 进行针对性修改。
+```bash
+node scripts/check-verify-report.mjs .d2c/docs/verification-reports/<designId>/<runId>-<phase>.json
+```
 
 ## 错误处理
 
 | 场景 | 处理方式 |
 |------|----------|
-| Chrome MCP 不可用 | 跳过验证，标记 SKIPPED |
-| 页面加载失败 | 检查 dev server 是否运行，提示重新启动 |
-| 截图为空白 | 检查页面是否有渲染错误，查看控制台日志 |
-| 无设计稿参考图 | 基于设计规格文字描述进行对比 |
+| Chrome MCP 不可用 | 跳过验证，标记 `SKIPPED` |
+| 页面加载失败 | 检查 dev server 是否运行 |
+| 截图为空白 | 检查页面渲染错误 |
+| 无设计稿参考图 | 回退到 raw figma / design spec 做弱校验 |

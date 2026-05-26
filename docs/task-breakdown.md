@@ -1,37 +1,40 @@
 # 任务拆分与实施计划
 
-## Phase 0: 项目文档
-- [x] 创建 `docs/` 目录
-- [x] `docs/README.md` — 项目概述与快速开始指南
-- [x] `docs/requirements.md` — 需求说明
-- [x] `docs/architecture.md` — 架构设计
-- [x] `docs/task-breakdown.md` — 任务拆分（本文件）
-- [x] `docs/operation-guide.md` — 操作指南
-- [x] `docs/verification.md` — 验证方案
+## Phase 0: 文档与协议
 
-## Phase 1: 基础设施
-- [ ] 创建完整目录结构
-- [ ] 编写 `CLAUDE.md`（项目级指令）
-- [ ] 编写 `.mcp.json`（MCP 服务器配置）
-- [ ] 创建 `.claude/skills/d2c-init/templates/` 预览项目模板
-- [ ] 创建 `.d2c/context/` 模板文件（通过 `/d2c-init`）
-- [ ] 创建 `.claude/rules/` 规则文件
+- [x] 建立 docs 文档目录
+- [x] 定义主编排和子 skill 职责
+- [x] 定义 manifest 驱动的工件协议
+- [x] 定义 normalized design、generation log、merge report 的阶段交接内容
 
-## Phase 2: 核心 Skill
-- [ ] 实现 `d2c-extract` skill（Figma 设计信息提取）
-- [ ] 实现 `d2c-generate` skill（Vue 3 代码生成）
-- [ ] 实现 `d2c-validate` skill + `scripts/validate.sh`
+## Phase 1: 初始化与上下文
 
-## Phase 3: 验证循环
-- [ ] 实现 `d2c-verify` skill（视觉验证）
-- [ ] 迭代循环逻辑（在主编排器中实现）
+- [x] 创建 `.claude/skills/d2c-init/templates/` 预览项目模板
+- [x] 创建 JSON 优先的 context 模板
+- [x] 支持 Vue 3 / React 项目检测
+- [x] 记录路径、alias、工具链、组件库和 token source 候选
 
-## Phase 4: 集成与编排
-- [ ] 实现 `d2c-merge` skill
-- [ ] 实现 `/d2c` 主编排 skill
-- [ ] 编写 `.claude/settings.json`
+## Phase 2: 核心流程
 
-## Phase 5: 测试验证
-- [ ] 用简单 Figma 组件测试完整流程
-- [ ] 用复杂多组件页面测试
-- [ ] 根据输出质量优化 prompt
+- [x] `d2c-extract`：raw Figma、assets、normalized design、design spec
+- [x] `d2c-generate`：preview 代码、token hints、component mappings、style fit
+- [x] `d2c-validate`：preview / target 双阶段校验
+- [x] `d2c-verify`：preview / target 双阶段视觉验证
+- [x] `d2c-merge`：目标项目合入、resolved tokens、资源和导入适配
+- [x] `d2c`：7 步主编排和阶段门禁
+
+## Phase 3: 工具与分发
+
+- [x] 提供 Claude skills 同步脚本
+- [x] 提供 Codex skills 同步脚本
+- [ ] 将测试断言升级到新协议
+- [ ] 清理重复 reference 并确定权威文档
+- [ ] 评估是否进一步封装为 plugin
+
+## Phase 4: 验证
+
+- [ ] 简单组件端到端验证
+- [ ] 复杂页面端到端验证
+- [ ] preview 与 target 差异验证
+- [ ] MCP 降级场景验证
+- [ ] target validate 失败场景验证

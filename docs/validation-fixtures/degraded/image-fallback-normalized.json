@@ -1,0 +1,68 @@
+{
+  "designId": "fixture_degraded-image",
+  "runId": "2026-05-26T00-00-00",
+  "source": {
+    "provider": "figma-image-fallback",
+    "mode": "image-fallback",
+    "providerAttempts": [
+      {
+        "provider": "figma-official-mcp",
+        "status": "FAILED"
+      },
+      {
+        "provider": "figma-rest",
+        "status": "FAILED"
+      },
+      {
+        "provider": "figma-image-fallback",
+        "status": "OK"
+      }
+    ]
+  },
+  "iconCandidates": [
+    {
+      "nodeId": "200:3",
+      "kind": "image",
+      "nameCandidates": [
+        "unknown"
+      ],
+      "confidence": 0.62,
+      "evidence": [
+        "image fallback cannot inspect vector layers"
+      ]
+    }
+  ],
+  "chartCandidates": [
+    {
+      "nodeId": "200:2",
+      "chartType": "unknown",
+      "series": [],
+      "confidence": 0.58,
+      "evidence": [
+        "chart inferred from screenshot only"
+      ]
+    }
+  ],
+  "responsiveFrames": [
+    {
+      "frameNodeId": "200:1",
+      "breakpoint": "desktop",
+      "width": 720,
+      "height": 480,
+      "confidence": 0.7,
+      "evidence": [
+        "single exported image"
+      ]
+    }
+  ],
+  "interactionStates": [
+    {
+      "nodeId": "200:4",
+      "state": "custom",
+      "confidence": 0.6,
+      "evidence": [
+        "state unavailable in image fallback"
+      ]
+    }
+  ]
+}

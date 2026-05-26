@@ -1,6 +1,7 @@
 #!/bin/bash
 # validate.sh - Run type checking + linting + build on the preview project
-# Adapts commands based on the detected framework in project-config.md
+# Skill-level validation is phase-aware; this helper remains preview-focused.
+# Runtime branching should prefer .d2c/context/project-config.json.
 set -e
 
 PREVIEW_DIR="${1:-.d2c/preview}"

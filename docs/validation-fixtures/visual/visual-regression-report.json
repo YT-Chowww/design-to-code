@@ -1,0 +1,87 @@
+{
+  "designId": "fixture_visual-regression",
+  "runId": "2026-05-26T00-00-00",
+  "phase": "preview",
+  "url": "http://127.0.0.1:5173",
+  "overallStatus": "FAILED",
+  "mcpProbe": {
+    "status": "AVAILABLE",
+    "configPath": ".mcp.json",
+    "serverName": "chrome-devtools",
+    "fallbackManualUrl": "http://127.0.0.1:5173",
+    "tools": [
+      "browser_navigate",
+      "browser_take_screenshot",
+      "browser_resize"
+    ]
+  },
+  "thresholds": {
+    "pixelRatio": 0.02,
+    "overallScore": 90
+  },
+  "requiresResponsive": true,
+  "requiresStates": false,
+  "screenshots": [
+    {
+      "breakpoint": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "status": "FAILED",
+      "referenceImagePath": ".d2c/docs/reference/fixture_visual/reference-desktop.png",
+      "actualImagePath": ".d2c/docs/verification-reports/fixture_visual/actual-desktop.png",
+      "diffImagePath": ".d2c/docs/verification-reports/fixture_visual/diff-desktop.png",
+      "score": 84
+    },
+    {
+      "breakpoint": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "status": "PASSED",
+      "referenceImagePath": ".d2c/docs/reference/fixture_visual/reference-tablet.png",
+      "actualImagePath": ".d2c/docs/verification-reports/fixture_visual/actual-tablet.png",
+      "diffImagePath": ".d2c/docs/verification-reports/fixture_visual/diff-tablet.png",
+      "score": 93
+    },
+    {
+      "breakpoint": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "status": "PASSED",
+      "referenceImagePath": ".d2c/docs/reference/fixture_visual/reference-mobile.png",
+      "actualImagePath": ".d2c/docs/verification-reports/fixture_visual/actual-mobile.png",
+      "diffImagePath": ".d2c/docs/verification-reports/fixture_visual/diff-mobile.png",
+      "score": 92
+    }
+  ],
+  "stateChecks": [],
+  "diff": {
+    "status": "FAILED",
+    "pixelRatio": 0.048,
+    "regions": [
+      {
+        "category": "layout",
+        "bounds": {
+          "x": 240,
+          "y": 120,
+          "width": 320,
+          "height": 72
+        }
+      },
+      {
+        "category": "color",
+        "bounds": {
+          "x": 40,
+          "y": 40,
+          "width": 120,
+          "height": 32
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "designId": "fixture_100-1",
+  "runId": "2026-05-26T00-00-00",
+  "targetDirectory": "/tmp/d2c-target-fixture",
+  "mergeStatus": "PASSED",
+  "requiresOpenSourceMerge": true,
+  "requiresBusinessMerge": true,
+  "requiresIconMerge": true,
+  "requiresChartMerge": true,
+  "hasConflicts": true,
+  "mergedFiles": [
+    {
+      "sourcePath": ".d2c/preview/src/MockAnalyticsCard.tsx",
+      "targetPath": "src/pages/mock/MockAnalyticsCard.tsx",
+      "status": "PASSED"
+    }
+  ],
+  "resolvedTokens": [
+    {
+      "rawValue": "#1677ff",
+      "strategy": "project-token",
+      "status": "resolved",
+      "target": "token.colorPrimary",
+      "evidence": [
+        "design-system token exact match"
+      ]
+    }
+  ],
+  "openSourceComponentMerges": [
+    {
+      "nodeId": "100:1",
+      "decision": "use-target-library",
+      "status": "PASSED",
+      "component": "Card",
+      "importFrom": "antd",
+      "styleFitScore": 0.78,
+      "evidence": [
+        "component mapping chose Card"
+      ]
+    }
+  ],
+  "businessComponentMerges": [
+    {
+      "nodeId": "100:5",
+      "decision": "use-business-component",
+      "status": "PASSED",
+      "component": "MetricSummary",
+      "importPath": "@/components/MetricSummary",
+      "propsMapping": {
+        "title": "title",
+        "value": "value"
+      },
+      "contractEvidence": [
+        "component-library fixture includes MetricSummary props"
+      ],
+      "dataBindingStatus": "adapter-placeholder"
+    }
+  ],
+  "iconMerges": [
+    {
+      "nodeId": "100:3",
+      "strategy": "icon-component",
+      "decision": "use-icon-component",
+      "status": "PASSED",
+      "component": "ReloadOutlined",
+      "importFrom": "@ant-design/icons"
+    }
+  ],
+  "chartMerges": [
+    {
+      "nodeId": "100:2",
+      "chartType": "line",
+      "decision": "use-target-chart-wrapper",
+      "status": "PASSED",
+      "dataBindingStatus": "adapter-placeholder",
+      "library": "echarts",
+      "component": "ReactECharts",
+      "importFrom": "@/components/charts/ReactECharts",
+      "optionPath": "src/pages/mock/chartOption.ts",
+      "dataAdapter": "src/pages/mock/chartDataAdapter.ts"
+    }
+  ],
+  "conflictResolutions": [
+    {
+      "type": "import",
+      "source": "@ant-design/icons",
+      "target": "src/pages/mock/MockAnalyticsCard.tsx",
+      "strategy": "merge import specifiers",
+      "decision": "use-icon-component",
+      "status": "resolved",
+      "affectedFiles": [
+        "src/pages/mock/MockAnalyticsCard.tsx"
+      ]
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 # 前端编码规范
 
-> D2C 根据 `project-config.md` 中检测到的 `framework` 字段选择对应的规范章节。
-> 未检测到框架时默认使用 Vue 3 规范。
+> D2C 根据 `project-config.json` 中检测到的 `framework` 字段选择对应的规范章节。
+> 当前生成目标支持 Vue 3 和 React。未检测到框架时默认使用 Vue 3 规范。
 
 ---
 
@@ -19,7 +19,8 @@
   3. 排版（font, color, text-align）
   4. 视觉（background, border, shadow, opacity）
   5. 动画（transition, animation）
-- 使用 CSS 变量引用设计 token
+- preview 阶段优先使用 Figma raw value 保证视觉还原
+- merge 阶段在证据可靠时使用项目 token、CSS 变量、Less/Sass 变量、theme 字段或工具类
 - 响应式使用 media query 或 CSS 容器查询
 
 ### 命名约定
@@ -98,73 +99,6 @@
 
 ---
 
-## Svelte 规范（framework = svelte）
+## 非目标框架
 
-### 组件文件格式
-- 使用 `.svelte` 文件
-- 顺序：`<script lang="ts">` → 模板 → `<style>`
-
-### Script 规范
-- 使用 `<script lang="ts">`
-- Props 使用 `export let propName: Type`（Svelte 4）或 `$props()`（Svelte 5）
-- 响应式声明：`$:` 或 `$derived()`
-
-### 模板规范
-- 条件渲染：`{#if}` / `{:else if}` / `{:else}` / `{/if}`
-- 列表渲染：`{#each items as item (item.id)}` / `{/each}`
-- 事件绑定：`on:click` 或 `onclick`（Svelte 5）
-
-### 样式规范
-- `<style>` 自动 scoped（Svelte 默认行为）
-- 全局样式使用 `:global()`
-
-### 命名约定
-- 组件文件名：PascalCase（`UserProfile.svelte`）
-- Props 名：camelCase
-
----
-
-## Angular 规范（framework = angular）
-
-### 组件文件格式
-- 每个组件包含：`.component.ts` + `.component.html` + `.component.css`
-- 使用 `@Component` 装饰器
-
-### TypeScript 规范
-- 使用 `@Input()` / `@Output()` 装饰器
-- 或 Signal-based：`input()` / `output()`（Angular 17+）
-- 依赖注入通过构造函数
-
-### 模板规范
-- 条件渲染：`*ngIf` 或 `@if`（Angular 17+）
-- 列表渲染：`*ngFor` 或 `@for`（Angular 17+）
-- 事件绑定：`(click)="handler()"`
-- 属性绑定：`[property]="value"`
-
-### 样式规范
-- ViewEncapsulation.Emulated（默认 scoped）
-- 每个组件独立 CSS 文件
-
-### 命名约定
-- 文件名：kebab-case + 类型后缀（`user-profile.component.ts`）
-- 类名：PascalCase + 后缀（`UserProfileComponent`）
-- 选择器：kebab-case 带前缀（`app-user-profile`）
-
----
-
-## Vanilla 规范（framework = vanilla）
-
-### 文件格式
-- HTML：`index.html`
-- CSS：独立 `.css` 文件
-- JS：独立 `.js` 或 `.ts` 文件
-
-### CSS 规范
-- 使用 BEM 命名约定（`.block__element--modifier`）
-- 避免深层嵌套选择器
-- 使用 CSS 变量管理设计 token
-
-### JavaScript 规范
-- 使用 ES Modules（`import` / `export`）
-- DOM 操作使用 `querySelector` / `createElement`
-- 事件委托优于逐个绑定
+Svelte、Angular 和 Vanilla 不是当前生成目标。遇到这些项目时，先通过 `d2c-init` 记录检测结果和限制，再要求用户选择 Vue 3/React 预览基线或后续扩展策略。

@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "skills": [
+    {
+      "name": "d2c",
+      "requiredArtifacts": [
+        "manifest.json",
+        "summary.md"
+      ],
+      "requiredStatuses": [
+        "extract",
+        "generate",
+        "previewValidate",
+        "previewVerify",
+        "merge"
+      ]
+    },
+    {
+      "name": "d2c-extract",
+      "requiredArtifacts": [
+        "figma-raw.json",
+        "assets.json",
+        "normalized.json",
+        "design-spec.md"
+      ]
+    },
+    {
+      "name": "d2c-generate",
+      "requiredArtifacts": [
+        "generation-log.json",
+        "preview source"
+      ]
+    },
+    {
+      "name": "d2c-validate",
+      "requiredArtifacts": [
+        "validation-report.json"
+      ]
+    },
+    {
+      "name": "d2c-verify",
+      "requiredArtifacts": [
+        "verification-report.json"
+      ]
+    },
+    {
+      "name": "d2c-merge",
+      "requiredArtifacts": [
+        "merge-report.json"
+      ]
+    }
+  ]
+}

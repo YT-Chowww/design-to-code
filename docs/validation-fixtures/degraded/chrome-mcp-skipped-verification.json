@@ -1,0 +1,53 @@
+{
+  "designId": "fixture_chrome-skipped",
+  "runId": "2026-05-26T00-00-00",
+  "phase": "preview",
+  "url": "http://127.0.0.1:5173",
+  "overallStatus": "SKIPPED",
+  "mcpProbe": {
+    "status": "MISSING_CONFIG",
+    "fallbackManualUrl": "http://127.0.0.1:5173",
+    "reason": ".mcp.json does not define a Chrome DevTools MCP server"
+  },
+  "thresholds": {
+    "pixelRatio": 0.02,
+    "overallScore": 90
+  },
+  "requiresResponsive": true,
+  "requiresStates": false,
+  "screenshots": [
+    {
+      "breakpoint": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "status": "SKIPPED",
+      "reason": "Chrome MCP unavailable"
+    },
+    {
+      "breakpoint": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "status": "SKIPPED",
+      "reason": "Chrome MCP unavailable"
+    },
+    {
+      "breakpoint": "mobile",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "status": "SKIPPED",
+      "reason": "Chrome MCP unavailable"
+    }
+  ],
+  "stateChecks": [],
+  "diff": {
+    "status": "SKIPPED",
+    "pixelRatio": 0,
+    "regions": []
+  }
+}

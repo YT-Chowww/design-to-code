@@ -1,0 +1,108 @@
+{
+  "designId": "fixture_100-1",
+  "runId": "2026-05-26T00-00-00",
+  "source": {
+    "provider": "mock",
+    "mode": "structured",
+    "providerAttempts": [
+      {
+        "provider": "mock",
+        "status": "OK"
+      }
+    ]
+  },
+  "componentTree": {
+    "nodeId": "100:1",
+    "name": "MockAnalyticsCard"
+  },
+  "requiredStyle": {
+    "colors": [
+      "#1677ff",
+      "#ffffff"
+    ],
+    "spacing": [
+      16,
+      24
+    ]
+  },
+  "tokenCandidates": [
+    {
+      "nodeId": "100:1",
+      "rawValue": "#1677ff",
+      "semantic": "colorPrimary",
+      "confidence": 0.82,
+      "evidence": [
+        "matches primary action color"
+      ]
+    }
+  ],
+  "uiPatternCandidates": [
+    {
+      "nodeId": "100:1",
+      "pattern": "analytics-card",
+      "confidence": 0.86,
+      "evidence": [
+        "chart area with metric header"
+      ]
+    }
+  ],
+  "iconCandidates": [
+    {
+      "nodeId": "100:3",
+      "kind": "svg",
+      "nameCandidates": [
+        "ReloadOutlined",
+        "refresh"
+      ],
+      "confidence": 0.78,
+      "evidence": [
+        "vector node named Refresh Icon"
+      ]
+    }
+  ],
+  "chartCandidates": [
+    {
+      "nodeId": "100:2",
+      "chartType": "line",
+      "series": [
+        {
+          "name": "Revenue",
+          "points": 6
+        }
+      ],
+      "confidence": 0.81,
+      "evidence": [
+        "polyline shape with x axis labels"
+      ]
+    }
+  ],
+  "responsiveFrames": [
+    {
+      "frameNodeId": "100:1",
+      "breakpoint": "desktop",
+      "width": 720,
+      "height": 480,
+      "matchedFrameIds": [
+        "100:10",
+        "100:11"
+      ],
+      "confidence": 0.8,
+      "evidence": [
+        "frame width maps to desktop baseline"
+      ]
+    }
+  ],
+  "interactionStates": [
+    {
+      "nodeId": "100:4",
+      "state": "hover",
+      "variantProperties": {
+        "state": "hover"
+      },
+      "confidence": 0.76,
+      "evidence": [
+        "variant property contains hover"
+      ]
+    }
+  ]
+}

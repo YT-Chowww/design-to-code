@@ -1,0 +1,88 @@
+{
+  "schemaVersion": "1.0.0",
+  "sourceType": "unknown",
+  "autoFill": {
+    "sourceSchema": {
+      "requiredFields": ["path", "sourceType", "cssStrategy", "exports", "evidence", "confidence"],
+      "sourceTypes": [
+        "less",
+        "tailwind",
+        "sass",
+        "styled-components",
+        "css-modules",
+        "scoped",
+        "css-variables",
+        "theme-object",
+        "mixed",
+        "unknown"
+      ]
+    },
+    "tokenSchema": {
+      "requiredFields": ["name", "value", "type", "source", "usage", "cssStrategy"],
+      "categories": ["color", "spacing", "typography", "radius", "shadow", "breakpoint", "zIndex", "component"]
+    },
+    "helperSchema": {
+      "requiredFields": ["name", "type", "source", "usage", "evidence"],
+      "types": ["mixin", "utility-class", "theme-helper", "provider", "function", "entry"]
+    },
+    "extractionRules": {
+      "less": ["variables", "mixins", "theme-config", "global-entry"],
+      "tailwind": ["theme", "extend", "plugins", "content"],
+      "sass": ["variables", "mixins", "functions", "global-entry"],
+      "styled-components": ["theme-object", "theme-provider", "token-json"],
+      "css-modules": ["module-naming", "global-token-source", "local-class-patterns"],
+      "scoped": ["style-blocks", "global-token-source", "local-class-patterns"]
+    }
+  },
+  "sources": [],
+  "tokens": {
+    "color": [],
+    "spacing": [],
+    "typography": [],
+    "radius": [],
+    "shadow": [],
+    "breakpoint": [],
+    "zIndex": [],
+    "component": []
+  },
+  "tokenResolutionRules": [
+    {
+      "semantic": "color-primary",
+      "propertyTypes": ["backgroundColor", "borderColor", "color"],
+      "targets": [
+        {
+          "target": "",
+          "strategy": "",
+          "source": "",
+          "currentValue": "",
+          "matchType": "",
+          "confidence": 0,
+          "evidence": [],
+          "notes": ""
+        }
+      ]
+    }
+  ],
+  "helpers": [],
+  "rules": {
+    "preferProjectTokens": true,
+    "requireReliableTokenEvidence": true,
+    "allowRawValuesWhenUnmapped": true,
+    "recordUnmappedTokens": true,
+    "outputStrategyByCss": {
+      "less": "prefer-token-or-mixin",
+      "css-modules": "prefer-token-reference",
+      "scoped": "prefer-token-reference",
+      "sass": "prefer-token-or-mixin",
+      "styled-components": "prefer-theme-reference",
+      "tailwind": "prefer-utility-class",
+      "css-variables": "prefer-var",
+      "default": "prefer-semantic-token"
+    },
+    "tokenMatch": {
+      "colorDistanceThreshold": 3,
+      "numericTolerancePx": 2,
+      "preferSemanticOverRawName": true
+    }
+  }
+}

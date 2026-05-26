@@ -1,0 +1,69 @@
+{
+  "designId": "fixture_100-1",
+  "runId": "2026-05-26T00-00-00",
+  "phase": "preview",
+  "url": "http://127.0.0.1:5173",
+  "overallStatus": "PASSED",
+  "mcpProbe": {
+    "status": "AVAILABLE",
+    "configPath": ".mcp.json",
+    "serverName": "chrome-devtools",
+    "fallbackManualUrl": "http://127.0.0.1:5173",
+    "tools": [
+      "browser_navigate",
+      "browser_take_screenshot",
+      "browser_resize"
+    ]
+  },
+  "thresholds": {
+    "pixelRatio": 0.02,
+    "overallScore": 90
+  },
+  "requiresResponsive": false,
+  "requiresStates": true,
+  "screenshots": [
+    {
+      "breakpoint": "desktop",
+      "viewport": {
+        "width": 720,
+        "height": 480
+      },
+      "status": "PASSED",
+      "referenceImagePath": ".d2c/docs/reference/fixture_100-1/reference.png",
+      "actualImagePath": ".d2c/docs/verification-reports/fixture_100-1/actual.png",
+      "diffImagePath": ".d2c/docs/verification-reports/fixture_100-1/diff.png",
+      "score": 96
+    }
+  ],
+  "stateChecks": [
+    {
+      "state": "default",
+      "status": "PASSED",
+      "trigger": "initial render",
+      "actualImagePath": ".d2c/docs/verification-reports/fixture_100-1/default.png",
+      "score": 96
+    },
+    {
+      "state": "hover",
+      "status": "PASSED",
+      "trigger": "hover .mock-analytics-card",
+      "actualImagePath": ".d2c/docs/verification-reports/fixture_100-1/hover.png",
+      "score": 94
+    }
+  ],
+  "diff": {
+    "status": "PASSED",
+    "pixelRatio": 0.008,
+    "regions": [
+      {
+        "category": "layout",
+        "bounds": {
+          "x": 24,
+          "y": 20,
+          "width": 120,
+          "height": 40
+        }
+      }
+    ]
+  }
+}

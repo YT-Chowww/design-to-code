@@ -1,0 +1,397 @@
+{
+  "version": 1,
+  "updatedAt": "2026-05-26",
+  "statusLegend": {
+    "planned": "Example is listed in the roadmap but has no registered Figma node yet.",
+    "registered-pending-verification": "A real Figma node is registered and ready for D2C extraction and verification.",
+    "partially-verified": "At least one D2C stage has been exercised, but the full validation or visual closure is not complete.",
+    "verified": "The example has completed the required D2C stages and can support a roadmap [x] status."
+  },
+  "examples": [
+    {
+      "slug": "d2c-baseline-card",
+      "roadmapName": "D2C Baseline Card",
+      "roadmapStatus": "[>]",
+      "status": "registered-pending-verification",
+      "figma": {
+        "title": "客群全景台 明日",
+        "url": "https://www.figma.com/design/M3lJODRvpEqL78AZdnzwYX/%E5%AE%A2%E7%BE%A4%E5%85%A8%E6%99%AF%E5%8F%B0-%E6%98%8E%E6%97%A5?node-id=5301-76004&t=d27Q7z2kZA7ewmMW-4",
+        "fileKey": "M3lJODRvpEqL78AZdnzwYX",
+        "nodeId": "5301:76004"
+      },
+      "coverage": [
+        "流程基线",
+        "基础 extract",
+        "基础 generate",
+        "preview validate",
+        "preview verify"
+      ],
+      "designRequirements": [
+        "单卡片",
+        "图片",
+        "标题",
+        "正文",
+        "按钮",
+        "圆角",
+        "阴影"
+      ],
+      "targetProjectRequired": false,
+      "requiredStages": [
+        "extract",
+        "generate",
+        "preview-validate",
+        "preview-verify"
+      ],
+      "verification": {
+        "status": "PENDING",
+        "notes": "Figma node is registered; run D2C stages before moving this example to verified."
+      }
+    },
+    {
+      "slug": "plain-marketing-section",
+      "roadmapName": "Plain Marketing Section",
+      "roadmapStatus": "[>]",
+      "status": "registered-pending-verification",
+      "figma": {
+        "title": "Ant Design Open Source Community",
+        "url": "https://www.figma.com/design/kt7SCaYkfGf1Ko7BjSxhYn/Ant-Design-Open-Source--Community-?node-id=39889-87855&t=wXzyNHa5l9tlOtas-4",
+        "fileKey": "kt7SCaYkfGf1Ko7BjSxhYn",
+        "nodeId": "39889:87855"
+      },
+      "coverage": [
+        "普通模板",
+        "布局",
+        "组件拆分",
+        "文件落位",
+        "import / alias 适配"
+      ],
+      "designRequirements": [
+        "Hero",
+        "Feature Cards",
+        "CTA",
+        "Footer"
+      ],
+      "targetProjectRequired": false,
+      "requiredStages": [
+        "extract",
+        "generate",
+        "preview-validate",
+        "preview-verify"
+      ],
+      "verification": {
+        "status": "PENDING",
+        "notes": "Figma node is registered; use it to verify layout extraction, component decomposition, and preview generation."
+      }
+    },
+    {
+      "slug": "plain-template-5362-136850",
+      "roadmapName": "普通模板 5362:136850",
+      "roadmapStatus": "[>]",
+      "status": "partially-verified",
+      "figma": {
+        "title": "客群全景台 明日",
+        "url": "https://www.figma.com/design/M3lJODRvpEqL78AZdnzwYX/%E5%AE%A2%E7%BE%A4%E5%85%A8%E6%99%AF%E5%8F%B0-%E6%98%8E%E6%97%A5?node-id=5362-136850",
+        "fileKey": "M3lJODRvpEqL78AZdnzwYX",
+        "nodeId": "5362:136850"
+      },
+      "coverage": [
+        "基础模板",
+        "Figma MCP extract",
+        "React preview",
+        "target merge"
+      ],
+      "designRequirements": [
+        "基础模板",
+        "真实 Figma 节点",
+        "preview 校验",
+        "target 聚焦校验"
+      ],
+      "targetProjectRequired": true,
+      "targetProjectStatus": "previous-run",
+      "requiredStages": [
+        "extract",
+        "generate",
+        "preview-validate",
+        "merge",
+        "target-validate",
+        "preview-verify"
+      ],
+      "verification": {
+        "status": "PARTIAL",
+        "notes": "MCP extract and preview/target focused validation were exercised; visual screenshot and complete target validation are still open."
+      }
+    },
+    {
+      "slug": "image-card",
+      "roadmapName": "Image Card",
+      "roadmapStatus": "[>]",
+      "status": "registered-pending-verification",
+      "figma": {
+        "title": "客群全景台 明日",
+        "url": "https://www.figma.com/design/M3lJODRvpEqL78AZdnzwYX/%E5%AE%A2%E7%BE%A4%E5%85%A8%E6%99%AF%E5%8F%B0-%E6%98%8E%E6%97%A5?node-id=5308-125805&t=d27Q7z2kZA7ewmMW-4",
+        "fileKey": "M3lJODRvpEqL78AZdnzwYX",
+        "nodeId": "5308:125805"
+      },
+      "coverage": [
+        "资源下载",
+        "资源迁移",
+        "assets manifest",
+        "image fallback"
+      ],
+      "designRequirements": [
+        "多张图片",
+        "背景图",
+        "头像",
+        "失败资源占位"
+      ],
+      "targetProjectRequired": false,
+      "requiredStages": [
+        "extract",
+        "generate",
+        "preview-validate",
+        "preview-verify"
+      ],
+      "verification": {
+        "status": "PENDING",
+        "notes": "Figma node is registered; use it to verify asset download, manifest tracking, and image fallback handling."
+      }
+    },
+    {
+      "slug": "open-ui-admin-page",
+      "roadmapName": "Open UI Admin Page",
+      "roadmapStatus": "[>]",
+      "status": "registered-pending-verification",
+      "figma": {
+        "title": "Ant Design Open Source Community",
+        "url": "https://www.figma.com/design/kt7SCaYkfGf1Ko7BjSxhYn/Ant-Design-Open-Source--Community-?node-id=64462-1762&t=wXzyNHa5l9tlOtas-4",
+        "fileKey": "kt7SCaYkfGf1Ko7BjSxhYn",
+        "nodeId": "64462:1762"
+      },
+      "coverage": [
+        "开源组件库",
+        "componentCandidates",
+        "componentMappings",
+        "开源组件库 merge"
+      ],
+      "designRequirements": [
+        "Form",
+        "Table",
+        "Tabs",
+        "Modal",
+        "Pagination",
+        "Tag",
+        "Button"
+      ],
+      "targetProjectRequired": true,
+      "targetProjectStatus": "not-provided",
+      "requiredStages": [
+        "extract",
+        "generate",
+        "preview-validate",
+        "merge",
+        "target-validate"
+      ],
+      "verification": {
+        "status": "PENDING",
+        "notes": "Target project is needed to verify installed component library versions, imports, theme bindings, and merge behavior."
+      }
+    },
+    {
+      "slug": "business-dashboard",
+      "roadmapName": "Business Dashboard",
+      "roadmapStatus": "[>]",
+      "status": "registered-pending-verification",
+      "figma": {
+        "title": "客群全景台 明日",
+        "url": "https://www.figma.com/design/M3lJODRvpEqL78AZdnzwYX/%E5%AE%A2%E7%BE%A4%E5%85%A8%E6%99%AF%E5%8F%B0-%E6%98%8E%E6%97%A5?node-id=5601-71203&t=d27Q7z2kZA7ewmMW-4",
+        "fileKey": "M3lJODRvpEqL78AZdnzwYX",
+        "nodeId": "5601:71203"
+      },
+      "coverage": [
+        "业务组件库",
+        "businessComponentMerges",
+        "数据绑定状态",
+        "overridePolicy"
+      ],
+      "designRequirements": [
+        "筛选栏",
+        "指标卡",
+        "业务表格",
+        "审批操作",
+        "状态组件"
+      ],
+      "targetProjectRequired": true,
+      "targetProjectStatus": "not-provided",
+      "requiredStages": [
+        "extract",
+        "generate",
+        "preview-validate",
+        "merge",
+        "target-validate"
+      ],
+      "verification": {
+        "status": "PENDING",
+        "notes": "Target project is needed to verify business component imports, props contracts, data adapters, and merge behavior."
+      }
+    },
+    {
+      "slug": "token-playground",
+      "roadmapName": "Token Playground",
+      "roadmapStatus": "[>]",
+      "status": "registered-pending-verification",
+      "figma": {
+        "title": "中金财富B端 PC组件库",
+        "url": "https://www.figma.com/design/rS4zdqUH92Hz5SWONKVSeL/%E4%B8%AD%E9%87%91%E8%B4%A2%E5%AF%8CB%E7%AB%AF-PC%E7%BB%84%E4%BB%B6%E5%BA%93?node-id=5340-375412&t=BbJFsIMUC4RxcD7j-4",
+        "fileKey": "rS4zdqUH92Hz5SWONKVSeL",
+        "nodeId": "5340:375412"
+      },
+      "coverage": [
+        "Design Token",
+        "tokenCandidates",
+        "tokenHints",
+        "resolvedTokens"
+      ],
+      "designRequirements": [
+        "主色",
+        "状态色",
+        "字号",
+        "间距",
+        "圆角",
+        "阴影",
+        "主题变量"
+      ],
+      "targetProjectRequired": false,
+      "requiredStages": [
+        "extract",
+        "generate",
+        "preview-validate",
+        "merge"
+      ],
+      "verification": {
+        "status": "PENDING",
+        "notes": "Figma node is registered; use it to verify token candidates, hints, and evidence-based token resolution."
+      }
+    },
+    {
+      "slug": "analytics-report",
+      "roadmapName": "Analytics Report",
+      "roadmapStatus": "[>]",
+      "status": "registered-pending-verification",
+      "figma": {
+        "title": "客群全景台 明日",
+        "url": "https://www.figma.com/design/M3lJODRvpEqL78AZdnzwYX/%E5%AE%A2%E7%BE%A4%E5%85%A8%E6%99%AF%E5%8F%B0-%E6%98%8E%E6%97%A5?node-id=5601-71250&t=d27Q7z2kZA7ewmMW-4",
+        "fileKey": "M3lJODRvpEqL78AZdnzwYX",
+        "nodeId": "5601:71250"
+      },
+      "coverage": [
+        "chartCandidates",
+        "图表代码生成",
+        "图表库 merge",
+        "图表视觉验证"
+      ],
+      "designRequirements": [
+        "折线图",
+        "柱状图",
+        "环图",
+        "图例",
+        "Tooltip 展示态"
+      ],
+      "targetProjectRequired": true,
+      "targetProjectStatus": "not-provided",
+      "requiredStages": [
+        "extract",
+        "generate",
+        "preview-validate",
+        "preview-verify",
+        "merge"
+      ],
+      "verification": {
+        "status": "PENDING",
+        "notes": "Target project is needed to verify project chart wrappers, options, dataAdapter, and merge behavior."
+      }
+    },
+    {
+      "slug": "order-management-console",
+      "roadmapName": "Order Management Console",
+      "roadmapStatus": "[>]",
+      "status": "registered-pending-verification",
+      "figma": {
+        "title": "【PRD】企微客户列表",
+        "url": "https://www.figma.com/design/h6yGJDAcQ4vX3fO93nYCLh/%E3%80%90PRD%E3%80%91%E4%BC%81%E5%BE%AE%E5%AE%A2%E6%88%B7%E5%88%97%E8%A1%A8?node-id=320-13867&t=Gl7chOIerDUOSmPG-4",
+        "fileKey": "h6yGJDAcQ4vX3fO93nYCLh",
+        "nodeId": "320:13867"
+      },
+      "coverage": [
+        "复杂业务页面",
+        "路由建议",
+        "冲突处理策略",
+        "target validate"
+      ],
+      "designRequirements": [
+        "筛选",
+        "表格",
+        "详情抽屉",
+        "批量操作",
+        "空态",
+        "错态",
+        "加载态"
+      ],
+      "targetProjectRequired": true,
+      "targetProjectStatus": "not-provided",
+      "requiredStages": [
+        "extract",
+        "generate",
+        "preview-validate",
+        "merge",
+        "target-validate",
+        "target-verify"
+      ],
+      "verification": {
+        "status": "PENDING",
+        "notes": "Target project is needed to verify route suggestions, conflict handling, target validation, and state coverage."
+      }
+    },
+    {
+      "slug": "interactive-component-set",
+      "roadmapName": "Interactive Component Set",
+      "roadmapStatus": "[>]",
+      "status": "registered-pending-verification",
+      "figma": {
+        "title": "中金财富B端 PC组件库",
+        "url": "https://www.figma.com/design/rS4zdqUH92Hz5SWONKVSeL/%E4%B8%AD%E9%87%91%E8%B4%A2%E5%AF%8CB%E7%AB%AF-PC%E7%BB%84%E4%BB%B6%E5%BA%93?node-id=54-208176&t=BbJFsIMUC4RxcD7j-4",
+        "fileKey": "rS4zdqUH92Hz5SWONKVSeL",
+        "nodeId": "54:208176"
+      },
+      "coverage": [
+        "interactionStates",
+        "variants",
+        "state code generation",
+        "state verification"
+      ],
+      "designRequirements": [
+        "Button variants",
+        "Input variants",
+        "Select variants",
+        "Tabs variants",
+        "Modal variants"
+      ],
+      "targetProjectRequired": false,
+      "requiredStages": [
+        "extract",
+        "generate",
+        "preview-validate",
+        "preview-verify"
+      ],
+      "verification": {
+        "status": "PENDING",
+        "notes": "Figma component set is registered; structured variant extraction must confirm supported states before verification."
+      }
+    }
+  ],
+  "deferredExamples": [
+    {
+      "roadmapName": "Responsive Pricing Page",
+      "reason": "User said this example should not be considered yet."
+    }
+  ]
+}

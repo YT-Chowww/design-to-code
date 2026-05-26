@@ -1,0 +1,35 @@
+{
+  "runId": "2026-05-26T00-00-00",
+  "designId": "fixture_100-1",
+  "input": {
+    "figmaUrl": "https://www.figma.com/design/mock/Fixture?node-id=100-1",
+    "targetDirectory": "/tmp/d2c-target-fixture"
+  },
+  "project": {
+    "framework": "react",
+    "language": "typescript",
+    "buildTool": "vite"
+  },
+  "config": {
+    "maxIterations": 3
+  },
+  "artifacts": {
+    "rawFigma": "docs/validation-fixtures/protocol/raw-figma.json",
+    "assetsManifest": "docs/validation-fixtures/protocol/assets.json",
+    "normalizedDesign": "docs/validation-fixtures/protocol/normalized.json",
+    "designSpec": "docs/validation-fixtures/protocol/design-spec.md",
+    "generationLog": "docs/validation-fixtures/protocol/generation-log.json",
+    "previewValidationReport": "docs/validation-fixtures/protocol/preview-validation-report.json",
+    "previewVerificationReport": "docs/validation-fixtures/protocol/preview-verification-report.json",
+    "mergeReport": "docs/validation-fixtures/protocol/merge-report.json"
+  },
+  "status": {
+    "extract": "OK",
+    "generate": "OK",
+    "previewValidate": "PASSED",
+    "previewVerify": "PASSED",
+    "merge": "OK",
+    "targetValidate": "PENDING",
+    "targetVerify": "PENDING"
+  }
+}

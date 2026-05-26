@@ -1,0 +1,31 @@
+{
+  "name": "Mock Analytics Card",
+  "lastModified": "2026-05-26T00:00:00Z",
+  "nodes": {
+    "100:1": {
+      "document": {
+        "id": "100:1",
+        "name": "Mock Analytics Card",
+        "type": "FRAME",
+        "absoluteBoundingBox": {
+          "x": 0,
+          "y": 0,
+          "width": 720,
+          "height": 480
+        },
+        "children": [
+          {
+            "id": "100:2",
+            "name": "Revenue Line Chart",
+            "type": "FRAME"
+          },
+          {
+            "id": "100:3",
+            "name": "Refresh Icon",
+            "type": "VECTOR"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,98 +1,27 @@
 # 设计系统 (Design System)
 
-> 请根据你的项目填写以下内容。这些设计 token 将用于生成代码时映射 Figma 设计稿中的样式值。
+`design-system.json` 是机器读取主数据。本文件应在初始化回填后由 `design-system.json` 同步生成，作为人工可读镜像。
 
-## 颜色 (Colors)
+## 生成要求
 
-### 主色 (Primary)
-```css
---color-primary: #3B82F6;
---color-primary-light: #60A5FA;
---color-primary-dark: #2563EB;
-```
+- 真实来源来自 `design-system.sources`
+- token 摘要来自 `design-system.tokens`
+- token 候选解析规则来自 `design-system.tokenResolutionRules`
+- 输出策略来自 `design-system.rules.outputStrategyByCss`
+- helper 摘要来自 `design-system.helpers`
 
-### 中性色 (Neutral)
-```css
---color-text-primary: #1F2937;
---color-text-secondary: #6B7280;
---color-text-disabled: #9CA3AF;
---color-background: #FFFFFF;
---color-surface: #F9FAFB;
---color-border: #E5E7EB;
-```
+## 内容结构
 
-### 语义色 (Semantic)
-```css
---color-success: #10B981;
---color-warning: #F59E0B;
---color-error: #EF4444;
---color-info: #3B82F6;
-```
+- 真实来源
+- 核心 Token
+- 组件级 Token
+- D2C token 候选解析规则
+- 输出策略
+- 可复用能力
+- 维护约束
 
-## 字体 (Typography)
+## 维护约束
 
-```css
---font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-
---font-size-xs: 12px;
---font-size-sm: 14px;
---font-size-base: 16px;
---font-size-lg: 18px;
---font-size-xl: 20px;
---font-size-2xl: 24px;
---font-size-3xl: 30px;
---font-size-4xl: 36px;
-
---font-weight-normal: 400;
---font-weight-medium: 500;
---font-weight-semibold: 600;
---font-weight-bold: 700;
-
---line-height-tight: 1.25;
---line-height-normal: 1.5;
---line-height-relaxed: 1.75;
-```
-
-## 间距 (Spacing)
-
-```css
---spacing-1: 4px;
---spacing-2: 8px;
---spacing-3: 12px;
---spacing-4: 16px;
---spacing-5: 20px;
---spacing-6: 24px;
---spacing-8: 32px;
---spacing-10: 40px;
---spacing-12: 48px;
---spacing-16: 64px;
-```
-
-## 圆角 (Border Radius)
-
-```css
---radius-sm: 4px;
---radius-md: 8px;
---radius-lg: 12px;
---radius-xl: 16px;
---radius-full: 9999px;
-```
-
-## 阴影 (Shadows)
-
-```css
---shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
---shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
---shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
---shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
-```
-
-## 断点 (Breakpoints)
-
-```css
---breakpoint-sm: 640px;
---breakpoint-md: 768px;
---breakpoint-lg: 1024px;
---breakpoint-xl: 1280px;
---breakpoint-2xl: 1536px;
-```
+- 初始化完成后，本文件应反映当前项目。
+- 修改 `design-system.json` 后，同步更新本文件。
+- 代码生成读取 JSON，本文件用于人工评审和跨阶段沟通。

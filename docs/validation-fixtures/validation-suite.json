@@ -1,0 +1,130 @@
+{
+  "version": 1,
+  "updatedAt": "2026-05-26",
+  "statusLegend": {
+    "[>]": "implemented as local automation, pending broader real-run verification",
+    "[x]": "implemented and passed the required real or fixture validation"
+  },
+  "cases": [
+    {
+      "id": "structure",
+      "roadmapItem": "结构测试",
+      "status": "[>]",
+      "kind": "structure",
+      "requiresFigma": false,
+      "requiresTargetProject": false,
+      "checks": [
+        ".claude/skills/d2c/SKILL.md",
+        ".claude/skills/d2c-init/SKILL.md",
+        ".claude/skills/d2c-extract/SKILL.md",
+        ".claude/skills/d2c-generate/SKILL.md",
+        ".claude/skills/d2c-validate/SKILL.md",
+        ".claude/skills/d2c-verify/SKILL.md",
+        ".claude/skills/d2c-merge/SKILL.md",
+        "docs/capability-roadmap.md",
+        "docs/figma-examples.json"
+      ]
+    },
+    {
+      "id": "preview-template-static",
+      "roadmapItem": "模板构建",
+      "status": "[>]",
+      "kind": "template-static",
+      "requiresFigma": false,
+      "requiresTargetProject": false,
+      "checks": [
+        ".claude/skills/d2c-init/templates/preview/package.json",
+        ".claude/skills/d2c-init/templates/preview/vite.config.ts",
+        ".claude/skills/d2c-init/templates/preview/src/App.vue",
+        ".claude/skills/d2c-init/templates/preview/src/main.ts"
+      ]
+    },
+    {
+      "id": "protocol-snapshots",
+      "roadmapItem": "协议快照测试",
+      "status": "[>]",
+      "kind": "protocol",
+      "requiresFigma": false,
+      "requiresTargetProject": false,
+      "fixtures": [
+        "docs/validation-fixtures/protocol/manifest.json",
+        "docs/validation-fixtures/protocol/normalized.json",
+        "docs/validation-fixtures/protocol/generation-log.json",
+        "docs/validation-fixtures/protocol/preview-validation-report.json",
+        "docs/validation-fixtures/protocol/preview-verification-report.json",
+        "docs/validation-fixtures/protocol/merge-report.json"
+      ]
+    },
+    {
+      "id": "mock-extract",
+      "roadmapItem": "mock extract 测试",
+      "status": "[>]",
+      "kind": "mock-extract",
+      "requiresFigma": false,
+      "requiresTargetProject": false,
+      "rawFixture": "docs/validation-fixtures/mock/raw-figma.json",
+      "normalizedFixture": "docs/validation-fixtures/protocol/normalized.json"
+    },
+    {
+      "id": "mock-generate",
+      "roadmapItem": "mock generate 测试",
+      "status": "[>]",
+      "kind": "mock-generate",
+      "requiresFigma": false,
+      "requiresTargetProject": false,
+      "inputFixture": "docs/validation-fixtures/protocol/normalized.json",
+      "outputFixture": "docs/validation-fixtures/protocol/generation-log.json"
+    },
+    {
+      "id": "mock-merge",
+      "roadmapItem": "mock merge 测试",
+      "status": "[>]",
+      "kind": "mock-merge",
+      "requiresFigma": false,
+      "requiresTargetProject": false,
+      "inputFixture": "docs/validation-fixtures/protocol/generation-log.json",
+      "outputFixture": "docs/validation-fixtures/protocol/merge-report.json"
+    },
+    {
+      "id": "skill-eval",
+      "roadmapItem": "skill eval",
+      "status": "[>]",
+      "kind": "skill-eval",
+      "requiresFigma": false,
+      "requiresTargetProject": false,
+      "fixture": "docs/validation-fixtures/skill-eval/expected-artifacts.json"
+    },
+    {
+      "id": "real-figma-e2e",
+      "roadmapItem": "真实 Figma E2E",
+      "status": "[>]",
+      "kind": "real-figma-registry",
+      "requiresFigma": true,
+      "requiresTargetProject": true,
+      "fixture": "docs/figma-examples.json",
+      "notes": "The registry is validated locally; real E2E execution remains pending."
+    },
+    {
+      "id": "visual-regression",
+      "roadmapItem": "视觉回归",
+      "status": "[>]",
+      "kind": "visual-regression",
+      "requiresFigma": true,
+      "requiresTargetProject": false,
+      "fixture": "docs/validation-fixtures/visual/visual-regression-report.json"
+    },
+    {
+      "id": "degraded-scenarios",
+      "roadmapItem": "降级场景",
+      "status": "[>]",
+      "kind": "degraded",
+      "requiresFigma": false,
+      "requiresTargetProject": false,
+      "fixtures": [
+        "docs/validation-fixtures/degraded/image-fallback-normalized.json",
+        "docs/validation-fixtures/degraded/chrome-mcp-skipped-verification.json",
+        "docs/validation-fixtures/degraded/target-build-degraded-validation.json"
+      ]
+    }
+  ]
+}

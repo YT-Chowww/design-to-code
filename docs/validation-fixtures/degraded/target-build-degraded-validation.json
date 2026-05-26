@@ -1,0 +1,69 @@
+{
+  "designId": "fixture_target-degraded",
+  "runId": "2026-05-26T00-00-00",
+  "phase": "target",
+  "framework": "react",
+  "language": "typescript",
+  "buildTool": "vite",
+  "targetDirectory": "/tmp/d2c-target-fixture",
+  "packageManager": "npm",
+  "overallStatus": "DEGRADED",
+  "commandMatrix": {
+    "typeCheck": {
+      "source": "package-script",
+      "command": "npm run type-check"
+    },
+    "lint": {
+      "source": "package-script",
+      "command": "npm run lint"
+    },
+    "format": {
+      "source": "project-adapter",
+      "command": "npm run format:check"
+    },
+    "stylelint": {
+      "source": "missing",
+      "reason": "target fixture has no stylelint script"
+    },
+    "build": {
+      "source": "package-script",
+      "command": "npm run build"
+    },
+    "devServer": {
+      "source": "missing",
+      "reason": "target fixture is validated without starting a server"
+    }
+  },
+  "checks": {
+    "typeCheck": {
+      "source": "package-script",
+      "command": "npm run type-check",
+      "status": "PASSED"
+    },
+    "lint": {
+      "source": "package-script",
+      "command": "npm run lint",
+      "status": "PASSED"
+    },
+    "format": {
+      "source": "project-adapter",
+      "command": "npm run format:check",
+      "status": "PASSED"
+    },
+    "stylelint": {
+      "source": "missing",
+      "status": "SKIPPED",
+      "reason": "target fixture has no stylelint script"
+    },
+    "build": {
+      "source": "package-script",
+      "command": "npm run build",
+      "status": "FAILED"
+    },
+    "devServer": {
+      "source": "missing",
+      "status": "NEEDS_MANUAL_START",
+      "reason": "target fixture is validated without starting a server"
+    }
+  }
+}

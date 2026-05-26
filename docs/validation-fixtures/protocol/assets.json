@@ -1,0 +1,12 @@
+{
+  "designId": "fixture_100-1",
+  "runId": "2026-05-26T00-00-00",
+  "assets": [
+    {
+      "nodeId": "100:3",
+      "kind": "svg",
+      "status": "SKIPPED",
+      "reason": "fixture uses inline fallback"
+    }
+  ]
+}

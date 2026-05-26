@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "1.0.0",
+  "autoFill": {
+    "detectFrom": ["package.json", "project-config.json", "components.json", "source-imports"],
+    "presetLibraries": {
+      "antd": {
+        "importFrom": "antd",
+        "components": ["Button", "Form", "Input", "Select", "Table", "Modal", "Tabs", "Tag", "Pagination"]
+      },
+      "ant-design-vue": {
+        "importFrom": "ant-design-vue",
+        "components": ["Button", "Form", "Input", "Select", "Table", "Modal", "Tabs", "Tag", "Pagination"]
+      },
+      "element-plus": {
+        "importFrom": "element-plus",
+        "components": ["Button", "Form", "Input", "Select", "Table", "Dialog", "Tabs", "Tag", "Pagination"]
+      }
+    },
+    "componentContract": {
+      "requiredFields": ["name", "importFrom", "patterns", "propsMapping", "styleContract", "overridePolicy"],
+      "patternExamples": ["primary-action", "filter-form", "data-table", "dialog", "tab-navigation", "status-tag"],
+      "styleFitInputs": ["covered", "variableByProps", "tokenSlots", "layoutLimits", "hardToOverride"],
+      "fallbackStrategy": "native-structure-when-stylefit-below-threshold"
+    }
+  },
+  "library": {
+    "name": "none",
+    "version": ""
+  },
+  "components": [],
+  "projectComponents": {
+    "roots": [],
+    "mappings": []
+  },
+  "matchingRules": {
+    "preferLibraryComponentWhenConfidenceAbove": 0.8,
+    "fallbackToNativeWhenUnknown": true,
+    "styleFit": {
+      "useComponent": 0.85,
+      "useComponentWithOverrides": 0.65
+    }
+  },
+  "componentSchema": {
+    "requiredFields": ["name", "importFrom", "patterns"],
+    "optionalFields": ["propsMapping", "styleContract", "overridePolicy", "notes"],
+    "styleContractFields": [
+      "covered",
+      "variableByProps",
+      "tokenSlots",
+      "layoutLimits",
+      "hardToOverride"
+    ],
+    "overridePolicyFields": [
+      "allowed",
+      "preferClassName",
+      "preferStyle",
+      "fallbackWhenMismatch"
+    ]
+  },
+  "notes": []
+}

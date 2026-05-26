@@ -1,0 +1,54 @@
+{
+  "framework": "vue3",
+  "language": "typescript",
+  "buildTool": "vite",
+  "cssStrategy": "scoped",
+  "componentLibrary": "none",
+  "router": "none",
+  "stateManagement": "none",
+  "tooling": {
+    "linter": {
+      "name": "none",
+      "configPath": "",
+      "command": ""
+    },
+    "formatter": {
+      "name": "none",
+      "configPath": "",
+      "command": ""
+    },
+    "styleLinter": {
+      "name": "none",
+      "configPath": "",
+      "command": ""
+    }
+  },
+  "paths": {
+    "repoRoot": ".",
+    "projectRoot": ".",
+    "srcRoot": "src",
+    "componentDirs": [
+      "src/components"
+    ],
+    "pageDirs": [
+      "src/pages",
+      "src/views"
+    ],
+    "styleDirs": [
+      "src/styles",
+      "src/assets/styles"
+    ],
+    "assetDirs": [
+      "src/assets"
+    ],
+    "aliasMap": {
+      "@": "src"
+    }
+  },
+  "previewPolicy": {
+    "requireTypeCheck": true,
+    "requireBuild": true,
+    "runLintWhenConfigured": true,
+    "runFormatDuringMerge": true
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectName": "",
+  "repoType": "single-package",
+  "autoFill": {
+    "detectFrom": [
+      "project-config.json",
+      "design-system.json",
+      "package.json",
+      "tsconfig.json",
+      "vite.config.*",
+      "webpack.config.*",
+      ".umirc.*",
+      "config/config.*"
+    ],
+    "requiredEvidenceFields": ["source", "path", "confidence", "notes"],
+    "validationCommandKeys": ["typeCheck", "build", "lint", "stylelint", "formatCheck"]
+  },
+  "pathCandidates": {
+    "components": [],
+    "pages": [],
+    "layouts": [],
+    "assets": [],
+    "styles": []
+  },
+  "configCandidates": {
+    "framework": [],
+    "typescript": [],
+    "eslint": [],
+    "prettier": [],
+    "stylelint": []
+  },
+  "tokenSources": {
+    "theme": [],
+    "less": [],
+    "cssVariables": [],
+    "tailwind": [],
+    "sass": [],
+    "styledComponents": []
+  },
+  "styleConventions": {
+    "styleLanguage": "",
+    "componentStyleColocation": true,
+    "globalStyleEntries": [],
+    "classNamePattern": ""
+  },
+  "aliasResolution": {},
+  "mergeTargets": {
+    "components": "",
+    "pages": "",
+    "styles": "",
+    "assets": ""
+  },
+  "validationCommands": {},
+  "projectSpecifics": {}
+}

@@ -3,3 +3,4 @@
 templates/vite-preview
 .d2c/*
 tests/results/*
+.DS_Store
