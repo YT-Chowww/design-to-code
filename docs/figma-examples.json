@@ -1,18 +1,18 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-26",
+  "updatedAt": "2026-06-02",
   "statusLegend": {
     "planned": "Example is listed in the roadmap but has no registered Figma node yet.",
     "registered-pending-verification": "A real Figma node is registered and ready for D2C extraction and verification.",
     "partially-verified": "At least one D2C stage has been exercised, but the full validation or visual closure is not complete.",
-    "verified": "The example has completed the required D2C stages and can support a roadmap [x] status."
+    "verified": "The example has completed the required D2C stages with verification.evidence and can support a roadmap [x] status."
   },
   "examples": [
     {
       "slug": "d2c-baseline-card",
       "roadmapName": "D2C Baseline Card",
-      "roadmapStatus": "[>]",
-      "status": "registered-pending-verification",
+      "roadmapStatus": "[x]",
+      "status": "verified",
       "figma": {
         "title": "客群全景台 明日",
         "url": "https://www.figma.com/design/M3lJODRvpEqL78AZdnzwYX/%E5%AE%A2%E7%BE%A4%E5%85%A8%E6%99%AF%E5%8F%B0-%E6%98%8E%E6%97%A5?node-id=5301-76004&t=d27Q7z2kZA7ewmMW-4",
@@ -43,15 +43,51 @@
         "preview-verify"
       ],
       "verification": {
-        "status": "PENDING",
-        "notes": "Figma node is registered; run D2C stages before moving this example to verified."
+        "status": "PASSED",
+        "notes": "Phase 1 preview-only D2C loop completed with Figma MCP extract, generated React preview, preview validation, and Chrome screenshot verification.",
+        "evidence": {
+          "validatedAt": "2026-05-27T22:45:00+08:00",
+          "validatorCommand": "node scripts/check-real-run-evidence.mjs docs/figma-examples.json",
+          "result": "PASSED",
+          "runId": "2026-05-27T22-30-00-d2c-baseline-card",
+          "manifest": ".d2c/docs/sessions/2026-05-27T22-30-00-d2c-baseline-card/manifest.json",
+          "artifacts": [
+            ".d2c/docs/reference/M3lJODRvpEqL78AZdnzwYX_5301-76004/2026-05-27T22-30-00-d2c-baseline-card-figma-raw.json",
+            ".d2c/docs/reference/M3lJODRvpEqL78AZdnzwYX_5301-76004/2026-05-27T22-30-00-d2c-baseline-card-assets.json",
+            ".d2c/docs/design-specs/M3lJODRvpEqL78AZdnzwYX_5301-76004/2026-05-27T22-30-00-d2c-baseline-card-normalized.json",
+            ".d2c/docs/design-specs/M3lJODRvpEqL78AZdnzwYX_5301-76004/2026-05-27T22-30-00-d2c-baseline-card-design-spec.md",
+            ".d2c/docs/generation-logs/M3lJODRvpEqL78AZdnzwYX_5301-76004/2026-05-27T22-30-00-d2c-baseline-card.json",
+            ".d2c/docs/validation-reports/M3lJODRvpEqL78AZdnzwYX_5301-76004/2026-05-27T22-30-00-d2c-baseline-card-preview.json",
+            ".d2c/docs/verification-reports/M3lJODRvpEqL78AZdnzwYX_5301-76004/2026-05-27T22-30-00-d2c-baseline-card-preview.json",
+            ".d2c/docs/verification-reports/M3lJODRvpEqL78AZdnzwYX_5301-76004/screenshots/2026-05-27T22-30-00-d2c-baseline-card-preview-desktop.png",
+            ".d2c/docs/verification-reports/M3lJODRvpEqL78AZdnzwYX_5301-76004/screenshots/2026-05-27T22-30-00-d2c-baseline-card-preview-desktop-diff.png"
+          ],
+          "stageResults": {
+            "extract": {
+              "status": "PASSED",
+              "report": ".d2c/docs/reference/M3lJODRvpEqL78AZdnzwYX_5301-76004/2026-05-27T22-30-00-d2c-baseline-card-figma-raw.json"
+            },
+            "generate": {
+              "status": "PASSED",
+              "report": ".d2c/docs/generation-logs/M3lJODRvpEqL78AZdnzwYX_5301-76004/2026-05-27T22-30-00-d2c-baseline-card.json"
+            },
+            "preview-validate": {
+              "status": "PASSED",
+              "report": ".d2c/docs/validation-reports/M3lJODRvpEqL78AZdnzwYX_5301-76004/2026-05-27T22-30-00-d2c-baseline-card-preview.json"
+            },
+            "preview-verify": {
+              "status": "PASSED",
+              "report": ".d2c/docs/verification-reports/M3lJODRvpEqL78AZdnzwYX_5301-76004/2026-05-27T22-30-00-d2c-baseline-card-preview.json"
+            }
+          }
+        }
       }
     },
     {
       "slug": "plain-marketing-section",
       "roadmapName": "Plain Marketing Section",
-      "roadmapStatus": "[>]",
-      "status": "registered-pending-verification",
+      "roadmapStatus": "[x]",
+      "status": "verified",
       "figma": {
         "title": "Ant Design Open Source Community",
         "url": "https://www.figma.com/design/kt7SCaYkfGf1Ko7BjSxhYn/Ant-Design-Open-Source--Community-?node-id=39889-87855&t=wXzyNHa5l9tlOtas-4",
@@ -79,8 +115,44 @@
         "preview-verify"
       ],
       "verification": {
-        "status": "PENDING",
-        "notes": "Figma node is registered; use it to verify layout extraction, component decomposition, and preview generation."
+        "status": "PASSED",
+        "notes": "Phase 1 preview-only D2C loop completed with Figma MCP extract, generated React preview, preview validation, and Chrome screenshot verification.",
+        "evidence": {
+          "validatedAt": "2026-05-27T22:45:00+08:00",
+          "validatorCommand": "node scripts/check-real-run-evidence.mjs docs/figma-examples.json",
+          "result": "PASSED",
+          "runId": "2026-05-27T22-31-00-plain-marketing-section",
+          "manifest": ".d2c/docs/sessions/2026-05-27T22-31-00-plain-marketing-section/manifest.json",
+          "artifacts": [
+            ".d2c/docs/reference/kt7SCaYkfGf1Ko7BjSxhYn_39889-87855/2026-05-27T22-31-00-plain-marketing-section-figma-raw.json",
+            ".d2c/docs/reference/kt7SCaYkfGf1Ko7BjSxhYn_39889-87855/2026-05-27T22-31-00-plain-marketing-section-assets.json",
+            ".d2c/docs/design-specs/kt7SCaYkfGf1Ko7BjSxhYn_39889-87855/2026-05-27T22-31-00-plain-marketing-section-normalized.json",
+            ".d2c/docs/design-specs/kt7SCaYkfGf1Ko7BjSxhYn_39889-87855/2026-05-27T22-31-00-plain-marketing-section-design-spec.md",
+            ".d2c/docs/generation-logs/kt7SCaYkfGf1Ko7BjSxhYn_39889-87855/2026-05-27T22-31-00-plain-marketing-section.json",
+            ".d2c/docs/validation-reports/kt7SCaYkfGf1Ko7BjSxhYn_39889-87855/2026-05-27T22-31-00-plain-marketing-section-preview.json",
+            ".d2c/docs/verification-reports/kt7SCaYkfGf1Ko7BjSxhYn_39889-87855/2026-05-27T22-31-00-plain-marketing-section-preview.json",
+            ".d2c/docs/verification-reports/kt7SCaYkfGf1Ko7BjSxhYn_39889-87855/screenshots/2026-05-27T22-31-00-plain-marketing-section-preview-desktop.png",
+            ".d2c/docs/verification-reports/kt7SCaYkfGf1Ko7BjSxhYn_39889-87855/screenshots/2026-05-27T22-31-00-plain-marketing-section-preview-desktop-diff.png"
+          ],
+          "stageResults": {
+            "extract": {
+              "status": "PASSED",
+              "report": ".d2c/docs/reference/kt7SCaYkfGf1Ko7BjSxhYn_39889-87855/2026-05-27T22-31-00-plain-marketing-section-figma-raw.json"
+            },
+            "generate": {
+              "status": "PASSED",
+              "report": ".d2c/docs/generation-logs/kt7SCaYkfGf1Ko7BjSxhYn_39889-87855/2026-05-27T22-31-00-plain-marketing-section.json"
+            },
+            "preview-validate": {
+              "status": "PASSED",
+              "report": ".d2c/docs/validation-reports/kt7SCaYkfGf1Ko7BjSxhYn_39889-87855/2026-05-27T22-31-00-plain-marketing-section-preview.json"
+            },
+            "preview-verify": {
+              "status": "PASSED",
+              "report": ".d2c/docs/verification-reports/kt7SCaYkfGf1Ko7BjSxhYn_39889-87855/2026-05-27T22-31-00-plain-marketing-section-preview.json"
+            }
+          }
+        }
       }
     },
     {
@@ -107,7 +179,7 @@
         "target 聚焦校验"
       ],
       "targetProjectRequired": true,
-      "targetProjectStatus": "previous-run",
+      "targetProjectStatus": "changed-files-validated",
       "requiredStages": [
         "extract",
         "generate",
@@ -118,14 +190,78 @@
       ],
       "verification": {
         "status": "PARTIAL",
-        "notes": "MCP extract and preview/target focused validation were exercised; visual screenshot and complete target validation are still open."
+        "notes": "Phase 2 rerun completed structured Figma MCP extract, React preview generation, preview validation, and an earlier isolated target merge. After the token update, both repository-local .mcp.json files match the supplied token by fingerprint. File-scoped Figma export downloaded the reference PNG and help-icon SVG even though /v1/me returned 403. The new reference-backed diff failed: 5406 / 63360 pixels differ, ratio 0.0853219696969697, above the 0.02 threshold. The current manifest resets downstream merge and target validation to PENDING and resumes at GENERATE_FROM_DRIFT. Chrome DevTools MCP automatic navigation, resize, snapshot, screenshot, and evaluate operations passed on 2026-05-30T15:44:42+08:00; the earlier profile-lock failure is no longer reproducible. Chrome enforced a minimum 500 x 236 CSS-pixel viewport at DPR 2, so the MCP screenshots are retained as capability evidence rather than canonical diff inputs. Target validate was rerun with the changed-files policy: focused TypeScript compilation plus style/resource reference checks passed for the merge report files index.tsx and index.less. Project-wide type-check and build are optional diagnostics and no longer degrade this D2C run. Gate state was rechecked from the target-project root on 2026-05-30T16:11:18+08:00: historical merge and target-validate reports remain auditable PASSED artifacts, but the current manifest keeps merge, targetValidate, and targetVerify PENDING while previewVerify is FAILED.",
+        "evidence": {
+          "validatedAt": "2026-05-30T16:11:18+08:00",
+          "validatorCommand": "node scripts/check-real-run-evidence.mjs docs/figma-examples.json --target-root=/Applications/work/wm/espace/pc/ms-fe-basic",
+          "result": "PARTIAL",
+          "runId": "2026-05-30T09-23-09-plain-template-5362-136850",
+          "manifest": ".d2c/docs/sessions/2026-05-30T09-23-09-plain-template-5362-136850/manifest.json",
+          "resumePoint": "GENERATE_FROM_DRIFT",
+          "currentManifestStatus": {
+            "extract": "OK",
+            "generate": "OK",
+            "previewValidate": "PASSED",
+            "previewVerify": "FAILED",
+            "merge": "PENDING",
+            "targetValidate": "PENDING",
+            "targetVerify": "PENDING"
+          },
+          "historicalEvidenceOnlyStages": [
+            "merge",
+            "target-validate"
+          ],
+          "artifacts": [
+            ".d2c/docs/reference/M3lJODRvpEqL78AZdnzwYX_5362-136850/2026-05-30T09-23-09-plain-template-5362-136850-figma-raw.json",
+            ".d2c/docs/reference/M3lJODRvpEqL78AZdnzwYX_5362-136850/2026-05-30T09-23-09-plain-template-5362-136850-assets.json",
+            ".d2c/docs/design-specs/M3lJODRvpEqL78AZdnzwYX_5362-136850/2026-05-30T09-23-09-plain-template-5362-136850-normalized.json",
+            ".d2c/docs/design-specs/M3lJODRvpEqL78AZdnzwYX_5362-136850/2026-05-30T09-23-09-plain-template-5362-136850-design-spec.md",
+            ".d2c/docs/generation-logs/M3lJODRvpEqL78AZdnzwYX_5362-136850/2026-05-30T09-23-09-plain-template-5362-136850.json",
+            ".d2c/docs/validation-reports/M3lJODRvpEqL78AZdnzwYX_5362-136850/2026-05-30T09-23-09-plain-template-5362-136850-preview.json",
+            ".d2c/docs/verification-reports/M3lJODRvpEqL78AZdnzwYX_5362-136850/2026-05-30T09-23-09-plain-template-5362-136850-preview.json",
+            ".d2c/assets/M3lJODRvpEqL78AZdnzwYX_5362-136850/reference.png",
+            ".d2c/assets/M3lJODRvpEqL78AZdnzwYX_5362-136850/help-icon.svg",
+            ".d2c/docs/verification-reports/M3lJODRvpEqL78AZdnzwYX_5362-136850/screenshots/2026-05-30T09-23-09-plain-template-5362-136850-preview-desktop-reference-backed.png",
+            ".d2c/docs/verification-reports/M3lJODRvpEqL78AZdnzwYX_5362-136850/screenshots/2026-05-30T09-23-09-plain-template-5362-136850-preview-desktop-diff.png",
+            ".d2c/docs/verification-reports/M3lJODRvpEqL78AZdnzwYX_5362-136850/screenshots/2026-05-30T09-23-09-plain-template-5362-136850-preview-desktop-chrome-mcp.png",
+            ".d2c/docs/verification-reports/M3lJODRvpEqL78AZdnzwYX_5362-136850/screenshots/2026-05-30T09-23-09-plain-template-5362-136850-preview-main-chrome-mcp.png",
+            ".d2c/docs/merge-reports/M3lJODRvpEqL78AZdnzwYX_5362-136850/2026-05-30T09-23-09-plain-template-5362-136850.json",
+            ".d2c/docs/validation-reports/M3lJODRvpEqL78AZdnzwYX_5362-136850/2026-05-30T09-23-09-plain-template-5362-136850-target.json"
+          ],
+          "stageResults": {
+            "extract": {
+              "status": "PASSED",
+              "report": ".d2c/docs/reference/M3lJODRvpEqL78AZdnzwYX_5362-136850/2026-05-30T09-23-09-plain-template-5362-136850-figma-raw.json"
+            },
+            "generate": {
+              "status": "PASSED",
+              "report": ".d2c/docs/generation-logs/M3lJODRvpEqL78AZdnzwYX_5362-136850/2026-05-30T09-23-09-plain-template-5362-136850.json"
+            },
+            "preview-validate": {
+              "status": "PASSED",
+              "report": ".d2c/docs/validation-reports/M3lJODRvpEqL78AZdnzwYX_5362-136850/2026-05-30T09-23-09-plain-template-5362-136850-preview.json"
+            },
+            "merge": {
+              "status": "PASSED",
+              "report": ".d2c/docs/merge-reports/M3lJODRvpEqL78AZdnzwYX_5362-136850/2026-05-30T09-23-09-plain-template-5362-136850.json"
+            },
+            "target-validate": {
+              "status": "PASSED",
+              "report": ".d2c/docs/validation-reports/M3lJODRvpEqL78AZdnzwYX_5362-136850/2026-05-30T09-23-09-plain-template-5362-136850-target.json"
+            },
+            "preview-verify": {
+              "status": "FAILED",
+              "report": ".d2c/docs/verification-reports/M3lJODRvpEqL78AZdnzwYX_5362-136850/2026-05-30T09-23-09-plain-template-5362-136850-preview.json"
+            }
+          }
+        }
       }
     },
     {
       "slug": "image-card",
       "roadmapName": "Image Card",
-      "roadmapStatus": "[>]",
-      "status": "registered-pending-verification",
+      "roadmapStatus": "[x]",
+      "status": "verified",
       "figma": {
         "title": "客群全景台 明日",
         "url": "https://www.figma.com/design/M3lJODRvpEqL78AZdnzwYX/%E5%AE%A2%E7%BE%A4%E5%85%A8%E6%99%AF%E5%8F%B0-%E6%98%8E%E6%97%A5?node-id=5308-125805&t=d27Q7z2kZA7ewmMW-4",
@@ -152,15 +288,51 @@
         "preview-verify"
       ],
       "verification": {
-        "status": "PENDING",
-        "notes": "Figma node is registered; use it to verify asset download, manifest tracking, and image fallback handling."
+        "status": "PASSED",
+        "notes": "Phase 1 preview-only D2C loop completed with Figma MCP extract, generated React preview, preview validation, and Chrome screenshot verification.",
+        "evidence": {
+          "validatedAt": "2026-05-27T22:45:00+08:00",
+          "validatorCommand": "node scripts/check-real-run-evidence.mjs docs/figma-examples.json",
+          "result": "PASSED",
+          "runId": "2026-05-27T22-32-00-image-card",
+          "manifest": ".d2c/docs/sessions/2026-05-27T22-32-00-image-card/manifest.json",
+          "artifacts": [
+            ".d2c/docs/reference/M3lJODRvpEqL78AZdnzwYX_5308-125805/2026-05-27T22-32-00-image-card-figma-raw.json",
+            ".d2c/docs/reference/M3lJODRvpEqL78AZdnzwYX_5308-125805/2026-05-27T22-32-00-image-card-assets.json",
+            ".d2c/docs/design-specs/M3lJODRvpEqL78AZdnzwYX_5308-125805/2026-05-27T22-32-00-image-card-normalized.json",
+            ".d2c/docs/design-specs/M3lJODRvpEqL78AZdnzwYX_5308-125805/2026-05-27T22-32-00-image-card-design-spec.md",
+            ".d2c/docs/generation-logs/M3lJODRvpEqL78AZdnzwYX_5308-125805/2026-05-27T22-32-00-image-card.json",
+            ".d2c/docs/validation-reports/M3lJODRvpEqL78AZdnzwYX_5308-125805/2026-05-27T22-32-00-image-card-preview.json",
+            ".d2c/docs/verification-reports/M3lJODRvpEqL78AZdnzwYX_5308-125805/2026-05-27T22-32-00-image-card-preview.json",
+            ".d2c/docs/verification-reports/M3lJODRvpEqL78AZdnzwYX_5308-125805/screenshots/2026-05-27T22-32-00-image-card-preview-desktop.png",
+            ".d2c/docs/verification-reports/M3lJODRvpEqL78AZdnzwYX_5308-125805/screenshots/2026-05-27T22-32-00-image-card-preview-desktop-diff.png"
+          ],
+          "stageResults": {
+            "extract": {
+              "status": "PASSED",
+              "report": ".d2c/docs/reference/M3lJODRvpEqL78AZdnzwYX_5308-125805/2026-05-27T22-32-00-image-card-figma-raw.json"
+            },
+            "generate": {
+              "status": "PASSED",
+              "report": ".d2c/docs/generation-logs/M3lJODRvpEqL78AZdnzwYX_5308-125805/2026-05-27T22-32-00-image-card.json"
+            },
+            "preview-validate": {
+              "status": "PASSED",
+              "report": ".d2c/docs/validation-reports/M3lJODRvpEqL78AZdnzwYX_5308-125805/2026-05-27T22-32-00-image-card-preview.json"
+            },
+            "preview-verify": {
+              "status": "PASSED",
+              "report": ".d2c/docs/verification-reports/M3lJODRvpEqL78AZdnzwYX_5308-125805/2026-05-27T22-32-00-image-card-preview.json"
+            }
+          }
+        }
       }
     },
     {
       "slug": "open-ui-admin-page",
       "roadmapName": "Open UI Admin Page",
-      "roadmapStatus": "[>]",
-      "status": "registered-pending-verification",
+      "roadmapStatus": "[x]",
+      "status": "verified",
       "figma": {
         "title": "Ant Design Open Source Community",
         "url": "https://www.figma.com/design/kt7SCaYkfGf1Ko7BjSxhYn/Ant-Design-Open-Source--Community-?node-id=64462-1762&t=wXzyNHa5l9tlOtas-4",
@@ -183,7 +355,7 @@
         "Button"
       ],
       "targetProjectRequired": true,
-      "targetProjectStatus": "not-provided",
+      "targetProjectStatus": "changed-files-validated",
       "requiredStages": [
         "extract",
         "generate",
@@ -192,15 +364,68 @@
         "target-validate"
       ],
       "verification": {
-        "status": "PENDING",
-        "notes": "Target project is needed to verify installed component library versions, imports, theme bindings, and merge behavior."
+        "status": "PASSED",
+        "notes": "Phase 3 completed MCP-first extract, Ant Design preview generation, preview validation, explicit user acceptance of the remaining preview visual differences, isolated target merge, and changed-files target validation. Target screenshot verification is separately recorded as SKIPPED because Phase 3 intentionally does not register an existing Umi business route.",
+        "evidence": {
+          "validatedAt": "2026-05-31T17:06:37+08:00",
+          "validatorCommand": "node scripts/check-real-run-evidence.mjs docs/figma-examples.json --target-root=/Applications/work/wm/espace/pc/ms-fe-basic",
+          "result": "PASSED",
+          "runId": "2026-05-30T16-27-18-open-ui-admin-page",
+          "manifest": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/sessions/2026-05-30T16-27-18-open-ui-admin-page/manifest.json",
+          "artifacts": [
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/reference/kt7SCaYkfGf1Ko7BjSxhYn_64462-1762/2026-05-30T16-27-18-open-ui-admin-page-figma-raw.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/reference/kt7SCaYkfGf1Ko7BjSxhYn_64462-1762/2026-05-30T16-27-18-open-ui-admin-page-assets.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/design-specs/kt7SCaYkfGf1Ko7BjSxhYn_64462-1762/2026-05-30T16-27-18-open-ui-admin-page-normalized.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/design-specs/kt7SCaYkfGf1Ko7BjSxhYn_64462-1762/2026-05-30T16-27-18-open-ui-admin-page-design-spec.md",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/generation-logs/kt7SCaYkfGf1Ko7BjSxhYn_64462-1762/2026-05-30T16-27-18-open-ui-admin-page.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/validation-reports/kt7SCaYkfGf1Ko7BjSxhYn_64462-1762/2026-05-30T16-27-18-open-ui-admin-page-preview.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/verification-reports/kt7SCaYkfGf1Ko7BjSxhYn_64462-1762/2026-05-30T16-27-18-open-ui-admin-page-preview.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/verification-reports/kt7SCaYkfGf1Ko7BjSxhYn_64462-1762/screenshots/2026-05-30T16-27-18-open-ui-admin-page-preview-desktop.png",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/verification-reports/kt7SCaYkfGf1Ko7BjSxhYn_64462-1762/screenshots/2026-05-30T16-27-18-open-ui-admin-page-preview-desktop-diff.png",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/merge-reports/kt7SCaYkfGf1Ko7BjSxhYn_64462-1762/2026-05-30T16-27-18-open-ui-admin-page.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/validation-reports/kt7SCaYkfGf1Ko7BjSxhYn_64462-1762/2026-05-30T16-27-18-open-ui-admin-page-target.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/verification-reports/kt7SCaYkfGf1Ko7BjSxhYn_64462-1762/2026-05-30T16-27-18-open-ui-admin-page-target.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/src/pages/d2c-lab/open-ui-admin-page/index.tsx",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/src/pages/d2c-lab/open-ui-admin-page/index.less"
+          ],
+          "stageResults": {
+            "extract": {
+              "status": "PASSED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/reference/kt7SCaYkfGf1Ko7BjSxhYn_64462-1762/2026-05-30T16-27-18-open-ui-admin-page-figma-raw.json"
+            },
+            "generate": {
+              "status": "PASSED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/generation-logs/kt7SCaYkfGf1Ko7BjSxhYn_64462-1762/2026-05-30T16-27-18-open-ui-admin-page.json"
+            },
+            "preview-validate": {
+              "status": "PASSED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/validation-reports/kt7SCaYkfGf1Ko7BjSxhYn_64462-1762/2026-05-30T16-27-18-open-ui-admin-page-preview.json"
+            },
+            "merge": {
+              "status": "PASSED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/merge-reports/kt7SCaYkfGf1Ko7BjSxhYn_64462-1762/2026-05-30T16-27-18-open-ui-admin-page.json"
+            },
+            "target-validate": {
+              "status": "PASSED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/validation-reports/kt7SCaYkfGf1Ko7BjSxhYn_64462-1762/2026-05-30T16-27-18-open-ui-admin-page-target.json"
+            },
+            "preview-verify": {
+              "status": "PASSED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/verification-reports/kt7SCaYkfGf1Ko7BjSxhYn_64462-1762/2026-05-30T16-27-18-open-ui-admin-page-preview.json"
+            },
+            "target-verify": {
+              "status": "SKIPPED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/verification-reports/kt7SCaYkfGf1Ko7BjSxhYn_64462-1762/2026-05-30T16-27-18-open-ui-admin-page-target.json"
+            }
+          }
+        }
       }
     },
     {
       "slug": "business-dashboard",
       "roadmapName": "Business Dashboard",
-      "roadmapStatus": "[>]",
-      "status": "registered-pending-verification",
+      "roadmapStatus": "[x]",
+      "status": "verified",
       "figma": {
         "title": "客群全景台 明日",
         "url": "https://www.figma.com/design/M3lJODRvpEqL78AZdnzwYX/%E5%AE%A2%E7%BE%A4%E5%85%A8%E6%99%AF%E5%8F%B0-%E6%98%8E%E6%97%A5?node-id=5601-71203&t=d27Q7z2kZA7ewmMW-4",
@@ -221,7 +446,7 @@
         "状态组件"
       ],
       "targetProjectRequired": true,
-      "targetProjectStatus": "not-provided",
+      "targetProjectStatus": "changed-files-validated",
       "requiredStages": [
         "extract",
         "generate",
@@ -230,15 +455,70 @@
         "target-validate"
       ],
       "verification": {
-        "status": "PENDING",
-        "notes": "Target project is needed to verify business component imports, props contracts, data adapters, and merge behavior."
+        "status": "PASSED",
+        "notes": "Phase 3 completed image-fallback extract after the structured Figma MCP returned HTTP 429, React preview generation, preview validation, three canonical diff attempts, explicit user acceptance of the remaining preview visual differences, isolated target merge, real BasicDataTable business-component adoption, fixture-only adapters, and changed-files target validation. Target screenshot verification is separately recorded as SKIPPED because Phase 3 intentionally does not register an existing Umi business route.",
+        "evidence": {
+          "validatedAt": "2026-06-01T08:37:15+08:00",
+          "validatorCommand": "node scripts/check-real-run-evidence.mjs docs/figma-examples.json --target-root=/Applications/work/wm/espace/pc/ms-fe-basic",
+          "result": "PASSED",
+          "runId": "2026-05-31T17-19-29-business-dashboard",
+          "manifest": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/sessions/2026-05-31T17-19-29-business-dashboard/manifest.json",
+          "artifacts": [
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/reference/M3lJODRvpEqL78AZdnzwYX_5601-71203/2026-05-31T17-19-29-business-dashboard-figma-raw.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/reference/M3lJODRvpEqL78AZdnzwYX_5601-71203/2026-05-31T17-19-29-business-dashboard-assets.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/design-specs/M3lJODRvpEqL78AZdnzwYX_5601-71203/2026-05-31T17-19-29-business-dashboard-normalized.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/design-specs/M3lJODRvpEqL78AZdnzwYX_5601-71203/2026-05-31T17-19-29-business-dashboard-design-spec.md",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/generation-logs/M3lJODRvpEqL78AZdnzwYX_5601-71203/2026-05-31T17-19-29-business-dashboard.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/validation-reports/M3lJODRvpEqL78AZdnzwYX_5601-71203/2026-05-31T17-19-29-business-dashboard-preview.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/verification-reports/M3lJODRvpEqL78AZdnzwYX_5601-71203/2026-05-31T17-19-29-business-dashboard-preview.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/verification-reports/M3lJODRvpEqL78AZdnzwYX_5601-71203/screenshots/2026-05-31T17-19-29-business-dashboard-preview-desktop.png",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/verification-reports/M3lJODRvpEqL78AZdnzwYX_5601-71203/screenshots/2026-05-31T17-19-29-business-dashboard-preview-desktop-diff.png",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/merge-reports/M3lJODRvpEqL78AZdnzwYX_5601-71203/2026-05-31T17-19-29-business-dashboard.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/validation-reports/M3lJODRvpEqL78AZdnzwYX_5601-71203/2026-05-31T17-19-29-business-dashboard-target.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/verification-reports/M3lJODRvpEqL78AZdnzwYX_5601-71203/2026-05-31T17-19-29-business-dashboard-target.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/src/pages/d2c-lab/business-dashboard/index.tsx",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/src/pages/d2c-lab/business-dashboard/index.less",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/src/pages/d2c-lab/business-dashboard/adapters.ts",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/src/pages/d2c-lab/business-dashboard/fixtures.ts"
+          ],
+          "stageResults": {
+            "extract": {
+              "status": "PASSED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/reference/M3lJODRvpEqL78AZdnzwYX_5601-71203/2026-05-31T17-19-29-business-dashboard-figma-raw.json"
+            },
+            "generate": {
+              "status": "PASSED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/generation-logs/M3lJODRvpEqL78AZdnzwYX_5601-71203/2026-05-31T17-19-29-business-dashboard.json"
+            },
+            "preview-validate": {
+              "status": "PASSED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/validation-reports/M3lJODRvpEqL78AZdnzwYX_5601-71203/2026-05-31T17-19-29-business-dashboard-preview.json"
+            },
+            "merge": {
+              "status": "PASSED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/merge-reports/M3lJODRvpEqL78AZdnzwYX_5601-71203/2026-05-31T17-19-29-business-dashboard.json"
+            },
+            "target-validate": {
+              "status": "PASSED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/validation-reports/M3lJODRvpEqL78AZdnzwYX_5601-71203/2026-05-31T17-19-29-business-dashboard-target.json"
+            },
+            "preview-verify": {
+              "status": "PASSED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/verification-reports/M3lJODRvpEqL78AZdnzwYX_5601-71203/2026-05-31T17-19-29-business-dashboard-preview.json"
+            },
+            "target-verify": {
+              "status": "SKIPPED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/verification-reports/M3lJODRvpEqL78AZdnzwYX_5601-71203/2026-05-31T17-19-29-business-dashboard-target.json"
+            }
+          }
+        }
       }
     },
     {
       "slug": "token-playground",
       "roadmapName": "Token Playground",
       "roadmapStatus": "[>]",
-      "status": "registered-pending-verification",
+      "status": "partially-verified",
       "figma": {
         "title": "中金财富B端 PC组件库",
         "url": "https://www.figma.com/design/rS4zdqUH92Hz5SWONKVSeL/%E4%B8%AD%E9%87%91%E8%B4%A2%E5%AF%8CB%E7%AB%AF-PC%E7%BB%84%E4%BB%B6%E5%BA%93?node-id=5340-375412&t=BbJFsIMUC4RxcD7j-4",
@@ -276,7 +556,7 @@
       "slug": "analytics-report",
       "roadmapName": "Analytics Report",
       "roadmapStatus": "[>]",
-      "status": "registered-pending-verification",
+      "status": "partially-verified",
       "figma": {
         "title": "客群全景台 明日",
         "url": "https://www.figma.com/design/M3lJODRvpEqL78AZdnzwYX/%E5%AE%A2%E7%BE%A4%E5%85%A8%E6%99%AF%E5%8F%B0-%E6%98%8E%E6%97%A5?node-id=5601-71250&t=d27Q7z2kZA7ewmMW-4",
@@ -297,17 +577,221 @@
         "Tooltip 展示态"
       ],
       "targetProjectRequired": true,
-      "targetProjectStatus": "not-provided",
+      "targetProjectStatus": "target-verified-donut-scope",
       "requiredStages": [
         "extract",
         "generate",
         "preview-validate",
         "preview-verify",
-        "merge"
+        "merge",
+        "target-validate",
+        "target-verify"
       ],
       "verification": {
-        "status": "PENDING",
-        "notes": "Target project is needed to verify project chart wrappers, options, dataAdapter, and merge behavior."
+        "status": "PARTIAL",
+        "notes": "A structured-raw extract completed through the repo-local dev token after the mounted MCP returned 429 and /v1/me returned an identity-scope-only 403. The registered node 5601:71250 is a 116 x 116 dual-ring donut group, not a complete Analytics Report page: it does not contain line charts, bar charts, legends, or a Tooltip state. ReactEchartsCore preview generation, type-check, build, Chrome MCP navigation/resize/snapshot/screenshot/evaluate, isolated target merge, changed-files validation, and target Chrome MCP verification completed. After three preview diff iterations, the user accepted the ECharts raster difference. The target route renders the same wrapper with 1093 / 13456 changed pixels, ratio 0.08122770511296076. The donut scope is closed; the complete Analytics Report requirements remain pending.",
+        "evidence": {
+          "validatedAt": "2026-06-01T21:59:54+08:00",
+          "validatorCommand": "node scripts/check-real-run-evidence.mjs docs/figma-examples.json --target-root=/Applications/work/wm/espace/pc/ms-fe-basic",
+          "result": "PARTIAL",
+          "runId": "2026-06-01T21-35-46-analytics-report",
+          "manifest": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/sessions/2026-06-01T21-35-46-analytics-report/manifest.json",
+          "resumePoint": "COMPLETE",
+          "currentManifestStatus": {
+            "extract": "OK",
+            "generate": "OK",
+            "previewValidate": "PASSED",
+            "previewVerify": "PASSED",
+            "merge": "OK",
+            "targetValidate": "PASSED",
+            "targetVerify": "PASSED"
+          },
+          "artifacts": [
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/reference/M3lJODRvpEqL78AZdnzwYX_5601-71250/2026-06-01T21-35-46-analytics-report-figma-raw.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/reference/M3lJODRvpEqL78AZdnzwYX_5601-71250/2026-06-01T21-35-46-analytics-report-assets.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/design-specs/M3lJODRvpEqL78AZdnzwYX_5601-71250/2026-06-01T21-35-46-analytics-report-normalized.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/generation-logs/M3lJODRvpEqL78AZdnzwYX_5601-71250/2026-06-01T21-35-46-analytics-report.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/validation-reports/M3lJODRvpEqL78AZdnzwYX_5601-71250/2026-06-01T21-35-46-analytics-report-preview.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/verification-reports/M3lJODRvpEqL78AZdnzwYX_5601-71250/2026-06-01T21-35-46-analytics-report-preview.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/merge-reports/M3lJODRvpEqL78AZdnzwYX_5601-71250/2026-06-01T21-35-46-analytics-report.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/validation-reports/M3lJODRvpEqL78AZdnzwYX_5601-71250/2026-06-01T21-35-46-analytics-report-target.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/verification-reports/M3lJODRvpEqL78AZdnzwYX_5601-71250/2026-06-01T21-35-46-analytics-report-target.json"
+          ],
+          "stageResults": {
+            "extract": {
+              "status": "PASSED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/reference/M3lJODRvpEqL78AZdnzwYX_5601-71250/2026-06-01T21-35-46-analytics-report-figma-raw.json"
+            },
+            "generate": {
+              "status": "PASSED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/generation-logs/M3lJODRvpEqL78AZdnzwYX_5601-71250/2026-06-01T21-35-46-analytics-report.json"
+            },
+            "preview-validate": {
+              "status": "PASSED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/validation-reports/M3lJODRvpEqL78AZdnzwYX_5601-71250/2026-06-01T21-35-46-analytics-report-preview.json"
+            },
+            "preview-verify": {
+              "status": "PASSED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/verification-reports/M3lJODRvpEqL78AZdnzwYX_5601-71250/2026-06-01T21-35-46-analytics-report-preview.json"
+            },
+            "merge": {
+              "status": "PASSED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/merge-reports/M3lJODRvpEqL78AZdnzwYX_5601-71250/2026-06-01T21-35-46-analytics-report.json"
+            },
+            "target-validate": {
+              "status": "PASSED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/validation-reports/M3lJODRvpEqL78AZdnzwYX_5601-71250/2026-06-01T21-35-46-analytics-report-target.json"
+            },
+            "target-verify": {
+              "status": "PASSED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/verification-reports/M3lJODRvpEqL78AZdnzwYX_5601-71250/2026-06-01T21-35-46-analytics-report-target.json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "slug": "analytics-report-full",
+      "roadmapName": "Analytics Report Full",
+      "roadmapStatus": "[>]",
+      "status": "partially-verified",
+      "figma": {
+        "title": "投顾B端图表规范",
+        "url": "https://www.figma.com/design/Ln2fBahqlpYrUZmwQG4vNy/?node-id=212-8232",
+        "fileKey": "Ln2fBahqlpYrUZmwQG4vNy",
+        "nodeId": "212:8232",
+        "relatedNodes": [
+          {
+            "role": "bar-chart",
+            "nodeId": "214:6780",
+            "url": "https://www.figma.com/design/Ln2fBahqlpYrUZmwQG4vNy/?node-id=214-6780"
+          },
+          {
+            "role": "ring-pie-chart",
+            "nodeId": "229:8356",
+            "url": "https://www.figma.com/design/Ln2fBahqlpYrUZmwQG4vNy/?node-id=229-8356"
+          }
+        ]
+      },
+      "requiresScopeAssessment": true,
+      "scopeAssessment": {
+        "selectedNodeCoverage": [
+          "折线图与 Tooltip 展示态",
+          "多值柱状图",
+          "五项占比环形饼图"
+        ],
+        "missingRequirements": [],
+        "verificationCeiling": "verified",
+        "reason": "三个节点覆盖本复合示例声明的全部图表需求。"
+      },
+      "coverage": [
+        "chartCandidates",
+        "relatedNodes",
+        "scopeAssessment",
+        "canonical screenshot",
+        "Tooltip 展示态"
+      ],
+      "designRequirements": [
+        "折线图",
+        "柱状图",
+        "环形饼图",
+        "图例",
+        "Tooltip 展示态"
+      ],
+      "targetProjectRequired": true,
+      "targetProjectStatus": "target-verified-degraded",
+      "requiredStages": [
+        "extract",
+        "generate",
+        "preview-validate",
+        "preview-verify",
+        "merge",
+        "target-validate",
+        "target-verify"
+      ],
+      "verification": {
+        "status": "DEGRADED",
+        "notes": "The composite structured-raw extract used one repo-local REST nodes request for all three selected nodes and downloaded three references. Preview generate and build passed. After three preview canonical diff iterations the user explicitly accepted the remaining differences, which stay recorded as DEGRADED with FAILED diff ratios 0.06038063909774436, 0.1811356439127375, and 0.08757477128782548. The isolated merge then added only the analytics-report-full page and routes.dev.ts entry. Changed-files TypeScript, Less, merge-report, and write-boundary checks passed. Chrome MCP target verification mounted the route through browser-document-only shell stubs and generated three target canonical diffs: 0.06532424812030076, 0.14477480647431387, and 0.07509676284306827. Target verification remains DEGRADED, so the manifest reaches COMPLETE without upgrading the roadmap status to [x].",
+        "evidence": {
+          "validatedAt": "2026-06-02T09:43:16+08:00",
+          "validatorCommand": "node scripts/check-real-run-evidence.mjs docs/figma-examples.json --target-root=/Applications/work/wm/espace/pc/ms-fe-basic",
+          "result": "DEGRADED",
+          "runId": "2026-06-02T08-46-56-analytics-report-full",
+          "manifest": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/sessions/2026-06-02T08-46-56-analytics-report-full/manifest.json",
+          "resumePoint": "COMPLETE",
+          "currentManifestStatus": {
+            "extract": "OK",
+            "generate": "OK",
+            "previewValidate": "PASSED",
+            "previewVerify": "DEGRADED",
+            "merge": "OK",
+            "targetValidate": "PASSED",
+            "targetVerify": "DEGRADED"
+          },
+          "artifacts": [
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/reference/Ln2fBahqlpYrUZmwQG4vNy_212-8232_214-6780_229-8356/2026-06-02T08-46-56-analytics-report-full-figma-raw.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/reference/Ln2fBahqlpYrUZmwQG4vNy_212-8232_214-6780_229-8356/2026-06-02T08-46-56-analytics-report-full-assets.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/design-specs/Ln2fBahqlpYrUZmwQG4vNy_212-8232_214-6780_229-8356/2026-06-02T08-46-56-analytics-report-full-normalized.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/generation-logs/Ln2fBahqlpYrUZmwQG4vNy_212-8232_214-6780_229-8356/2026-06-02T08-46-56-analytics-report-full.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/validation-reports/Ln2fBahqlpYrUZmwQG4vNy_212-8232_214-6780_229-8356/2026-06-02T08-46-56-analytics-report-full-preview.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/verification-reports/Ln2fBahqlpYrUZmwQG4vNy_212-8232_214-6780_229-8356/2026-06-02T08-46-56-analytics-report-full-preview.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/merge-reports/Ln2fBahqlpYrUZmwQG4vNy_212-8232_214-6780_229-8356/2026-06-02T08-46-56-analytics-report-full.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/validation-reports/Ln2fBahqlpYrUZmwQG4vNy_212-8232_214-6780_229-8356/2026-06-02T08-46-56-analytics-report-full-target.json",
+            "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/verification-reports/Ln2fBahqlpYrUZmwQG4vNy_212-8232_214-6780_229-8356/2026-06-02T08-46-56-analytics-report-full-target.json"
+          ],
+          "stageResults": {
+            "extract": {
+              "status": "PASSED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/reference/Ln2fBahqlpYrUZmwQG4vNy_212-8232_214-6780_229-8356/2026-06-02T08-46-56-analytics-report-full-figma-raw.json"
+            },
+            "generate": {
+              "status": "PASSED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/generation-logs/Ln2fBahqlpYrUZmwQG4vNy_212-8232_214-6780_229-8356/2026-06-02T08-46-56-analytics-report-full.json"
+            },
+            "preview-validate": {
+              "status": "PASSED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/validation-reports/Ln2fBahqlpYrUZmwQG4vNy_212-8232_214-6780_229-8356/2026-06-02T08-46-56-analytics-report-full-preview.json"
+            },
+            "preview-verify": {
+              "status": "DEGRADED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/verification-reports/Ln2fBahqlpYrUZmwQG4vNy_212-8232_214-6780_229-8356/2026-06-02T08-46-56-analytics-report-full-preview.json"
+            },
+            "merge": {
+              "status": "PASSED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/merge-reports/Ln2fBahqlpYrUZmwQG4vNy_212-8232_214-6780_229-8356/2026-06-02T08-46-56-analytics-report-full.json"
+            },
+            "target-validate": {
+              "status": "PASSED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/validation-reports/Ln2fBahqlpYrUZmwQG4vNy_212-8232_214-6780_229-8356/2026-06-02T08-46-56-analytics-report-full-target.json"
+            },
+            "target-verify": {
+              "status": "DEGRADED",
+              "report": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/verification-reports/Ln2fBahqlpYrUZmwQG4vNy_212-8232_214-6780_229-8356/2026-06-02T08-46-56-analytics-report-full-target.json"
+            }
+          }
+        }
+      },
+      "latestConvergenceAttempt": {
+        "runId": "2026-06-02T16-40-15-analytics-report-full-visual-convergence",
+        "manifest": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/sessions/2026-06-02T16-40-15-analytics-report-full-visual-convergence/manifest.json",
+        "status": "DEGRADED",
+        "resumePoint": "COMPLETE",
+        "notes": "A separate visual-convergence run preserved the older DEGRADED evidence, added chart contract assessment, and ran three Chrome MCP DPR=2 preview canonical diff rounds. The third preview round still exceeded 0.02 for line, bar, and donut; the user explicitly accepted the current differences on 2026-06-06. The run then completed isolated merge, changed-files target validation, and target canonical verification. Target screenshots used a puppeteer-core fallback after Chrome MCP confirmed the shell but could not intercept bootstrap XHR/fetch. Target diff ratios remain above threshold, so the run is COMPLETE + DEGRADED and does not upgrade roadmap status to [x].",
+        "previewVerificationReport": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/verification-reports/Ln2fBahqlpYrUZmwQG4vNy_212-8232_214-6780_229-8356/2026-06-02T16-40-15-analytics-report-full-visual-convergence-preview.json",
+        "mergeReport": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/merge-reports/Ln2fBahqlpYrUZmwQG4vNy_212-8232_214-6780_229-8356/2026-06-02T16-40-15-analytics-report-full-visual-convergence.json",
+        "targetValidationReport": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/validation-reports/Ln2fBahqlpYrUZmwQG4vNy_212-8232_214-6780_229-8356/2026-06-02T16-40-15-analytics-report-full-visual-convergence-target.json",
+        "targetVerificationReport": "/Applications/work/wm/espace/pc/ms-fe-basic/.d2c/docs/verification-reports/Ln2fBahqlpYrUZmwQG4vNy_212-8232_214-6780_229-8356/2026-06-02T16-40-15-analytics-report-full-visual-convergence-target.json",
+        "previewAcceptedAt": "2026-06-06T10:13:55+08:00",
+        "thirdIterationPixelRatios": {
+          "line": 0.05453477443609023,
+          "bar": 0.0488652357494722,
+          "donut": 0.03340077410274454
+        },
+        "targetPixelRatios": {
+          "line": 0.05545112781954887,
+          "bar": 0.04868050668543279,
+          "donut": 0.033471147079521466
+        }
       }
     },
     {
@@ -354,8 +838,8 @@
     {
       "slug": "interactive-component-set",
       "roadmapName": "Interactive Component Set",
-      "roadmapStatus": "[>]",
-      "status": "registered-pending-verification",
+      "roadmapStatus": "[x]",
+      "status": "verified",
       "figma": {
         "title": "中金财富B端 PC组件库",
         "url": "https://www.figma.com/design/rS4zdqUH92Hz5SWONKVSeL/%E4%B8%AD%E9%87%91%E8%B4%A2%E5%AF%8CB%E7%AB%AF-PC%E7%BB%84%E4%BB%B6%E5%BA%93?node-id=54-208176&t=BbJFsIMUC4RxcD7j-4",
@@ -383,8 +867,44 @@
         "preview-verify"
       ],
       "verification": {
-        "status": "PENDING",
-        "notes": "Figma component set is registered; structured variant extraction must confirm supported states before verification."
+        "status": "PASSED",
+        "notes": "Phase 1 preview-only D2C loop completed with Figma MCP extract, generated React preview, preview validation, and Chrome screenshot verification.",
+        "evidence": {
+          "validatedAt": "2026-05-27T22:45:00+08:00",
+          "validatorCommand": "node scripts/check-real-run-evidence.mjs docs/figma-examples.json",
+          "result": "PASSED",
+          "runId": "2026-05-27T22-33-00-interactive-component-set",
+          "manifest": ".d2c/docs/sessions/2026-05-27T22-33-00-interactive-component-set/manifest.json",
+          "artifacts": [
+            ".d2c/docs/reference/rS4zdqUH92Hz5SWONKVSeL_54-208176/2026-05-27T22-33-00-interactive-component-set-figma-raw.json",
+            ".d2c/docs/reference/rS4zdqUH92Hz5SWONKVSeL_54-208176/2026-05-27T22-33-00-interactive-component-set-assets.json",
+            ".d2c/docs/design-specs/rS4zdqUH92Hz5SWONKVSeL_54-208176/2026-05-27T22-33-00-interactive-component-set-normalized.json",
+            ".d2c/docs/design-specs/rS4zdqUH92Hz5SWONKVSeL_54-208176/2026-05-27T22-33-00-interactive-component-set-design-spec.md",
+            ".d2c/docs/generation-logs/rS4zdqUH92Hz5SWONKVSeL_54-208176/2026-05-27T22-33-00-interactive-component-set.json",
+            ".d2c/docs/validation-reports/rS4zdqUH92Hz5SWONKVSeL_54-208176/2026-05-27T22-33-00-interactive-component-set-preview.json",
+            ".d2c/docs/verification-reports/rS4zdqUH92Hz5SWONKVSeL_54-208176/2026-05-27T22-33-00-interactive-component-set-preview.json",
+            ".d2c/docs/verification-reports/rS4zdqUH92Hz5SWONKVSeL_54-208176/screenshots/2026-05-27T22-33-00-interactive-component-set-preview-desktop.png",
+            ".d2c/docs/verification-reports/rS4zdqUH92Hz5SWONKVSeL_54-208176/screenshots/2026-05-27T22-33-00-interactive-component-set-preview-desktop-diff.png"
+          ],
+          "stageResults": {
+            "extract": {
+              "status": "PASSED",
+              "report": ".d2c/docs/reference/rS4zdqUH92Hz5SWONKVSeL_54-208176/2026-05-27T22-33-00-interactive-component-set-figma-raw.json"
+            },
+            "generate": {
+              "status": "PASSED",
+              "report": ".d2c/docs/generation-logs/rS4zdqUH92Hz5SWONKVSeL_54-208176/2026-05-27T22-33-00-interactive-component-set.json"
+            },
+            "preview-validate": {
+              "status": "PASSED",
+              "report": ".d2c/docs/validation-reports/rS4zdqUH92Hz5SWONKVSeL_54-208176/2026-05-27T22-33-00-interactive-component-set-preview.json"
+            },
+            "preview-verify": {
+              "status": "PASSED",
+              "report": ".d2c/docs/verification-reports/rS4zdqUH92Hz5SWONKVSeL_54-208176/2026-05-27T22-33-00-interactive-component-set-preview.json"
+            }
+          }
+        }
       }
     }
   ],

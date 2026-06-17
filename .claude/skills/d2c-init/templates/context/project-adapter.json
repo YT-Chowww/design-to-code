@@ -52,5 +52,10 @@
     "assets": ""
   },
   "validationCommands": {},
+  "validationPolicy": {
+    "targetScope": "changed-files",
+    "changedFilesSource": "merge-report",
+    "projectWideChecks": "optional-diagnostic"
+  },
   "projectSpecifics": {}
 }

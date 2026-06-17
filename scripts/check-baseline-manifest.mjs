@@ -27,10 +27,10 @@ const COMPLETE_STATUSES = {
   extract: new Set(["OK", "DEGRADED", "BACKFILLED"]),
   generate: new Set(["OK", "BACKFILLED"]),
   previewValidate: new Set(["OK", "WARN", "PASSED", "DEGRADED", "BACKFILLED"]),
-  previewVerify: new Set(["PASSED", "FAILED", "SKIPPED", "BACKFILLED"]),
+  previewVerify: new Set(["PASSED", "FAILED", "DEGRADED", "SKIPPED", "BACKFILLED"]),
   merge: new Set(["OK", "SKIPPED", "BACKFILLED"]),
   targetValidate: new Set(["OK", "WARN", "PASSED", "FAILED", "DEGRADED", "SKIPPED", "BACKFILLED"]),
-  targetVerify: new Set(["PASSED", "FAILED", "SKIPPED", "BACKFILLED"]),
+  targetVerify: new Set(["PASSED", "FAILED", "DEGRADED", "SKIPPED", "BACKFILLED"]),
 };
 
 const ALLOWED_STATUSES = new Set([
@@ -105,6 +105,19 @@ function isStageComplete(manifest, stage) {
   return COMPLETE_STATUSES[stage].has(status);
 }
 
+function hasAcceptedVisualDiff(manifest, phase) {
+  const acceptance = manifest[`${phase}Acceptance`];
+  return acceptance?.status === "ACCEPTED_WITH_VISUAL_DIFF" &&
+    typeof acceptance.reviewer === "string" &&
+    typeof acceptance.acceptedAt === "string" &&
+    typeof acceptance.scope === "string" &&
+    typeof acceptance.reason === "string";
+}
+
+function scopeAssessmentAllowsProgress(manifest) {
+  return (manifest.scopeAssessment?.missingRequirements ?? []).length === 0;
+}
+
 function validateCompletedArtifacts(manifest, stage) {
   for (const artifactName of STAGE_ARTIFACTS[stage] ?? []) {
     const artifactPath = manifest.artifacts?.[artifactName];
@@ -136,7 +149,10 @@ function nextStep(manifest) {
     return "PREVIEW_VERIFY";
   }
 
-  if (!["PASSED", "SKIPPED", "BACKFILLED"].includes(previewVerifyStatus)) {
+  if (
+    !["PASSED", "SKIPPED", "BACKFILLED"].includes(previewVerifyStatus) &&
+    !(previewVerifyStatus === "DEGRADED" && hasAcceptedVisualDiff(manifest, "preview") && scopeAssessmentAllowsProgress(manifest))
+  ) {
     return "PREVIEW_VERIFY";
   }
   if (!isStageComplete(manifest, "merge")) {
@@ -189,8 +205,12 @@ function validateManifest(manifest) {
   }
 
   const previewVerifyStatus = manifest.status?.previewVerify;
-  if (isStageComplete(manifest, "merge") && !["PASSED", "SKIPPED", "BACKFILLED"].includes(previewVerifyStatus)) {
-    errors.push("Merge requires status.previewVerify to be PASSED, SKIPPED, or BACKFILLED");
+  const acceptedPreviewDiff =
+    previewVerifyStatus === "DEGRADED" &&
+    hasAcceptedVisualDiff(manifest, "preview") &&
+    scopeAssessmentAllowsProgress(manifest);
+  if (isStageComplete(manifest, "merge") && !["PASSED", "SKIPPED", "BACKFILLED"].includes(previewVerifyStatus) && !acceptedPreviewDiff) {
+    errors.push("Merge requires preview verification to pass, skip, backfill, or carry an accepted visual diff with complete scope");
   }
 
   const targetValidateStatus = manifest.status?.targetValidate;

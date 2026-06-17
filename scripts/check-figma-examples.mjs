@@ -81,6 +81,86 @@ function requireArray(item, field, scope, errors) {
   return item[field];
 }
 
+function requireEvidenceFile(relativePath, scope, errors) {
+  const filePath = path.resolve(process.cwd(), relativePath);
+  if (!fs.existsSync(filePath)) {
+    errors.push(`${scope}: missing evidence artifact ${relativePath}`);
+    return;
+  }
+  const stat = fs.statSync(filePath);
+  if (!stat.isFile() || stat.size === 0) {
+    errors.push(`${scope}: empty or non-file evidence artifact ${relativePath}`);
+  }
+}
+
+function validateVerificationEvidence(example, scope, errors) {
+  if (example.roadmapStatus !== "[x]" && example.status !== "verified") {
+    return;
+  }
+
+  if (example.roadmapStatus !== "[x]" || example.status !== "verified") {
+    errors.push(`${scope}: verified examples must use status=verified and roadmapStatus=[x] together`);
+    return;
+  }
+
+  if (example.verification?.status !== "PASSED") {
+    errors.push(`${scope}.verification.status must be PASSED for [x] examples`);
+  }
+  if (example.requiresScopeAssessment === true) {
+    const assessment = example.scopeAssessment;
+    if (!isObject(assessment)) {
+      errors.push(`${scope}.scopeAssessment is required when requiresScopeAssessment is true`);
+    } else if ((assessment.missingRequirements ?? []).length > 0) {
+      errors.push(`${scope}.scopeAssessment.missingRequirements must be empty for [x] examples`);
+    }
+  }
+
+  const evidence = example.verification?.evidence;
+  if (!isObject(evidence)) {
+    errors.push(`${scope}.verification.evidence is required for [x] examples`);
+    return;
+  }
+
+  for (const field of ["validatedAt", "validatorCommand", "result", "runId", "manifest"]) {
+    if (!nonEmptyString(evidence[field])) {
+      errors.push(`${scope}.verification.evidence.${field} is required`);
+    }
+  }
+  if (evidence.result !== "PASSED") {
+    errors.push(`${scope}.verification.evidence.result must be PASSED`);
+  }
+
+  const stageResults = evidence.stageResults;
+  if (!isObject(stageResults)) {
+    errors.push(`${scope}.verification.evidence.stageResults must be an object`);
+  } else {
+    for (const stage of example.requiredStages ?? []) {
+      if (!isObject(stageResults[stage]) || stageResults[stage].status !== "PASSED") {
+        errors.push(`${scope}.verification.evidence.stageResults.${stage}.status must be PASSED`);
+      }
+      if (!nonEmptyString(stageResults[stage]?.report)) {
+        errors.push(`${scope}.verification.evidence.stageResults.${stage}.report is required`);
+      }
+    }
+  }
+
+  if (!Array.isArray(evidence.artifacts) || evidence.artifacts.length === 0) {
+    errors.push(`${scope}.verification.evidence.artifacts must be a non-empty array`);
+  } else {
+    for (const artifact of evidence.artifacts) {
+      if (!nonEmptyString(artifact)) {
+        errors.push(`${scope}.verification.evidence.artifacts must contain non-empty paths`);
+      } else {
+        requireEvidenceFile(artifact, `${scope}.verification.evidence`, errors);
+      }
+    }
+  }
+
+  if (nonEmptyString(evidence.manifest)) {
+    requireEvidenceFile(evidence.manifest, `${scope}.verification.evidence`, errors);
+  }
+}
+
 function validateExample(example, index, seenKeys, errors) {
   const scope = `examples[${index}]`;
 
@@ -127,6 +207,38 @@ function validateExample(example, index, seenKeys, errors) {
       errors.push(`${scope}.figma duplicates another registered node: ${uniqueKey}`);
     }
     seenKeys.add(uniqueKey);
+
+    if (example.figma.relatedNodes !== undefined) {
+      if (!Array.isArray(example.figma.relatedNodes)) {
+        errors.push(`${scope}.figma.relatedNodes must be an array when present`);
+      } else {
+        for (const [relatedIndex, related] of example.figma.relatedNodes.entries()) {
+          const relatedScope = `${scope}.figma.relatedNodes[${relatedIndex}]`;
+          if (!isObject(related)) {
+            errors.push(`${relatedScope} must be an object`);
+            continue;
+          }
+          for (const field of ["role", "url", "nodeId"]) {
+            requireString(related, field, relatedScope, errors);
+          }
+          const parsedRelated = parseFigmaUrl(related.url);
+          if (!parsedRelated.isFigma) {
+            errors.push(`${relatedScope}.url must be a figma.com URL`);
+          }
+          if (parsedRelated.fileKey !== example.figma.fileKey) {
+            errors.push(`${relatedScope}.url file key must match figma.fileKey`);
+          }
+          if (normalizeNodeId(related.nodeId) !== parsedRelated.nodeId) {
+            errors.push(`${relatedScope}.nodeId does not match URL node-id`);
+          }
+          const relatedKey = `${example.figma.fileKey}:${normalizeNodeId(related.nodeId)}`;
+          if (seenKeys.has(relatedKey)) {
+            errors.push(`${relatedScope} duplicates another registered node: ${relatedKey}`);
+          }
+          seenKeys.add(relatedKey);
+        }
+      }
+    }
   }
 
   requireArray(example, "coverage", scope, errors);
@@ -154,6 +266,30 @@ function validateExample(example, index, seenKeys, errors) {
       !validVerificationStatuses.has(example.verification.status)
     ) {
       errors.push(`${scope}.verification.status has unsupported value: ${example.verification.status}`);
+    }
+  }
+  validateVerificationEvidence(example, scope, errors);
+
+  if (example.requiresScopeAssessment !== undefined && typeof example.requiresScopeAssessment !== "boolean") {
+    errors.push(`${scope}.requiresScopeAssessment must be a boolean when present`);
+  }
+  if (example.requiresScopeAssessment === true) {
+    const assessment = example.scopeAssessment;
+    if (!isObject(assessment)) {
+      errors.push(`${scope}.scopeAssessment is required when requiresScopeAssessment is true`);
+    } else {
+      if (!Array.isArray(assessment.selectedNodeCoverage)) {
+        errors.push(`${scope}.scopeAssessment.selectedNodeCoverage must be an array`);
+      }
+      if (!Array.isArray(assessment.missingRequirements)) {
+        errors.push(`${scope}.scopeAssessment.missingRequirements must be an array`);
+      }
+      if (!["verified", "partially-verified"].includes(assessment.verificationCeiling)) {
+        errors.push(`${scope}.scopeAssessment.verificationCeiling must be verified or partially-verified`);
+      }
+      if ((assessment.missingRequirements ?? []).length > 0 && assessment.verificationCeiling !== "partially-verified") {
+        errors.push(`${scope}.scopeAssessment.verificationCeiling must be partially-verified when requirements are missing`);
+      }
     }
   }
 

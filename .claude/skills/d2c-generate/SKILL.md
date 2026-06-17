@@ -311,9 +311,12 @@ context 缺失时使用默认值：
 
 生成规则：
 
+- `chartMappings[].requiresChartContractAssessment=true` 时必须同时记录 `candidateComponents`、`matchedContract`、`missingContract`、`selectedComponent`、`libraryVersion`、`optionPath`、`dataAdapter`、`dataBindingStatus`、`containerStyle`、`decision` 和 `fallbackReason`。
+- 折线图与柱状图可以选择公开 props 已覆盖 `chartType`、`dateList`、`dataSource`、`legendList`、`option` 和 `seriesList` 的业务 wrapper。
+- donut 等 wrapper 未覆盖的类型必须记录缺失契约，并回退到项目内已有本地图表 wrapper。
 - 图表容器宽高、标题、图例、坐标轴样式优先取 Figma raw value。
 - 图像 fallback 或低置信度数据只能生成示意 data，并把 `dataStatus` 标为 `estimated-preview-data`。
-- 不在 generate 阶段绑定真实接口；真实数据接入由 merge 或人工完成。
+- preview 测试数据保持静态；不在 generate 阶段生成 API、store、hook 或 proxy 修改。真实数据接入由 merge 或人工完成。
 
 ### Step 7: 生成响应式代码
 

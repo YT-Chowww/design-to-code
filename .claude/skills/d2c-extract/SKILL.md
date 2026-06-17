@@ -70,6 +70,21 @@ Provider 优先级：
 
 结构化 provider 可以互相补充，但必须有一个 `source.provider` 作为主 provider。补充数据写入 `source.auxiliaryProviders`，不得覆盖主 provider 的原始证据。
 
+复合节点示例必须在 normalized artifact 中记录：
+
+```json
+{
+  "scopeAssessment": {
+    "selectedNodeCoverage": [],
+    "missingRequirements": [],
+    "verificationCeiling": "verified | partially-verified",
+    "reason": ""
+  }
+}
+```
+
+存在 `missingRequirements` 时不能升级 registry `verified` 或路线图 `[x]`。registry 可用 `figma.relatedNodes[]` 登记同一文件中的补充节点。
+
 ## 流程
 
 ### Step 1: Provider 探测与选择
@@ -103,6 +118,35 @@ Provider 优先级：
 - 如果 Framelink context 返回 layout/style，但缺少 asset binary，可继续调用 REST image export 作为辅助 provider。
 - 如果所有结构化 provider 失败，尝试 `figma-image-fallback`。
 - 只有 image export 也失败，才要求用户手动提供截图和描述，进入 `manual-input`。
+
+#### Repo-local dev token REST 探测
+
+MCP-first 顺序保持不变，但目标项目 `.mcp.json` 中的 dev token REST 是独立 fallback。预挂载 MCP 返回 `429` 时，不得直接推断 repo-local token 也被限流；必须继续执行：
+
+```text
+GET /v1/files/<fileKey>/nodes?ids=<nodeId>
+GET /v1/images/<fileKey>?ids=<nodeId>
+```
+
+`GET /v1/me` 只作为可选账号信息探测，不是 token 有效性的前置检查。使用：
+
+```bash
+node scripts/probe-figma-token.mjs \
+  --config=<repo-local-.mcp.json> \
+  --file-key=<fileKey> \
+  --node-id=<nodeId>
+```
+
+分类规则：
+
+- nodes API `200`：token 具备结构化读取能力，使用 `figma-rest`，`source.mode=structured-raw`。
+- `/v1/me=403` 且缺少 `current_user:read`：记录 `INCONCLUSIVE_IDENTITY_SCOPE`，继续 file-scoped 请求。
+- nodes API `401` 或明确返回 invalid token：记录认证失败。
+- nodes API `403`：记录文件访问或 scope 不足，继续尝试 image export。
+- nodes API `429`：只标记当前 provider/token 限流；继续尝试目标项目本地 dev token，不得沿用预挂载 MCP 的限流结论。
+- nodes 失败但 image export `200`：进入 `figma-image-fallback`，状态为 `DEGRADED`。
+
+raw 工件只能记录 token 来源、`sha256[:16]` 脱敏指纹、接口状态和错误摘要，不得记录明文 token。
 
 ### Step 2: 获取并持久化原始设计数据
 
@@ -558,7 +602,7 @@ raw json 和 normalized json 必须存在。
 
 - Figma URL 无效：提示用户检查 URL 格式
 - MCP 连接失败：记录该 provider 失败，继续尝试下一层 provider
-- Figma nodes API 限流 / 失败：记录 `figma-rest` 失败，继续尝试 image export；成功则使用 `figma-image-fallback`
+- Figma nodes API 限流 / 失败：记录当前 provider/token 失败，继续尝试 repo-local dev token 的 file-scoped REST，再尝试 image export；成功则使用 `figma-image-fallback`
 - 设计数据为空：提示用户检查 node-id 参数
 - 资源下载失败：记录到 assets manifest，继续标准化结构数据
 - `figma-image-fallback` 中模型无法识别关键文本或结构：停止 generate，要求用户补充截图说明或等待 Figma nodes API 恢复

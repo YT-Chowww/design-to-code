@@ -9,10 +9,21 @@
     {
       "id": "structure",
       "roadmapItem": "结构测试",
-      "status": "[>]",
+      "status": "[x]",
       "kind": "structure",
       "requiresFigma": false,
       "requiresTargetProject": false,
+      "validationEvidence": {
+        "validatedAt": "2026-05-26",
+        "validatorCommand": "node scripts/check-validation-suite.mjs",
+        "result": "PASSED",
+        "artifacts": [
+          ".claude/skills/d2c/SKILL.md",
+          "docs/capability-roadmap.md",
+          "docs/figma-examples.json",
+          "scripts/check-validation-suite.mjs"
+        ]
+      },
       "checks": [
         ".claude/skills/d2c/SKILL.md",
         ".claude/skills/d2c-init/SKILL.md",
@@ -22,16 +33,28 @@
         ".claude/skills/d2c-verify/SKILL.md",
         ".claude/skills/d2c-merge/SKILL.md",
         "docs/capability-roadmap.md",
-        "docs/figma-examples.json"
+        "docs/figma-examples.json",
+        "scripts/check-real-run-evidence.mjs"
       ]
     },
     {
       "id": "preview-template-static",
       "roadmapItem": "模板构建",
-      "status": "[>]",
+      "status": "[x]",
       "kind": "template-static",
       "requiresFigma": false,
       "requiresTargetProject": false,
+      "validationEvidence": {
+        "validatedAt": "2026-05-26",
+        "validatorCommand": "node scripts/check-validation-suite.mjs",
+        "result": "PASSED",
+        "artifacts": [
+          ".claude/skills/d2c-init/templates/preview/package.json",
+          ".claude/skills/d2c-init/templates/preview/vite.config.ts",
+          ".claude/skills/d2c-init/templates/preview/src/App.vue",
+          ".claude/skills/d2c-init/templates/preview/src/main.ts"
+        ]
+      },
       "checks": [
         ".claude/skills/d2c-init/templates/preview/package.json",
         ".claude/skills/d2c-init/templates/preview/vite.config.ts",
@@ -42,56 +65,106 @@
     {
       "id": "protocol-snapshots",
       "roadmapItem": "协议快照测试",
-      "status": "[>]",
+      "status": "[x]",
       "kind": "protocol",
       "requiresFigma": false,
       "requiresTargetProject": false,
+      "validationEvidence": {
+        "validatedAt": "2026-05-26",
+        "validatorCommand": "node scripts/check-validation-suite.mjs",
+        "result": "PASSED",
+        "artifacts": [
+          "docs/validation-fixtures/protocol/manifest.json",
+          "docs/validation-fixtures/protocol/normalized.json",
+          "docs/validation-fixtures/protocol/generation-log.json",
+          "docs/validation-fixtures/protocol/preview-validation-report.json",
+          "docs/validation-fixtures/protocol/preview-verification-report.json",
+          "docs/validation-fixtures/protocol/target-runtime-bootstrap-verification-report.json",
+          "docs/validation-fixtures/protocol/merge-report.json"
+        ]
+      },
       "fixtures": [
         "docs/validation-fixtures/protocol/manifest.json",
         "docs/validation-fixtures/protocol/normalized.json",
         "docs/validation-fixtures/protocol/generation-log.json",
         "docs/validation-fixtures/protocol/preview-validation-report.json",
         "docs/validation-fixtures/protocol/preview-verification-report.json",
+        "docs/validation-fixtures/protocol/target-runtime-bootstrap-verification-report.json",
         "docs/validation-fixtures/protocol/merge-report.json"
       ]
     },
     {
       "id": "mock-extract",
       "roadmapItem": "mock extract 测试",
-      "status": "[>]",
+      "status": "[x]",
       "kind": "mock-extract",
       "requiresFigma": false,
       "requiresTargetProject": false,
+      "validationEvidence": {
+        "validatedAt": "2026-05-26",
+        "validatorCommand": "node scripts/check-validation-suite.mjs",
+        "result": "PASSED",
+        "artifacts": [
+          "docs/validation-fixtures/mock/raw-figma.json",
+          "docs/validation-fixtures/protocol/normalized.json"
+        ]
+      },
       "rawFixture": "docs/validation-fixtures/mock/raw-figma.json",
       "normalizedFixture": "docs/validation-fixtures/protocol/normalized.json"
     },
     {
       "id": "mock-generate",
       "roadmapItem": "mock generate 测试",
-      "status": "[>]",
+      "status": "[x]",
       "kind": "mock-generate",
       "requiresFigma": false,
       "requiresTargetProject": false,
+      "validationEvidence": {
+        "validatedAt": "2026-05-26",
+        "validatorCommand": "node scripts/check-validation-suite.mjs",
+        "result": "PASSED",
+        "artifacts": [
+          "docs/validation-fixtures/protocol/normalized.json",
+          "docs/validation-fixtures/protocol/generation-log.json"
+        ]
+      },
       "inputFixture": "docs/validation-fixtures/protocol/normalized.json",
       "outputFixture": "docs/validation-fixtures/protocol/generation-log.json"
     },
     {
       "id": "mock-merge",
       "roadmapItem": "mock merge 测试",
-      "status": "[>]",
+      "status": "[x]",
       "kind": "mock-merge",
       "requiresFigma": false,
       "requiresTargetProject": false,
+      "validationEvidence": {
+        "validatedAt": "2026-05-26",
+        "validatorCommand": "node scripts/check-validation-suite.mjs",
+        "result": "PASSED",
+        "artifacts": [
+          "docs/validation-fixtures/protocol/generation-log.json",
+          "docs/validation-fixtures/protocol/merge-report.json"
+        ]
+      },
       "inputFixture": "docs/validation-fixtures/protocol/generation-log.json",
       "outputFixture": "docs/validation-fixtures/protocol/merge-report.json"
     },
     {
       "id": "skill-eval",
       "roadmapItem": "skill eval",
-      "status": "[>]",
+      "status": "[x]",
       "kind": "skill-eval",
       "requiresFigma": false,
       "requiresTargetProject": false,
+      "validationEvidence": {
+        "validatedAt": "2026-05-26",
+        "validatorCommand": "node scripts/check-validation-suite.mjs",
+        "result": "PASSED",
+        "artifacts": [
+          "docs/validation-fixtures/skill-eval/expected-artifacts.json"
+        ]
+      },
       "fixture": "docs/validation-fixtures/skill-eval/expected-artifacts.json"
     },
     {
@@ -102,29 +175,144 @@
       "requiresFigma": true,
       "requiresTargetProject": true,
       "fixture": "docs/figma-examples.json",
-      "notes": "The registry is validated locally; real E2E execution remains pending."
+      "notes": "The registry and real-run evidence schema are validated locally; real E2E execution remains pending until examples carry PASSED stage artifacts."
+    },
+    {
+      "id": "real-run-evidence-fixture",
+      "roadmapItem": "真实 run 证据门禁",
+      "status": "[x]",
+      "kind": "real-run-evidence",
+      "requiresFigma": false,
+      "requiresTargetProject": false,
+      "validationEvidence": {
+        "validatedAt": "2026-05-26",
+        "validatorCommand": "node scripts/check-validation-suite.mjs",
+        "result": "PASSED",
+        "artifacts": [
+          "docs/validation-fixtures/real-run/verified-example-registry.json",
+          "scripts/check-real-run-evidence.mjs"
+        ]
+      },
+      "fixture": "docs/validation-fixtures/real-run/verified-example-registry.json"
     },
     {
       "id": "visual-regression",
       "roadmapItem": "视觉回归",
-      "status": "[>]",
+      "status": "[x]",
       "kind": "visual-regression",
       "requiresFigma": true,
       "requiresTargetProject": false,
+      "validationEvidence": {
+        "validatedAt": "2026-05-26",
+        "validatorCommand": "node scripts/check-validation-suite.mjs",
+        "result": "PASSED",
+        "artifacts": [
+          "docs/validation-fixtures/visual/visual-regression-report.json"
+        ]
+      },
       "fixture": "docs/validation-fixtures/visual/visual-regression-report.json"
     },
     {
       "id": "degraded-scenarios",
       "roadmapItem": "降级场景",
-      "status": "[>]",
+      "status": "[x]",
       "kind": "degraded",
       "requiresFigma": false,
       "requiresTargetProject": false,
+      "validationEvidence": {
+        "validatedAt": "2026-05-26",
+        "validatorCommand": "node scripts/check-validation-suite.mjs",
+        "result": "PASSED",
+        "artifacts": [
+          "docs/validation-fixtures/degraded/image-fallback-normalized.json",
+          "docs/validation-fixtures/degraded/chrome-mcp-skipped-verification.json",
+          "docs/validation-fixtures/degraded/target-build-degraded-validation.json"
+        ]
+      },
       "fixtures": [
         "docs/validation-fixtures/degraded/image-fallback-normalized.json",
         "docs/validation-fixtures/degraded/chrome-mcp-skipped-verification.json",
         "docs/validation-fixtures/degraded/target-build-degraded-validation.json"
       ]
+    },
+    {
+      "id": "figma-token-probe",
+      "roadmapItem": "Figma token 脱敏探测",
+      "status": "[x]",
+      "kind": "figma-token-probe",
+      "requiresFigma": false,
+      "requiresTargetProject": false,
+      "validationEvidence": {
+        "validatedAt": "2026-06-01",
+        "validatorCommand": "node scripts/check-validation-suite.mjs",
+        "result": "PASSED",
+        "artifacts": [
+          "scripts/probe-figma-token.mjs",
+          "scripts/check-figma-token-probe.mjs",
+          "docs/validation-fixtures/figma-token-probe/scenarios.json"
+        ]
+      },
+      "fixture": "docs/validation-fixtures/figma-token-probe/scenarios.json"
+    },
+    {
+      "id": "canonical-screenshot-dpr-2",
+      "roadmapItem": "Canonical screenshot DPR 裁剪",
+      "status": "[x]",
+      "kind": "canonical-screenshot",
+      "requiresFigma": false,
+      "requiresTargetProject": false,
+      "validationEvidence": {
+        "validatedAt": "2026-06-02",
+        "validatorCommand": "node scripts/check-validation-suite.mjs",
+        "result": "PASSED",
+        "artifacts": [
+          "scripts/capture-canonical-screenshot.mjs",
+          "scripts/check-canonical-screenshot.mjs",
+          "docs/validation-fixtures/canonical-screenshot/dpr-2.json"
+        ]
+      },
+      "fixture": "docs/validation-fixtures/canonical-screenshot/dpr-2.json"
+    },
+    {
+      "id": "accepted-visual-diff",
+      "roadmapItem": "人工接受视觉差异恢复协议",
+      "status": "[x]",
+      "kind": "accepted-visual-diff",
+      "requiresFigma": false,
+      "requiresTargetProject": false,
+      "validationEvidence": {
+        "validatedAt": "2026-06-02",
+        "validatorCommand": "node scripts/check-validation-suite.mjs",
+        "result": "PASSED",
+        "artifacts": [
+          "docs/validation-fixtures/protocol/accepted-visual-diff-verification-report.json",
+          "scripts/check-verify-report.mjs"
+        ]
+      },
+      "fixture": "docs/validation-fixtures/protocol/accepted-visual-diff-verification-report.json"
+    },
+    {
+      "id": "chart-contract-assessment",
+      "roadmapItem": "图表组件契约匹配检查",
+      "status": "[x]",
+      "kind": "chart-contract-assessment",
+      "requiresFigma": false,
+      "requiresTargetProject": false,
+      "validationEvidence": {
+        "validatedAt": "2026-06-02",
+        "validatorCommand": "node scripts/check-validation-suite.mjs",
+        "result": "PASSED",
+        "artifacts": [
+          "docs/validation-fixtures/chart-contract/generation-complete.json",
+          "docs/validation-fixtures/chart-contract/generation-incomplete.json",
+          "docs/validation-fixtures/chart-contract/merge-complete.json",
+          "docs/validation-fixtures/chart-contract/merge-incomplete.json"
+        ]
+      },
+      "generationFixture": "docs/validation-fixtures/chart-contract/generation-complete.json",
+      "incompleteGenerationFixture": "docs/validation-fixtures/chart-contract/generation-incomplete.json",
+      "mergeFixture": "docs/validation-fixtures/chart-contract/merge-complete.json",
+      "incompleteMergeFixture": "docs/validation-fixtures/chart-contract/merge-incomplete.json"
     }
   ]
 }

@@ -90,10 +90,12 @@ Normalized source example:
 `d2c-validate` runs twice:
 
 - preview validation checks the generated preview project before visual iteration
-- target validation checks the merged target project after imports, tokens, resources, and business components are adapted
+- target validation checks only the files added or modified by the current merge after imports, tokens, resources, and business components are adapted
 - validation records the resolved command matrix and check results, but it does not judge visual similarity
-- target validation must prefer real target scripts before framework defaults; missing optional checks are `SKIPPED` with reasons
-- if target build or required target type checks fail, the overall D2C run must not be declared complete
+- target validation derives `validationScope.files` from merge report `mergedFiles[].targetPath` and uses real target dependencies to construct scoped commands
+- project-wide type-check and build commands are optional diagnostics; historical global errors must not degrade a passing changed-files result
+- missing optional checks are `SKIPPED` with reasons
+- if required changed-files type checks fail, the overall D2C run must not be declared complete
 
 `d2c-verify` runs twice:
 

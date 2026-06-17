@@ -1,4 +1,3 @@
-# Protocol Fixture Design Spec
+# 协议测试数据的设计规格
 
-This fixture describes a compact analytics card with one chart, one icon, and
-responsive/state candidates. It is used only for protocol validation.
+这个测试数据描述一个紧凑的数据分析卡片，包含一个图表、一个图标，以及响应式和状态候选信息。它只用于协议验证。

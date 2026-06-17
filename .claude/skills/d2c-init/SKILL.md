@@ -335,7 +335,7 @@ body {
 - `project-config.json`：写入技术栈、工具链、目录、alias、包管理器和 scripts。
 - `design-system.json`：写入 `sources`、`tokens`、`tokenResolutionRules`、`helpers`、`rules.outputStrategyByCss`，字段需与 `d2c-generate` 读取契约一致。
 - `component-library.json`：写入基础组件库信息、组件候选、`matchingRules`、`styleContract`、`overridePolicy`；检测到 Ant Design、Element Plus 等常见组件库时预置高频组件契约，业务组件等待后续补充。
-- `project-adapter.json`：写入路径候选、配置候选、`tokenSources`、样式约定、alias、mergeTargets、validationCommands 和项目特例。
+- `project-adapter.json`：写入路径候选、配置候选、`tokenSources`、样式约定、alias、mergeTargets、validationCommands、validationPolicy 和项目特例。
 - `.md` 文件写对应 JSON 的人工可读镜像，保留摘要、人工说明和维护约束。
 
 ### Step 6: 自动回填设计上下文
@@ -409,6 +409,7 @@ body {
 - `aliasResolution`：从 tsconfig、vite、webpack、umi、next 或 package 配置中提取 alias。
 - `mergeTargets`：选择默认组件、页面、样式、资源落位目录；多个候选时记录最保守路径。
 - `validationCommands`：从 package scripts 和 tooling 中提取 `typeCheck`、`build`、`lint`、`stylelint`、`formatCheck`。
+- `validationPolicy`：默认写入 `targetScope=changed-files`、`changedFilesSource=merge-report`、`projectWideChecks=optional-diagnostic`，避免目标项目历史错误污染本次 D2C 合入校验。
 - `projectSpecifics`：仅记录已验证的项目特例，并写入 `evidence`。
 
 结构校验：

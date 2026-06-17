@@ -29,6 +29,16 @@ ls <target-directory>/src/
 - 提示用户检查目录路径
 - 中止合并流程
 
+### Step 1.1: 固定写入边界
+
+merge 前读取 `manifest.writeBoundary.allow`、`deny` 和 `baselineStatus`。默认禁止修改 `.mcp.json`、正式 `config/routes.ts`、业务 API、store 和 hook。合入后执行：
+
+```bash
+node scripts/check-write-boundary.mjs --manifest=<manifest.json> --root=<target-directory>
+```
+
+边界检查失败时停止 target validate，不得把 merge 写成通过。
+
 ### Step 2: 分析目标项目结构
 
 优先读取：
@@ -126,8 +136,9 @@ ls <target-directory>/src/
 8. **适配图表库**
    - 读取 `generate` 阶段的 `chartMappings`、目标项目依赖和 `project-adapter.json`
    - 优先接入目标项目已有图表封装，例如 `ReactECharts`、`VueECharts`、业务 ChartCard 或项目图表 adapter
-   - preview 阶段的示例数据只能作为结构占位；真实 API、store、query hook 或数据转换必须在 `dataAdapter` 中标记来源和状态
-   - 报告 `chartMerges`：`nodeId`、`chartType`、`library`、`component`、`importFrom`、`optionPath`、`dataAdapter`、`dataBindingStatus`、`containerStyle`、`decision`、`fallbackReason`
+   - preview 阶段的示例数据只能作为静态结构占位；默认禁止生成 API、store、query hook 或 proxy 修改
+   - `requiresChartContractAssessment=true` 时，先记录候选组件与公开 props 匹配结果；折线/柱图可以选择覆盖 `chartType`、`dateList`、`dataSource`、`legendList`、`option`、`seriesList` 的业务 wrapper，donut 契约缺失时回退本地 wrapper
+   - 报告 `chartMerges`：`nodeId`、`chartType`、`requiresChartContractAssessment`、`candidateComponents`、`matchedContract`、`missingContract`、`selectedComponent`、`libraryVersion`、`library`、`component`、`importFrom`、`optionPath`、`dataAdapter`、`dataBindingStatus`、`containerStyle`、`decision`、`fallbackReason`
    - 目标项目没有可靠图表库或数据契约时，保留静态 preview chart / placeholder，并记录后续人工接入点
 
 9. **处理合并冲突**

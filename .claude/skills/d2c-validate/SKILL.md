@@ -10,7 +10,9 @@ description: Validate generated frontend code in preview or target-project phase
 - `targetDirectory`：目标项目目录，`phase=target` 时必需；未提供时使用 CWD
 - 已生成的代码（preview 阶段位于 `.d2c/preview/src/`，target 阶段位于合入后的目标项目目录）
 - `.d2c/context/project-config.json`
+- `.d2c/context/project-adapter.json`
 - `.d2c/docs/sessions/<runId>/manifest.json`
+- `.d2c/docs/merge-reports/<designId>/<runId>.json`（`phase=target` 时用于确定本次新增/修改文件）
 
 ## 目标
 
@@ -21,9 +23,12 @@ description: Validate generated frontend code in preview or target-project phase
 - `format`：不在本阶段强制执行
 
 `phase=target` 保证合入后的目标项目满足真实工程约束：
-- 使用目标项目实际命令、依赖、别名、样式构建和资源处理规则
+- 只校验当前 D2C run 新增或修改的文件，不默认扫描目标项目全量历史代码
+- 从 merge report 的 `mergedFiles[].targetPath` 获取 changed-files 清单
+- 使用目标项目实际依赖、别名、样式规则和可按文件执行的工具
 - 覆盖 token 适配、业务组件替换、路径迁移后的类型和构建问题
-- 目标项目校验失败时，最终 D2C 状态保持未完成
+- 当前 run 的 changed-files 校验失败时，最终 D2C 状态保持未完成
+- 项目级全量 type-check / build 仅作为可选诊断；既有全局错误不得降级本次 changed-files 校验结果
 
 ## 命令发现协议
 
@@ -57,10 +62,11 @@ Validate 阶段必须先生成一份命令矩阵，再执行具体检查。命�
 3. 框架默认 fallback
 
 `phase=target`：
-1. `<targetDirectory>/package.json scripts`
-2. `.d2c/context/project-adapter.json.validationCommands`
-3. `.d2c/context/project-config.json.tooling`
-4. 框架默认 fallback
+1. `.d2c/docs/merge-reports/<designId>/<runId>.json` 的 `mergedFiles[].targetPath`
+2. `<targetDirectory>/package.json scripts` 和本地依赖，用于构造 changed-files 命令
+3. `.d2c/context/project-adapter.json.validationCommands`
+4. `.d2c/context/project-config.json.tooling`
+5. 框架默认 fallback
 
 每个检查项必须记录 `source`：
 
@@ -70,17 +76,18 @@ Validate 阶段必须先生成一份命令矩阵，再执行具体检查。命�
 | `project-adapter` | 来自 `project-adapter.json.validationCommands` |
 | `project-config` | 来自 `project-config.json.tooling` |
 | `framework-default` | 来自 validate skill 默认矩阵 |
+| `merge-report` | 基于 merge report 的 changed-files 清单构造 |
 | `missing` | 未找到可执行命令，状态必须为 `SKIPPED` |
 
 ### 检查矩阵
 
 | 检查项 | preview 选择规则 | target 选择规则 | 缺失处理 |
 |--------|------------------|------------------|----------|
-| `typeCheck` | 优先 `type-check` / `typecheck` / `tsc`；TypeScript 无脚本时用框架默认命令 | 优先目标项目真实脚本，再读 adapter/config，再 fallback | JavaScript 项目 `SKIPPED`；TypeScript 项目 fallback |
-| `lint` | 优先 `lint` / `eslint`；无 linter 配置时跳过 | 优先目标项目真实 `lint`，再读 adapter/config | `SKIPPED` 并记录 reason |
+| `typeCheck` | 优先 `type-check` / `typecheck` / `tsc`；TypeScript 无脚本时用框架默认命令 | 对 changed-files 中的 TS/TSX/Vue 文件构造 scoped 命令；不得默认执行全量脚本 | JavaScript 项目或无类型文件时 `SKIPPED` |
+| `lint` | 优先 `lint` / `eslint`；无 linter 配置时跳过 | 检测到 linter 时仅传入 changed-files | `SKIPPED` 并记录 reason |
 | `format` | 默认不强制，存在 `format:check` / `format` 才执行 | 存在真实脚本才执行 | `SKIPPED` 并记录 reason |
-| `stylelint` | 存在 `stylelint` / `lint:style` 才执行 | 存在真实脚本才执行 | `SKIPPED` 并记录 reason |
-| `build` | 优先 `build`；无脚本时 Vite fallback | 优先 `build` / `build:test` / `dev:build` / `build:prod` | target 缺失时 `FAILED` |
+| `stylelint` | 存在 `stylelint` / `lint:style` 才执行 | 检测到 stylelint 时仅传入 changed-files 中的样式文件 | `SKIPPED` 并记录 reason |
+| `build` | 优先 `build`；无脚本时 Vite fallback | 仅执行可按 changed-files 运行的 scoped build；项目级 build 只登记为可选诊断 | 无 scoped build 时 `SKIPPED` 并记录 reason |
 | `devServer` | 优先 `dev`；无脚本时 Vite fallback | 优先 `start` / `dev` / `serve` | `NEEDS_MANUAL_START` |
 
 覆盖 Vite、Umi、Next、Webpack 的默认 fallback：
@@ -95,8 +102,10 @@ Validate 阶段必须先生成一份命令矩阵，再执行具体检查。命�
 ### 状态规则
 
 - `lint`、`format`、`stylelint` 没有可用命令时必须写 `SKIPPED`，并记录 `reason`。
-- `target build` 没有可用命令或执行失败时，`overallStatus` 不得为 `PASSED`。
-- `target typeCheck` 失败时，`overallStatus` 必须为 `FAILED` 或 `DEGRADED`。
+- `phase=target` 的报告必须写入 `validationScope.mode=changed-files`、`validationScope.source=merge-report` 和非空 `validationScope.files`。
+- target build 只有在存在可按 changed-files 执行的 scoped build 命令时才是必需检查；仅有项目级 build script 时必须写为 `SKIPPED`，并记录 `reason`。
+- 项目级全量 type-check / build 可以写入 `globalDiagnostics`，但默认不执行，且不得影响 changed-files `overallStatus`。
+- `target typeCheck` 的 changed-files 命令失败时，`overallStatus` 必须为 `FAILED` 或 `DEGRADED`。
 - `target` 阶段任一必需检查为 `FAILED` 时，不得继续声明整体 D2C 流程完成。
 - 所有执行过的命令都必须记录 `command`、`source`、`status` 和摘要输出路径或摘要文本。
 
@@ -175,14 +184,16 @@ ls <target-directory>/node_modules
 | vue3 | `cd .d2c/preview && npx vue-tsc --noEmit` | language = typescript |
 | react | `cd .d2c/preview && npx tsc --noEmit` | language = typescript |
 
-`phase=target` 时优先使用目标项目配置的 type-check 命令；缺失时按框架回退：
+`phase=target` 时从 merge report 获取 changed-files，并使用目标项目依赖构造 scoped type-check 命令：
 
-| 框架 | 回退命令 | 条件 |
-|------|----------|------|
-| vue3 | `cd <target-directory> && npx vue-tsc --noEmit` | language = typescript |
-| react | `cd <target-directory> && npx tsc --noEmit` | language = typescript |
+| 框架 | changed-files 命令 | 条件 |
+|------|---------------------|------|
+| vue3 | 使用项目已有 scoped vue-tsc / lint 能力，仅传入本次变更文件；无法可靠按文件执行时记录 `SKIPPED` 和替代检查 | language = typescript |
+| react | `cd <target-directory> && npx tsc --noEmit --skipLibCheck --jsx react-jsx --esModuleInterop --moduleResolution node <changed-ts-files...>` | language = typescript |
 
 如果 `language = javascript`，跳过类型检查。
+
+禁止把 `npx tsc --noEmit`、`npm run type-check` 等全项目命令作为 target 默认门禁。只有用户明确要求项目级诊断时，才允许额外执行并写入 `globalDiagnostics`。
 
 **如果失败**：
 1. 分析错误信息
@@ -222,7 +233,7 @@ ls <target-directory>/node_modules
 | vue3 | `cd .d2c/preview && npx vite build` |
 | react | `cd .d2c/preview && npx vite build` |
 
-`phase=target` 优先执行目标项目配置的 build 命令；缺失时读取 `package.json scripts`，按 `build`、`build:test`、`dev:build` 的顺序选择可用命令。
+`phase=target` 仅在项目存在 scoped build 能力时执行 changed-files 构建。普通 `npm run build`、`npm run build:test`、`dev:build` 属于项目级全量命令，默认不执行；写为 `SKIPPED`，并在报告中说明可作为用户明确要求时的附加诊断。
 
 如果失败：
 1. 分析构建错误
@@ -299,6 +310,22 @@ JSON 报告最小结构：
 }
 ```
 
+`phase=target` 时必须额外写入：
+
+```json
+{
+  "validationScope": {
+    "mode": "changed-files",
+    "source": "merge-report",
+    "files": ["src/pages/d2c-lab/example/index.tsx", "src/pages/d2c-lab/example/index.less"]
+  },
+  "globalDiagnostics": {
+    "status": "SKIPPED",
+    "reason": "Project-wide checks are optional diagnostics and were not requested."
+  }
+}
+```
+
 生成后运行：
 
 ```bash
@@ -353,6 +380,9 @@ node scripts/check-validate-report.mjs .d2c/docs/validation-reports/<designId>/<
 | `node_modules` 不存在 | 运行 `npm install` |
 | 类型错误修复 2 次仍失败 | 添加降级注释并记录 TODO |
 | linter 未配置 | 跳过 lint 检查 |
-| 构建失败（依赖缺失） | 安装缺失依赖 |
+| preview 构建失败（依赖缺失） | 安装缺失依赖 |
+| target 仅存在项目级 build | 默认跳过并记录为可选诊断；用户明确要求时才额外执行 |
 | 端口 5173 被占用 | 停止占用进程后重新启动 |
 | `npm install` 失败 | 报告错误，建议用户手动安装 |
+
+dev server 状态统一为 `Running | Failed | NEEDS_MANUAL_START | SKIPPED`。启动成功后把阶段、端口、命令和 PID 写入 `manifest.runtimeProcesses[]`；最终门禁执行 `node scripts/cleanup-d2c-servers.mjs <manifest.json>`。

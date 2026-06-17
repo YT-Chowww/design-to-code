@@ -131,6 +131,31 @@ function validateFallbackBoundaries(normalized, errors) {
   }
 }
 
+function validateScopeAssessment(normalized, errors) {
+  const assessment = normalized.scopeAssessment;
+  if (assessment === undefined) {
+    return;
+  }
+  if (!isObject(assessment)) {
+    errors.push("scopeAssessment must be an object when present");
+    return;
+  }
+  for (const field of ["selectedNodeCoverage", "missingRequirements"]) {
+    if (!Array.isArray(assessment[field])) {
+      errors.push(`scopeAssessment.${field} must be an array`);
+    }
+  }
+  if (!["verified", "partially-verified"].includes(assessment.verificationCeiling)) {
+    errors.push("scopeAssessment.verificationCeiling must be verified or partially-verified");
+  }
+  if (typeof assessment.reason !== "string") {
+    errors.push("scopeAssessment.reason must be a string");
+  }
+  if ((assessment.missingRequirements ?? []).length > 0 && assessment.verificationCeiling !== "partially-verified") {
+    errors.push("scopeAssessment.verificationCeiling must be partially-verified when missingRequirements is not empty");
+  }
+}
+
 function validateNormalized(normalized) {
   const errors = [];
 
@@ -162,6 +187,7 @@ function validateNormalized(normalized) {
   }
 
   validateFallbackBoundaries(normalized, errors);
+  validateScopeAssessment(normalized, errors);
 
   return errors;
 }

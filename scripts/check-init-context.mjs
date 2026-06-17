@@ -105,8 +105,19 @@ if (errors.length === 0) {
     "aliasResolution",
     "mergeTargets",
     "validationCommands",
+    "validationPolicy",
     "projectSpecifics"
   ], "project-adapter", errors);
+
+  if (projectAdapter.validationPolicy?.targetScope !== "changed-files") {
+    errors.push("project-adapter.validationPolicy.targetScope must be changed-files");
+  }
+  if (projectAdapter.validationPolicy?.changedFilesSource !== "merge-report") {
+    errors.push("project-adapter.validationPolicy.changedFilesSource must be merge-report");
+  }
+  if (projectAdapter.validationPolicy?.projectWideChecks !== "optional-diagnostic") {
+    errors.push("project-adapter.validationPolicy.projectWideChecks must be optional-diagnostic");
+  }
 
   for (const group of ["components", "pages", "layouts", "assets", "styles"]) {
     if (projectAdapter.pathCandidates) {

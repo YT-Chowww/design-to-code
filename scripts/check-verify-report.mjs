@@ -181,6 +181,69 @@ function validateDiff(diff, report, errors) {
   if (report.overallStatus === "PASSED" && !hasDiffImage && !humanPassed) {
     errors.push("overallStatus PASSED requires a diff image or humanReview.status PASSED");
   }
+  if (report.overallStatus === "PASSED" && diff.status !== "PASSED") {
+    errors.push("overallStatus PASSED requires diff.status PASSED");
+  }
+}
+
+function validateAcceptanceOverride(report, errors) {
+  const override = report.acceptanceOverride;
+  if (override === undefined) {
+    return;
+  }
+  if (!isObject(override)) {
+    errors.push("acceptanceOverride must be an object when present");
+    return;
+  }
+  if (override.status !== "ACCEPTED_WITH_VISUAL_DIFF") {
+    errors.push("acceptanceOverride.status must be ACCEPTED_WITH_VISUAL_DIFF");
+  }
+  for (const field of ["reviewer", "acceptedAt", "scope", "reason"]) {
+    requireString(override, field, errors);
+  }
+  if (report.diff?.status !== "FAILED") {
+    errors.push("acceptanceOverride requires diff.status FAILED");
+  }
+  if (report.overallStatus !== "DEGRADED") {
+    errors.push("acceptanceOverride requires overallStatus DEGRADED");
+  }
+  if (!report.screenshots?.some((item) => item.status === "DEGRADED")) {
+    errors.push("acceptanceOverride requires at least one DEGRADED screenshot");
+  }
+  if (!isObject(report.humanReview) || report.humanReview.status !== "ACCEPTED_WITH_VISUAL_DIFF") {
+    errors.push("acceptanceOverride requires humanReview.status ACCEPTED_WITH_VISUAL_DIFF");
+  }
+}
+
+function validateRuntimeBootstrap(report, errors) {
+  if (report.phase !== "target") {
+    return;
+  }
+  const bootstrap = report.runtimeBootstrap;
+  if (!isObject(bootstrap)) {
+    errors.push("target runtimeBootstrap must be an object");
+    return;
+  }
+  if (bootstrap.scope !== "browser-document-only") {
+    errors.push("runtimeBootstrap.scope must be browser-document-only");
+  }
+  if (typeof bootstrap.reason !== "string") {
+    errors.push("runtimeBootstrap.reason must be a string");
+  }
+  for (const field of ["writesProjectFiles", "affectsVerifiedComponentInputs"]) {
+    if (typeof bootstrap[field] !== "boolean") {
+      errors.push(`runtimeBootstrap.${field} must be a boolean`);
+    }
+  }
+  if (!Array.isArray(bootstrap.stubs)) {
+    errors.push("runtimeBootstrap.stubs must be an array");
+  }
+  if (bootstrap.writesProjectFiles === true) {
+    errors.push("runtimeBootstrap.writesProjectFiles must remain false");
+  }
+  if (bootstrap.affectsVerifiedComponentInputs === true && report.overallStatus === "PASSED") {
+    errors.push("target verification must be DEGRADED when runtime bootstrap affects verified component inputs");
+  }
 }
 
 function validateReport(report) {
@@ -241,6 +304,8 @@ function validateReport(report) {
   }
 
   validateDiff(report.diff, report, errors);
+  validateAcceptanceOverride(report, errors);
+  validateRuntimeBootstrap(report, errors);
 
   return errors;
 }

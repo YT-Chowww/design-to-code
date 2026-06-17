@@ -13,6 +13,26 @@
   "config": {
     "maxIterations": 3
   },
+  "scopeAssessment": {
+    "selectedNodeCoverage": [
+      "line chart",
+      "hover state"
+    ],
+    "missingRequirements": [],
+    "verificationCeiling": "verified",
+    "reason": "Fixture covers every declared requirement."
+  },
+  "writeBoundary": {
+    "allow": [
+      ".d2c/",
+      "src/pages/mock/"
+    ],
+    "deny": [
+      ".mcp.json",
+      "config/routes.ts"
+    ]
+  },
+  "runtimeProcesses": [],
   "artifacts": {
     "rawFigma": "docs/validation-fixtures/protocol/raw-figma.json",
     "assetsManifest": "docs/validation-fixtures/protocol/assets.json",

@@ -1,0 +1,35 @@
+{
+  "designId": "fixture_chart-contract-incomplete",
+  "runId": "2026-06-02T00-00-00-chart-contract-incomplete",
+  "targetDirectory": "/tmp/d2c-chart-contract-target",
+  "mergeStatus": "PASSED",
+  "requiresChartMerge": true,
+  "mergedFiles": [
+    {
+      "sourcePath": ".d2c/preview/src/ChartContract.tsx",
+      "targetPath": "src/pages/chart-contract/index.tsx",
+      "status": "PASSED"
+    }
+  ],
+  "chartMerges": [
+    {
+      "nodeId": "212:8232",
+      "chartType": "line",
+      "requiresChartContractAssessment": true,
+      "candidateComponents": ["MultipleLegendChart"],
+      "matchedContract": ["chartType", "dateList", "dataSource"],
+      "missingContract": [],
+      "selectedComponent": "MultipleLegendChart",
+      "libraryVersion": "echarts@4.9.0",
+      "library": "echarts@4.9.0",
+      "component": "MultipleLegendChart",
+      "importFrom": "@/components/multiple-legend-chart",
+      "dataAdapter": "src/pages/chart-contract/adapters.ts#lineSeriesList",
+      "dataBindingStatus": "static-preview",
+      "containerStyle": "src/pages/chart-contract/index.less",
+      "decision": "use-target-chart-wrapper",
+      "fallbackReason": "",
+      "status": "PASSED"
+    }
+  ]
+}

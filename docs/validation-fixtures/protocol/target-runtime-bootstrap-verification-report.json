@@ -1,0 +1,49 @@
+{
+  "designId": "fixture_target_runtime_bootstrap",
+  "runId": "2026-06-02T00-02-00",
+  "phase": "target",
+  "url": "http://127.0.0.1:7001/#/d2c-lab/example",
+  "overallStatus": "PASSED",
+  "mcpProbe": {
+    "status": "AVAILABLE",
+    "configPath": ".mcp.json",
+    "serverName": "chrome-devtools",
+    "fallbackManualUrl": "http://127.0.0.1:7001/#/d2c-lab/example",
+    "tools": [
+      "browser_navigate",
+      "browser_take_screenshot",
+      "browser_resize"
+    ]
+  },
+  "thresholds": {
+    "pixelRatio": 0.02,
+    "overallScore": 90
+  },
+  "runtimeBootstrap": {
+    "scope": "browser-document-only",
+    "reason": "Fixture records an empty browser-only bootstrap.",
+    "writesProjectFiles": false,
+    "affectsVerifiedComponentInputs": false,
+    "stubs": []
+  },
+  "screenshots": [
+    {
+      "breakpoint": "desktop",
+      "viewport": {
+        "width": 500,
+        "height": 320
+      },
+      "status": "PASSED",
+      "referenceImagePath": ".d2c/assets/fixture/reference.png",
+      "actualImagePath": ".d2c/docs/verification-reports/fixture/actual.png",
+      "diffImagePath": ".d2c/docs/verification-reports/fixture/diff.png",
+      "score": 98
+    }
+  ],
+  "stateChecks": [],
+  "diff": {
+    "status": "PASSED",
+    "pixelRatio": 0.01,
+    "regions": []
+  }
+}

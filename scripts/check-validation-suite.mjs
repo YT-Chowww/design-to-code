@@ -8,6 +8,7 @@ const root = process.cwd();
 const suitePath = path.resolve(root, process.argv[2] ?? "docs/validation-fixtures/validation-suite.json");
 const errors = [];
 const results = [];
+const allowedCaseStatuses = new Set(["[>]", "[x]"]);
 
 function readJson(filePath) {
   try {
@@ -19,6 +20,10 @@ function readJson(filePath) {
 
 function isObject(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function nonEmptyString(value) {
+  return typeof value === "string" && value.trim().length > 0;
 }
 
 function requireFile(relativePath, scope) {
@@ -51,6 +56,79 @@ function runNode(script, fixture, scope, extraArgs = []) {
   }
 
   results.push(`${scope}: ${script} ${fixture}`);
+}
+
+function runNodeExpectFailure(script, fixture, scope) {
+  requireFile(script, scope);
+  requireFile(fixture, scope);
+
+  const result = spawnSync(process.execPath, [script, fixture], {
+    cwd: root,
+    encoding: "utf8"
+  });
+
+  if (result.status === 0) {
+    errors.push(`${scope}: ${script} unexpectedly passed for ${fixture}`);
+    return;
+  }
+
+  results.push(`${scope}: expected failure ${script} ${fixture}`);
+}
+
+// `[x]` is a claim of completed validation, so it must point to durable
+// evidence that another run can inspect. `[>]` remains allowed without this.
+function checkValidationEvidence(testCase) {
+  if (testCase.status !== "[x]") {
+    return;
+  }
+
+  const evidence = testCase.validationEvidence;
+  if (!isObject(evidence)) {
+    errors.push(`${testCase.id}: [x] cases must include validationEvidence`);
+    return;
+  }
+
+  if (!nonEmptyString(evidence.validatedAt)) {
+    errors.push(`${testCase.id}: validationEvidence.validatedAt is required`);
+  }
+  if (!nonEmptyString(evidence.validatorCommand)) {
+    errors.push(`${testCase.id}: validationEvidence.validatorCommand is required`);
+  }
+  if (evidence.result !== "PASSED") {
+    errors.push(`${testCase.id}: validationEvidence.result must be PASSED`);
+  }
+  if (!Array.isArray(evidence.artifacts) || evidence.artifacts.length === 0) {
+    errors.push(`${testCase.id}: validationEvidence.artifacts must be a non-empty array`);
+  } else {
+    for (const artifact of evidence.artifacts) {
+      if (!nonEmptyString(artifact)) {
+        errors.push(`${testCase.id}: validationEvidence.artifacts must contain non-empty paths`);
+      } else {
+        requireFile(artifact, `${testCase.id}.validationEvidence`);
+      }
+    }
+  }
+
+  if ((testCase.requiresFigma || testCase.requiresTargetProject) && testCase.kind === "real-figma-registry") {
+    if (!Array.isArray(evidence.runs) || evidence.runs.length === 0) {
+      errors.push(`${testCase.id}: real [x] cases must include validationEvidence.runs`);
+    } else {
+      for (const [index, run] of evidence.runs.entries()) {
+        if (!isObject(run)) {
+          errors.push(`${testCase.id}: validationEvidence.runs[${index}] must be an object`);
+          continue;
+        }
+        for (const field of ["runId", "exampleSlug", "manifest"]) {
+          if (!nonEmptyString(run[field])) {
+            errors.push(`${testCase.id}: validationEvidence.runs[${index}].${field} is required`);
+          }
+        }
+        if (nonEmptyString(run.manifest)) {
+          requireFile(run.manifest, `${testCase.id}.validationEvidence`);
+        }
+      }
+    }
+  }
 }
 
 function checkStructure(testCase) {
@@ -98,6 +176,7 @@ function checkProtocol(testCase) {
   runNode("scripts/check-generate-decisions.mjs", "docs/validation-fixtures/protocol/generation-log.json", testCase.id);
   runNode("scripts/check-validate-report.mjs", "docs/validation-fixtures/protocol/preview-validation-report.json", testCase.id);
   runNode("scripts/check-verify-report.mjs", "docs/validation-fixtures/protocol/preview-verification-report.json", testCase.id);
+  runNode("scripts/check-verify-report.mjs", "docs/validation-fixtures/protocol/target-runtime-bootstrap-verification-report.json", testCase.id);
   runNode("scripts/check-merge-report.mjs", "docs/validation-fixtures/protocol/merge-report.json", testCase.id);
 }
 
@@ -142,6 +221,7 @@ function checkSkillEval(testCase) {
 
 function checkRealFigmaRegistry(testCase) {
   runNode("scripts/check-figma-examples.mjs", testCase.fixture, testCase.id);
+  runNode("scripts/check-real-run-evidence.mjs", testCase.fixture, testCase.id);
   const registry = readJson(path.resolve(root, testCase.fixture));
   const registered = registry.examples?.filter((example) => example.roadmapStatus === "[>]") ?? [];
   if (registered.length === 0) {
@@ -150,6 +230,12 @@ function checkRealFigmaRegistry(testCase) {
   if (!registered.some((example) => example.targetProjectRequired === true)) {
     errors.push(`${testCase.id}: registry should include target-project-required examples`);
   }
+}
+
+function checkRealRunEvidence(testCase) {
+  runNode("scripts/check-real-run-evidence.mjs", testCase.fixture, testCase.id, [
+    "--require-verified"
+  ]);
 }
 
 function checkVisualRegression(testCase) {
@@ -175,6 +261,25 @@ function checkDegraded(testCase) {
   runNode("scripts/check-validate-report.mjs", "docs/validation-fixtures/degraded/target-build-degraded-validation.json", testCase.id);
 }
 
+function checkFigmaTokenProbe(testCase) {
+  runNode("scripts/check-figma-token-probe.mjs", testCase.fixture, testCase.id);
+}
+
+function checkCanonicalScreenshot(testCase) {
+  runNode("scripts/check-canonical-screenshot.mjs", testCase.fixture, testCase.id);
+}
+
+function checkAcceptedVisualDiff(testCase) {
+  runNode("scripts/check-verify-report.mjs", testCase.fixture, testCase.id);
+}
+
+function checkChartContractAssessment(testCase) {
+  runNode("scripts/check-generate-decisions.mjs", testCase.generationFixture, testCase.id);
+  runNode("scripts/check-merge-report.mjs", testCase.mergeFixture, testCase.id);
+  runNodeExpectFailure("scripts/check-generate-decisions.mjs", testCase.incompleteGenerationFixture, testCase.id);
+  runNodeExpectFailure("scripts/check-merge-report.mjs", testCase.incompleteMergeFixture, testCase.id);
+}
+
 function validateCase(testCase) {
   if (!isObject(testCase)) {
     errors.push("suite.cases must contain objects");
@@ -185,9 +290,10 @@ function validateCase(testCase) {
       errors.push(`case is missing ${field}`);
     }
   }
-  if (testCase.status !== "[>]") {
-    errors.push(`${testCase.id}: module 8 suite cases must be [>] until real validation upgrades them`);
+  if (!allowedCaseStatuses.has(testCase.status)) {
+    errors.push(`${testCase.id}: status must be [>] or [x]`);
   }
+  checkValidationEvidence(testCase);
   if (typeof testCase.requiresFigma !== "boolean") {
     errors.push(`${testCase.id}: requiresFigma must be boolean`);
   }
@@ -195,6 +301,8 @@ function validateCase(testCase) {
     errors.push(`${testCase.id}: requiresTargetProject must be boolean`);
   }
 
+  // The suite is an orchestrator: each kind delegates protocol details to a
+  // focused checker, while this file owns status/evidence policy.
   switch (testCase.kind) {
     case "structure":
       checkStructure(testCase);
@@ -220,11 +328,26 @@ function validateCase(testCase) {
     case "real-figma-registry":
       checkRealFigmaRegistry(testCase);
       break;
+    case "real-run-evidence":
+      checkRealRunEvidence(testCase);
+      break;
     case "visual-regression":
       checkVisualRegression(testCase);
       break;
     case "degraded":
       checkDegraded(testCase);
+      break;
+    case "figma-token-probe":
+      checkFigmaTokenProbe(testCase);
+      break;
+    case "canonical-screenshot":
+      checkCanonicalScreenshot(testCase);
+      break;
+    case "accepted-visual-diff":
+      checkAcceptedVisualDiff(testCase);
+      break;
+    case "chart-contract-assessment":
+      checkChartContractAssessment(testCase);
       break;
     default:
       errors.push(`${testCase.id}: unsupported kind ${testCase.kind}`);

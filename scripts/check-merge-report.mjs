@@ -20,6 +20,7 @@ const validDecisions = new Set([
   'use-svg-fallback',
   'use-image-fallback',
   'use-target-chart-wrapper',
+  'fallback-local-chart-wrapper',
   'use-preview-chart',
   'use-placeholder',
   'fallback-native',
@@ -86,6 +87,34 @@ function hasEvidence(item) {
 
 function hasFallback(item) {
   return nonEmptyString(item.fallbackReason) || item.decision?.startsWith('fallback-') || item.decision === 'skip';
+}
+
+function requirePresentString(item, field, scope) {
+  if (typeof item[field] !== 'string') {
+    errors.push(`${scope}.${field} must be a string`);
+  }
+}
+
+function checkChartContractAssessment(item, scope) {
+  if (item.requiresChartContractAssessment !== true) return;
+
+  for (const field of ['candidateComponents', 'matchedContract', 'missingContract']) {
+    if (!Array.isArray(item[field])) {
+      errors.push(`${scope}.${field} must be an array`);
+    }
+  }
+  for (const field of [
+    'selectedComponent',
+    'libraryVersion',
+    'optionPath',
+    'dataAdapter',
+    'dataBindingStatus',
+    'containerStyle',
+    'decision',
+    'fallbackReason',
+  ]) {
+    requirePresentString(item, field, scope);
+  }
 }
 
 const report = readJson(reportPath);
@@ -240,6 +269,7 @@ if (report) {
       if (!validDataBindingStatuses.has(item.dataBindingStatus)) {
         errors.push(`${scope}.dataBindingStatus has unsupported value: ${item.dataBindingStatus}`);
       }
+      checkChartContractAssessment(item, scope);
       if (item.decision === 'use-target-chart-wrapper') {
         requireString(item, 'library', scope);
         requireString(item, 'component', scope);

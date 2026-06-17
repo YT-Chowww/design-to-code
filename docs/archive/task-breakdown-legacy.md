@@ -1,4 +1,8 @@
-# 任务拆分与实施计划
+# 任务拆分与实施计划（历史归档）
+
+> 这是早期实施 checklist 的历史归档，状态口径已经过时。
+> 当前能力状态请以 `docs/capability-roadmap.md` 为准；验证证据请以
+> `docs/validation-fixtures/`、`docs/figma-examples.json` 和真实运行工件为准。
 
 ## Phase 0: 文档与协议
 
@@ -21,7 +25,7 @@
 - [x] `d2c-validate`：preview / target 双阶段校验
 - [x] `d2c-verify`：preview / target 双阶段视觉验证
 - [x] `d2c-merge`：目标项目合入、resolved tokens、资源和导入适配
-- [x] `d2c`：7 步主编排和阶段门禁
+- [x] `d2c`：7 步主编排和阶段顺序检查
 
 ## Phase 3: 工具与分发
 

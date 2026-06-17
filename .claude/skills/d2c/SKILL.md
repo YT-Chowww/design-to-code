@@ -47,13 +47,14 @@ D2C 是工件驱动流程，不是事后补文档流程。每个阶段必须满�
    - 必须从 manifest 读取 `normalizedDesign`，不得从会话记忆或临时分析结果直接生成代码。
    - 必须先生成 `.d2c/preview/src/` 代码和 generation log，并将 `status.generate` 写回 manifest。
    - 在 generation log 写入 manifest 前，禁止合入目标项目代码。
+   - 图表候选要求契约评估时，generation log 必须记录候选组件、匹配与缺失契约、选择结果、option、adapter、静态数据状态和 fallback 原因。
 
 4. **Validate / Verify 门禁**
    - 每次 validate / verify 后必须立即生成报告文件，并写回 manifest 对应 `artifacts` 与 `status`。
    - Chrome DevTools MCP 不可用时可以 `SKIPPED`，但必须在 verify 报告中记录不可用原因、人工检查入口和已完成的静态校验。
 
 5. **Merge 门禁**
-   - 只有 `status.previewVerify` 为 `PASSED` 或 `SKIPPED` 时才能进入 merge。
+   - 只有 `status.previewVerify` 为 `PASSED`、`SKIPPED`，或具有完整 `previewAcceptance.status=ACCEPTED_WITH_VISUAL_DIFF` 且 `scopeAssessment.missingRequirements=[]` 的 `DEGRADED` 时才能进入 merge。
    - merge 必须从 manifest 读取 preview、normalized design、generation log 和 target directory。
    - 修改目标项目业务代码前，必须先说明将修改的目标文件；修改后必须立即写 merge report 并回写 manifest。
 
@@ -81,6 +82,7 @@ D2C 是工件驱动流程，不是事后补文档流程。每个阶段必须满�
 
 ## MCP 降级策略
 - Figma provider 不可用：按 `figma-official-mcp -> framelink-context-mcp -> figma-rest -> figma-image-fallback -> manual-input` 逐层降级
+- MCP-first 顺序不变；预挂载 MCP 限流后仍须用目标项目 `.mcp.json` 中的 repo-local dev token 独立探测 file-scoped REST，`/v1/me` 的 identity scope 失败不能短路 nodes/images 请求
 - 只有所有结构化 provider 和 image export 都不可用时，才提示用户手动提供设计信息（截图 + 描述）
 - Chrome DevTools MCP 不可用：跳过视觉验证，仅做静态校验，输出警告
 
@@ -229,11 +231,12 @@ Starting design-to-code conversion...
 ```
 
 - 传入 `phase=target` 和目标目录
-- 使用目标项目真实 `package.json`、TypeScript、lint、build 配置
-- 检查合入后的导入路径、类型、样式引用、资源路径和构建结果
+- 从 merge report 的 `mergedFiles[].targetPath` 获取本次新增/修改文件
+- 使用目标项目真实依赖和配置，仅校验本次 changed-files 的导入路径、类型、样式引用和资源路径
+- 不默认运行全项目 type-check 或 build；项目级命令仅作为用户明确要求时的附加诊断，不得因既有全局错误降级本次 changed-files 结果
 - 将校验报告路径和 `status.targetValidate` 回写到 `manifest.json`
-- 运行门禁校验：target validation report 存在且可解析；未运行完整构建时必须记录原因和替代校验
-- 如果失败，中止自动完成状态，要求先修复目标项目校验问题
+- 运行门禁校验：target validation report 存在且可解析；报告必须记录 `validationScope.mode=changed-files`、文件清单、实际 scoped 命令；未运行项目级构建时记录原因
+- 如果 changed-files 校验失败，中止自动完成状态，要求先修复本次合入文件
 
 ### Step 7/7: Target 视觉验证
 
@@ -372,7 +375,8 @@ Manifest: .d2c/docs/sessions/<runId>/manifest.json
 - 任何步骤可以通过用户中断停止
 - 已生成的代码保留在 `.d2c/preview/src/` 中
 - 可通过 `manifest.json` 恢复中断步骤，恢复判断不得依赖对话记忆
-- 开发服务器可能需要手动停止：`lsof -i :5173` 然后 `kill <PID>`
+- dev server 启动后必须写入 `manifest.runtimeProcesses[]`。最终门禁运行 `node scripts/cleanup-d2c-servers.mjs <manifest>` 并确认本轮端口无监听。
+- merge 前后用 `manifest.writeBoundary.allow/deny` 和 `node scripts/check-write-boundary.mjs --manifest=<manifest> --root=<target-root>` 审计新增改动。
 
 恢复时先读取 `.d2c/docs/sessions/<runId>/manifest.json`，检查状态和工件存在性，再按下表选择下一步：
 
@@ -384,6 +388,7 @@ Manifest: .d2c/docs/sessions/<runId>/manifest.json
 | `status.previewValidate` 未完成或 preview validation report 缺失 | 从 Step 3/7 `d2c-validate phase=preview` 恢复 |
 | `status.previewVerify=FAILED` 且未达到最大迭代次数 | 用偏差报告重新进入 `d2c-generate` 迭代 |
 | `status.previewVerify=FAILED` 且已达到最大迭代次数 | 停止自动恢复，等待用户介入 |
+| `status.previewVerify=DEGRADED` 且存在完整 `ACCEPTED_WITH_VISUAL_DIFF`、scope 无缺失 | 从 Step 5/7 `d2c-merge` 恢复；target 截图仍必须执行 |
 | `status.previewVerify` 未完成或 preview verification report 缺失 | 从 Step 4/7 `d2c-verify phase=preview` 恢复 |
 | `status.previewVerify=PASSED/SKIPPED` 且 `status.merge` 未完成 | 从 Step 5/7 `d2c-merge` 恢复 |
 | `status.targetValidate=FAILED/DEGRADED` | 停止完成声明，先修复 target 校验问题 |

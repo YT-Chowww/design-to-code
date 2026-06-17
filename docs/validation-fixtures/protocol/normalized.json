@@ -11,6 +11,15 @@
       }
     ]
   },
+  "scopeAssessment": {
+    "selectedNodeCoverage": [
+      "line chart",
+      "hover state"
+    ],
+    "missingRequirements": [],
+    "verificationCeiling": "verified",
+    "reason": "Fixture covers every declared requirement."
+  },
   "componentTree": {
     "nodeId": "100:1",
     "name": "MockAnalyticsCard"

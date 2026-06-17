@@ -165,6 +165,34 @@ description: Visually verify preview or target-project code by comparing a brows
 - 所有截图均 `SKIPPED` 时整体只能为 `SKIPPED`
 - 存在部分断点或状态 `SKIPPED` 且主截图通过时整体为 `DEGRADED`
 
+### Step 5.1: 人工接受视觉差异
+
+自动 diff 超阈值且达到迭代上限时返回 `WAIT_FOR_USER`。用户明确接受差异后：
+
+- 保留 `diff.status=FAILED` 和真实 `pixelRatio`。
+- screenshot 与整体报告写 `DEGRADED`。
+- 写入 `humanReview`、`acceptanceOverride.status=ACCEPTED_WITH_VISUAL_DIFF`、reviewer、时间、范围和原因。
+- preview 接受后允许进入 merge，但 target 截图仍必须执行。
+- 人工接受不能绕过 `scopeAssessment`，不能自动升级能力路线图 `[x]`。
+
+target 浏览器临时 stub 仅允许当前文档内 storage、XHR 或 fetch 覆盖，并写入：
+
+```json
+{
+  "runtimeBootstrap": {
+    "scope": "browser-document-only",
+    "reason": "",
+    "writesProjectFiles": false,
+    "affectsVerifiedComponentInputs": false,
+    "stubs": []
+  }
+}
+```
+
+如果 stub 改变待验证组件数据契约或样式输入，target verify 只能写 `DEGRADED`。
+
+复合图表视觉收敛最多执行三轮。每轮固定按 selector 截图、CSS rect + DPR canonical 裁剪和 diff 顺序执行；第三轮后任一图表仍高于 `thresholds.pixelRatio` 时，必须写 `overallStatus=FAILED`、manifest `status.previewVerify=FAILED` 和 `next=WAIT_FOR_USER`。不得自动沿用旧 run 的人工接受记录。
+
 ### Step 6: 输出结果与偏差报告
 
 输出：

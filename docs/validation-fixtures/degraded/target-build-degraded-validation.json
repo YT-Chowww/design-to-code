@@ -8,6 +8,13 @@
   "targetDirectory": "/tmp/d2c-target-fixture",
   "packageManager": "npm",
   "overallStatus": "DEGRADED",
+  "validationScope": {
+    "mode": "changed-files",
+    "source": "merge-report",
+    "files": [
+      "src/pages/d2c-lab/fixture/index.tsx"
+    ]
+  },
   "commandMatrix": {
     "typeCheck": {
       "source": "package-script",

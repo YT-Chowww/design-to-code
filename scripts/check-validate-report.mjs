@@ -9,6 +9,7 @@ const VALID_SOURCES = new Set([
   "package-script",
   "project-adapter",
   "project-config",
+  "merge-report",
   "framework-default",
   "missing"
 ]);
@@ -118,6 +119,24 @@ function validateReport(report) {
     errors.push("overallStatus must be PASSED, FAILED, DEGRADED, or SKIPPED");
   }
 
+  if (report.phase === "target") {
+    if (!isObject(report.validationScope)) {
+      errors.push("target validationScope must be an object");
+    } else {
+      if (report.validationScope.mode !== "changed-files") {
+        errors.push("target validationScope.mode must be changed-files");
+      }
+      if (report.validationScope.source !== "merge-report") {
+        errors.push("target validationScope.source must be merge-report");
+      }
+      if (!Array.isArray(report.validationScope.files) || report.validationScope.files.length === 0) {
+        errors.push("target validationScope.files must be a non-empty array");
+      } else if (report.validationScope.files.some((file) => typeof file !== "string" || file.trim() === "")) {
+        errors.push("target validationScope.files entries must be non-empty strings");
+      }
+    }
+  }
+
   if (!isObject(report.commandMatrix)) {
     errors.push("commandMatrix must be an object");
   } else {
@@ -139,8 +158,8 @@ function validateReport(report) {
       if (targetBuild?.status === "FAILED" && report.overallStatus === "PASSED") {
         errors.push("target build FAILED cannot have overallStatus PASSED");
       }
-      if (targetBuild?.source === "missing" && report.overallStatus === "PASSED") {
-        errors.push("target build missing cannot have overallStatus PASSED");
+      if (targetBuild?.source === "missing" && targetBuild?.status !== "SKIPPED") {
+        errors.push("target scoped build must be SKIPPED when source is missing");
       }
       if (["FAILED", "DEGRADED"].includes(targetTypeCheck?.status) && report.overallStatus === "PASSED") {
         errors.push("target typeCheck failed/degraded cannot have overallStatus PASSED");

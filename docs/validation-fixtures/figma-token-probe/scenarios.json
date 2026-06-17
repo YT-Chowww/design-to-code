@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "scenarios": [
+    {
+      "id": "identity-scope-missing-nodes-ok",
+      "configPath": "/fixture/.mcp.json",
+      "fileKey": "file-key",
+      "nodeId": "1:2",
+      "config": {
+        "mcpServers": {
+          "figma": {
+            "command": "npx",
+            "args": ["-y", "figma-developer-mcp", "--figma-api-key=test-token-identity-scope", "--stdio"]
+          }
+        }
+      },
+      "responses": {
+        "identity": { "status": 403, "body": { "message": "Missing scope current_user:read" } },
+        "nodes": { "status": 200, "body": { "nodes": { "1:2": { "document": { "id": "1:2" } } } } },
+        "images": { "status": 200, "body": { "images": { "1:2": "https://example.test/reference.png" } } }
+      },
+      "expected": {
+        "identityProbe.classification": "INCONCLUSIVE_IDENTITY_SCOPE",
+        "capabilities.structuredRaw": true,
+        "recommendedProvider": "figma-rest"
+      }
+    },
+    {
+      "id": "upstream-mcp-rate-limited-local-token-ok",
+      "configPath": "/fixture/.mcp.json",
+      "fileKey": "file-key",
+      "nodeId": "1:2",
+      "upstreamMcpStatus": 429,
+      "config": {
+        "mcpServers": {
+          "figma": {
+            "command": "npx",
+            "args": ["-y", "figma-developer-mcp", "--figma-api-key=test-token-local-fallback", "--stdio"]
+          }
+        }
+      },
+      "responses": {
+        "identity": { "status": 403, "body": { "message": "Missing scope current_user:read" } },
+        "nodes": { "status": 200, "body": { "nodes": { "1:2": { "document": { "id": "1:2" } } } } },
+        "images": { "status": 200, "body": { "images": { "1:2": "https://example.test/reference.png" } } }
+      },
+      "expected": {
+        "capabilities.structuredRaw": true,
+        "capabilities.upstreamRateLimitDoesNotBlockLocalProbe": true,
+        "recommendedProvider": "figma-rest"
+      }
+    },
+    {
+      "id": "nodes-rate-limited-image-export-ok",
+      "configPath": "/fixture/.mcp.json",
+      "fileKey": "file-key",
+      "nodeId": "1:2",
+      "config": {
+        "mcpServers": {
+          "figma": {
+            "command": "npx",
+            "args": ["-y", "figma-developer-mcp", "--figma-api-key=test-token-image-fallback", "--stdio"]
+          }
+        }
+      },
+      "responses": {
+        "identity": { "status": 403, "body": { "message": "Missing scope current_user:read" } },
+        "nodes": { "status": 429, "body": { "message": "Rate limit exceeded" } },
+        "images": { "status": 200, "body": { "images": { "1:2": "https://example.test/reference.png" } } }
+      },
+      "expected": {
+        "nodesProbe.classification": "RATE_LIMITED",
+        "capabilities.imageFallback": true,
+        "recommendedProvider": "figma-image-fallback"
+      }
+    },
+    {
+      "id": "invalid-token-file-probes-fail",
+      "configPath": "/fixture/.mcp.json",
+      "fileKey": "file-key",
+      "nodeId": "1:2",
+      "config": {
+        "mcpServers": {
+          "figma": {
+            "command": "npx",
+            "args": ["-y", "figma-developer-mcp", "--figma-api-key=test-token-invalid", "--stdio"]
+          }
+        }
+      },
+      "responses": {
+        "identity": { "status": 401, "body": { "message": "Invalid token" } },
+        "nodes": { "status": 401, "body": { "message": "Invalid token" } },
+        "images": { "status": 401, "body": { "message": "Invalid token" } }
+      },
+      "expected": {
+        "capabilities.authenticationFailed": true,
+        "recommendedProvider": "unavailable"
+      }
+    }
+  ]
+}

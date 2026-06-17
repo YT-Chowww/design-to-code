@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "updatedAt": "2026-05-26",
+  "examples": [
+    {
+      "slug": "fixture-real-run",
+      "roadmapName": "Fixture Real Run",
+      "roadmapStatus": "[x]",
+      "status": "verified",
+      "figma": {
+        "title": "Fixture",
+        "url": "https://www.figma.com/design/mock/Fixture?node-id=100-1",
+        "fileKey": "mock",
+        "nodeId": "100:1"
+      },
+      "coverage": [
+        "real run evidence gate"
+      ],
+      "designRequirements": [
+        "manifest",
+        "stage reports"
+      ],
+      "targetProjectRequired": false,
+      "requiredStages": [
+        "extract",
+        "generate",
+        "preview-validate",
+        "preview-verify",
+        "merge"
+      ],
+      "verification": {
+        "status": "PASSED",
+        "notes": "Fixture registry used to validate the [x] evidence path without requiring live Figma or Chrome.",
+        "evidence": {
+          "validatedAt": "2026-05-26",
+          "validatorCommand": "node scripts/check-real-run-evidence.mjs docs/validation-fixtures/real-run/verified-example-registry.json",
+          "result": "PASSED",
+          "runId": "2026-05-26T00-00-00",
+          "manifest": "docs/validation-fixtures/protocol/manifest.json",
+          "stageResults": {
+            "extract": {
+              "status": "PASSED",
+              "report": "docs/validation-fixtures/protocol/normalized.json"
+            },
+            "generate": {
+              "status": "PASSED",
+              "report": "docs/validation-fixtures/protocol/generation-log.json"
+            },
+            "preview-validate": {
+              "status": "PASSED",
+              "report": "docs/validation-fixtures/protocol/preview-validation-report.json"
+            },
+            "preview-verify": {
+              "status": "PASSED",
+              "report": "docs/validation-fixtures/protocol/preview-verification-report.json"
+            },
+            "merge": {
+              "status": "PASSED",
+              "report": "docs/validation-fixtures/protocol/merge-report.json"
+            }
+          },
+          "artifacts": [
+            "docs/validation-fixtures/protocol/manifest.json",
+            "docs/validation-fixtures/protocol/normalized.json",
+            "docs/validation-fixtures/protocol/generation-log.json",
+            "docs/validation-fixtures/protocol/preview-validation-report.json",
+            "docs/validation-fixtures/protocol/preview-verification-report.json",
+            "docs/validation-fixtures/protocol/merge-report.json"
+          ]
+        }
+      }
+    }
+  ]
+}

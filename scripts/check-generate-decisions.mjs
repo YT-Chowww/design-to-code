@@ -38,6 +38,39 @@ function requireArray(target, key, label) {
   }
 }
 
+function requireBoolean(target, key, label) {
+  if (typeof target?.[key] !== 'boolean') {
+    errors.push(`${label}.${key} must be a boolean`);
+  }
+}
+
+function requirePresentString(target, key, label) {
+  if (typeof target?.[key] !== 'string') {
+    errors.push(`${label}.${key} must be a string`);
+  }
+}
+
+function checkChartContractAssessment(item, label) {
+  if (item.requiresChartContractAssessment !== true) return;
+
+  requireBoolean(item, 'requiresChartContractAssessment', label);
+  for (const key of ['candidateComponents', 'matchedContract', 'missingContract']) {
+    requireArray(item, key, label);
+  }
+  for (const key of [
+    'selectedComponent',
+    'libraryVersion',
+    'optionPath',
+    'dataAdapter',
+    'dataBindingStatus',
+    'containerStyle',
+    'decision',
+    'fallbackReason',
+  ]) {
+    requirePresentString(item, key, label);
+  }
+}
+
 function checkConfidence(value, label) {
   if (value === undefined) return;
   if (typeof value !== 'number' || value < 0 || value > 1) {
@@ -138,6 +171,7 @@ if (decisions) {
         errors.push(`${label}.dataStatus must be one of ${allowedStatus.join(', ')}`);
       }
     }
+    checkChartContractAssessment(item, label);
   });
 
   checkDecisionArray(decisions, 'responsiveRules', (item, label) => {

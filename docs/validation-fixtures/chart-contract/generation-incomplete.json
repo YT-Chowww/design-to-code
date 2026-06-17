@@ -1,0 +1,38 @@
+{
+  "designId": "fixture_chart-contract-incomplete",
+  "runId": "2026-06-02T00-00-00-chart-contract-incomplete",
+  "source": {
+    "provider": "mock",
+    "mode": "structured"
+  },
+  "tokenHints": [],
+  "generatedFiles": [
+    {
+      "path": ".d2c/preview/src/ChartContract.tsx",
+      "kind": "component"
+    }
+  ],
+  "componentMappings": [],
+  "iconMappings": [],
+  "chartMappings": [
+    {
+      "nodeId": "212:8232",
+      "chartType": "line",
+      "source": "business-library",
+      "dataStatus": "static-preview-data",
+      "requiresChartContractAssessment": true,
+      "candidateComponents": ["MultipleLegendChart"],
+      "matchedContract": ["chartType", "dateList", "dataSource"],
+      "missingContract": [],
+      "selectedComponent": "MultipleLegendChart",
+      "libraryVersion": "echarts@4.9.0",
+      "dataAdapter": ".d2c/preview/src/ChartContract.tsx#lineSeries",
+      "dataBindingStatus": "static-preview",
+      "containerStyle": ".chart-card",
+      "decision": "use-business-component",
+      "fallbackReason": ""
+    }
+  ],
+  "responsiveRules": [],
+  "stateMappings": []
+}

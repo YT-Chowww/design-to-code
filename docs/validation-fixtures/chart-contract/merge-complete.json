@@ -1,0 +1,76 @@
+{
+  "designId": "fixture_chart-contract",
+  "runId": "2026-06-02T00-00-00-chart-contract",
+  "targetDirectory": "/tmp/d2c-chart-contract-target",
+  "mergeStatus": "PASSED",
+  "requiresChartMerge": true,
+  "mergedFiles": [
+    {
+      "sourcePath": ".d2c/preview/src/ChartContract.tsx",
+      "targetPath": "src/pages/chart-contract/index.tsx",
+      "status": "PASSED"
+    }
+  ],
+  "chartMerges": [
+    {
+      "nodeId": "212:8232",
+      "chartType": "line",
+      "requiresChartContractAssessment": true,
+      "candidateComponents": ["MultipleLegendChart", "ReactEchartsCore"],
+      "matchedContract": ["chartType", "dateList", "dataSource", "legendList", "option", "seriesList"],
+      "missingContract": [],
+      "selectedComponent": "MultipleLegendChart",
+      "libraryVersion": "echarts@4.9.0",
+      "library": "echarts@4.9.0",
+      "component": "MultipleLegendChart",
+      "importFrom": "@/components/multiple-legend-chart",
+      "optionPath": "src/pages/chart-contract/chart-options.ts#lineOption",
+      "dataAdapter": "src/pages/chart-contract/adapters.ts#lineSeriesList",
+      "dataBindingStatus": "static-preview",
+      "containerStyle": "src/pages/chart-contract/index.less",
+      "decision": "use-target-chart-wrapper",
+      "fallbackReason": "",
+      "status": "PASSED"
+    },
+    {
+      "nodeId": "214:6780",
+      "chartType": "bar",
+      "requiresChartContractAssessment": true,
+      "candidateComponents": ["MultipleLegendChart", "ReactEchartsCore"],
+      "matchedContract": ["chartType", "dateList", "dataSource", "legendList", "option", "seriesList"],
+      "missingContract": [],
+      "selectedComponent": "MultipleLegendChart",
+      "libraryVersion": "echarts@4.9.0",
+      "library": "echarts@4.9.0",
+      "component": "MultipleLegendChart",
+      "importFrom": "@/components/multiple-legend-chart",
+      "optionPath": "src/pages/chart-contract/chart-options.ts#barOption",
+      "dataAdapter": "src/pages/chart-contract/adapters.ts#barSeriesList",
+      "dataBindingStatus": "static-preview",
+      "containerStyle": "src/pages/chart-contract/index.less",
+      "decision": "use-target-chart-wrapper",
+      "fallbackReason": "",
+      "status": "PASSED"
+    },
+    {
+      "nodeId": "229:8356",
+      "chartType": "donut",
+      "requiresChartContractAssessment": true,
+      "candidateComponents": ["MultipleLegendChart", "ReactEchartsCore"],
+      "matchedContract": ["option"],
+      "missingContract": ["donut chartType", "pie radius", "pie center"],
+      "selectedComponent": "ReactEchartsCore",
+      "libraryVersion": "echarts@4.9.0",
+      "library": "echarts@4.9.0",
+      "component": "ReactEchartsCore",
+      "importFrom": "echarts-for-react/lib/core",
+      "optionPath": "src/pages/chart-contract/chart-options.ts#donutOption",
+      "dataAdapter": "src/pages/chart-contract/fixtures.ts#donutData",
+      "dataBindingStatus": "static-preview",
+      "containerStyle": "src/pages/chart-contract/index.less",
+      "decision": "fallback-local-chart-wrapper",
+      "fallbackReason": "MultipleLegendChart exposes line and bar chartType only.",
+      "status": "PASSED"
+    }
+  ]
+}

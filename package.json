@@ -1,0 +1,16 @@
+{
+  "name": "design-to-code",
+  "version": "1.0.0",
+  "description": "D2C 是一组 Claude Code / Codex 可用的 Design-to-Code skills，用于把 Figma 设计稿转换为 Vue 3 或 React 前端代码。新版流程以文件工件为中心：每次运行都会生成 `runId`、`designId`、`manifest.json`、标准化设计 JSON、生成日志、校验报告、视觉验证报告和合并报告。",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
