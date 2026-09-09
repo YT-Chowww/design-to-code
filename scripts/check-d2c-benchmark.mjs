@@ -6,6 +6,7 @@ import path from "node:path";
 const root = process.cwd();
 const skillPath = ".claude/skills/d2c-benchmark/SKILL.md";
 const scenariosPath = ".claude/skills/d2c-benchmark/references/scenarios.md";
+const pcTemplatePath = ".claude/skills/d2c-benchmark/templates/pc-react-antd";
 const required = [
   skillPath,
   scenariosPath,
@@ -110,10 +111,54 @@ function checkScenarioReferenceDoesNotLinkToReference() {
   }
 }
 
+function checkPcTemplate() {
+  const packagePath = path.join(pcTemplatePath, "package.json");
+  const appPath = path.join(pcTemplatePath, "src/App.tsx");
+
+  if (!fs.existsSync(absolute(packagePath))) {
+    return;
+  }
+
+  let packageJson;
+  try {
+    packageJson = JSON.parse(fs.readFileSync(absolute(packagePath), "utf8"));
+  } catch (error) {
+    errors.push(`invalid JSON: ${packagePath} (${error.message})`);
+    return;
+  }
+
+  const dependencies = {
+    ...packageJson.dependencies,
+    ...packageJson.devDependencies,
+  };
+  for (const dependency of ["react", "react-dom", "antd", "echarts"]) {
+    if (!dependencies[dependency]) {
+      errors.push(`${packagePath} must declare ${dependency}`);
+    }
+  }
+
+  if (dependencies["react-router"] || dependencies["react-router-dom"]) {
+    errors.push(`${packagePath} must not add React Router`);
+  }
+
+  if (!fs.existsSync(absolute(appPath))) {
+    errors.push(`missing required file: ${appPath}`);
+    return;
+  }
+
+  const app = fs.readFileSync(absolute(appPath), "utf8");
+  for (const route of ["/data-management", "/chart-analytics"]) {
+    if (!app.includes(route)) {
+      errors.push(`${appPath} must expose route: ${route}`);
+    }
+  }
+}
+
 checkRequiredFiles();
 checkLatestIsIgnored();
 checkDirectScenarioLink();
 checkScenarioReferenceDoesNotLinkToReference();
+checkPcTemplate();
 
 if (errors.length > 0) {
   console.error("D2C Benchmark contract failed:");
