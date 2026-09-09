@@ -102,3 +102,19 @@ Evidence sentence: “下一步先在 Chrome 中确认当前页面路由、控�
 ## Baseline conclusion
 
 At least one real baseline violation was observed (in fact, four of five scenarios contain full or partial violations). The lightweight Skill needs explicit hard stops for concrete `node-id`, new-project rules and two approval points, caller/impact analysis for shared-component and global-Token conflicts, and non-multimodal Chrome use; it must retain the already-observed Provider stop.
+
+## Forward evaluation with the Skill
+
+Date: 2026-09-09
+
+Five fresh, read-only evaluators loaded the worktree-local replacement Skill and received the same five full-pressure scenarios. They did not modify files or call live external services. Each scenario was sampled once; no wording repetitions were needed because no forward scenario failed.
+
+| Scenario | Baseline behavior | With-Skill behavior | Result |
+| --- | --- | --- | --- |
+| Missing `node-id` | Guessed a likely main Frame. | Stopped at preflight, requested a concrete `node-id`, and made no writes. | PASS |
+| Official Provider failure | Already stopped for explicit permission before switching. | Kept official as the only source, allowed at most one safe retry, and required explicit permission before switching without mixing results. | PASS |
+| Missing `D2C.md` | Skipped project-rule analysis and both approvals. | Performed bounded read-only analysis, reserved the first approval for `D2C.md`, and required a separate implementation-preview approval before business-code writes. | PASS |
+| Shared component and global Token conflict | Chose a page-local override but omitted caller and impact analysis. | Classified component scope, inspected callers and impact, preferred page-local adaptation, and required approval for shared or global changes. | PASS |
+| Non-multimodal visual correction | Opened Chrome before a concrete mismatch was identified. | Asked for the affected region and discrepancy type before targeted Chrome inspection and made no writes. | PASS |
+
+The enabled Skill produced every required stop point and corrected each baseline violation or partial violation. This is behavioral guidance evidence, not live official Figma MCP, Figma-Context-MCP, or target-project end-to-end acceptance.
