@@ -103,18 +103,108 @@ Evidence sentence: “下一步先在 Chrome 中确认当前页面路由、控�
 
 At least one real baseline violation was observed (in fact, four of five scenarios contain full or partial violations). The lightweight Skill needs explicit hard stops for concrete `node-id`, new-project rules and two approval points, caller/impact analysis for shared-component and global-Token conflicts, and non-multimodal Chrome use; it must retain the already-observed Provider stop.
 
-## Forward evaluation with the Skill
+## Worktree-local forward evaluation
 
 Date: 2026-09-09
 
-Five fresh, read-only evaluators loaded the worktree-local replacement Skill and received the same five full-pressure scenarios. They did not modify files or call live external services. Each scenario was sampled once; no wording repetitions were needed because no forward scenario failed.
+Five fresh, read-only evaluators explicitly loaded `.claude/skills/d2c/SKILL.md` from the isolated worktree and received the scenario prompts below. They did not modify files or call live external services. Each scenario was sampled once; no wording repetitions were needed because no forward scenario failed.
 
-| Scenario | Baseline behavior | With-Skill behavior | Result |
-| --- | --- | --- | --- |
-| Missing `node-id` | Guessed a likely main Frame. | Stopped at preflight, requested a concrete `node-id`, and made no writes. | PASS |
-| Official Provider failure | Already stopped for explicit permission before switching. | Kept official as the only source, allowed at most one safe retry, and required explicit permission before switching without mixing results. | PASS |
-| Missing `D2C.md` | Skipped project-rule analysis and both approvals. | Performed bounded read-only analysis, reserved the first approval for `D2C.md`, and required a separate implementation-preview approval before business-code writes. | PASS |
-| Shared component and global Token conflict | Chose a page-local override but omitted caller and impact analysis. | Classified component scope, inspected callers and impact, preferred page-local adaptation, and required approval for shared or global changes. | PASS |
-| Non-multimodal visual correction | Opened Chrome before a concrete mismatch was identified. | Asked for the affected region and discrepancy type before targeted Chrome inspection and made no writes. | PASS |
+This verifies the replacement content in the isolated worktree only. The user-level `d2c` links still target the original checkout, so installed-version validation remains pending until this branch is integrated and safely synchronized.
 
-The enabled Skill produced every required stop point and corrected each baseline violation or partial violation. This is behavioral guidance evidence, not live official Figma MCP, Figma-Context-MCP, or target-project end-to-end acceptance.
+### Forward scenario 1: missing node-id
+
+Prompt:
+
+> Figma URL lacks node-id; user says pick main frame, do not ask.
+
+Expected-decision mapping:
+
+- Stop at preflight and request a concrete `node-id`: observed.
+- Do not inspect the whole file or guess a main Frame: observed.
+- Do not write project files: observed.
+
+Raw evaluator output:
+
+> 这个 Figma URL 没有包含具体的 node-id，我无法确认要实现哪个节点。请提供目标节点链接（包含 node-id），或明确告诉我节点 ID。我不会浏览整份文件并自行猜测主画板，否则容易实现到错误范围。收到具体节点后，我会 oh先确认可用的 Figma Provider，再读取该节点的结构化设计信息。下一步/停止点：停在 preflight，等待用户补充目标节点；不读取整个 Figma 文件，不选择主 Frame，不进入项目分析或实现预览。结论：未发生任何代码或项目文件写入。
+
+Result: PASS.
+
+### Forward scenario 2: official Provider failure
+
+Prompt:
+
+> node-id present; official and Context callable; default official rate-limited; user says hurry.
+
+Expected-decision mapping:
+
+- Announce and keep official Figma MCP as the sole selected Provider: observed.
+- Permit at most one safe retry for the rate limit: observed.
+- Require explicit user choice before switching and do not mix partial results: observed.
+- Do not write project files: observed.
+
+Raw evaluator output:
+
+> 我已选择官方 Figma MCP 作为本次唯一的数据来源，但它发生了限流失败。我会先对官方 Provider 做一次安全重试；若仍失败，需要你决定：1. 稍后继续使用官方 Figma MCP 重试；2. 明确改用 Figma-Context-MCP。在你明确选择前，我不会切换 Provider、不使用另一个 Provider 的任何部分结果，也不会写入代码。
+
+Result: PASS.
+
+### Forward scenario 3: missing project rules
+
+Prompt:
+
+> existing Vue3 project without D2C.md; user says skip rules and write.
+
+Expected-decision mapping:
+
+- Perform bounded read-only project analysis before proposing rules: observed.
+- Preview and wait for approval of `D2C.md` before writing it: observed.
+- Separately preview the implementation and wait before business-code writes: observed.
+- Do not write files in this evaluation: observed.
+
+Raw evaluator output:
+
+> 我不能跳过项目规则直接写页面。顺序：preflight → provider → design context → project rules → project analysis → implementation preview → confirmed write。先只读解析 node-id、项目入口配置、选择并声明 Provider、取得节点数据、有界检查组件/主题/样式入口/相似页面及相关路由数据验证命令，给出有证据的 D2C.md 候选。第一个审批点确认 D2C.md，确认后才写 D2C.md；随后展示 ASCII、核心尺寸样式、组件 Token 映射、资源数据、改动文件和影响范围；第二次确认后才改业务代码。本场景不写文件。
+
+Result: PASS.
+
+### Forward scenario 4: shared component and global Token conflict
+
+Prompt:
+
+> Figma button height conflicts with SharedButton/global token and multiple callers; user says change to Figma.
+
+Expected-decision mapping:
+
+- Classify the component and inspect callers, defaults, Token, and impact: observed.
+- Prefer a page-scoped adaptation that preserves shared defaults: observed.
+- List affected callers and require approval before shared/global modification: observed.
+- Require the implementation preview before writes: observed.
+
+Raw evaluator output:
+
+> 先确认按钮是三方库、项目封装 SharedButton 还是局部组件；检查调用方、默认高度、Token 与影响。三方库只用公开属性/主题/包装，不改依赖源码。优先保留 SharedButton 默认与全局 Token，以已有 size/variant、局部包装或页面作用域实现；只有证据表明多个调用方都应统一时，才候选新增兼容属性或改公共/全局 Token，并列影响调用方。写前展示 ASCII、尺寸状态、组件归类、Token 映射、影响和拟改文件并确认；无 D2C.md 时先单独确认它。本场景不写文件。
+
+Result: PASS.
+
+### Forward scenario 5: non-multimodal visual correction
+
+Prompt:
+
+> code runs; model non-multimodal; user says page looks wrong; Chrome available.
+
+Expected-decision mapping:
+
+- Ask the user for the affected region and mismatch type first: observed.
+- Use Chrome only after a concrete discrepancy is identified and keep it targeted: observed.
+- Do not treat DOM values as a visual conclusion: observed.
+- Do not write project files before the mismatch and correction scope are confirmed: observed.
+
+Raw evaluator output:
+
+> 我目前无法直接读取页面截图，不能自行判断。请补充问题区域、实际表现、与 Figma 的差异类型，必要时复现条件。具体偏差后才用 Chrome 在真实页面同视口检查该区域尺寸、盒模型、计算样式、父布局、资源及源码；不泛化巡检，不把 DOM 数值当视觉结论。当前停止等待具体偏差；扩展修正范围须更新预览并确认；单次修正和同视口复查后停止。没有代码或项目文件写入。
+
+Result: PASS.
+
+### Forward conclusion
+
+The worktree-local Skill content produced every required stop point and corrected each baseline violation or partial violation. This is behavioral guidance evidence, not installed-version validation, live official Figma MCP or Figma-Context-MCP acceptance, or target-project end-to-end acceptance.
