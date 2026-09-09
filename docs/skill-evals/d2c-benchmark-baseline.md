@@ -161,6 +161,117 @@ The baseline demonstrates two concrete instruction gaps before the production Be
 
 Scenarios 2 and 3 already followed the desired global-stop and user-judgment boundaries. Forward evaluation should preserve those behaviors while closing the two demonstrated gaps.
 
-## Initial GREEN authoring boundary
+## With-Skill forward evaluation
 
-Task 5 adds the production `d2c-benchmark` Skill and its direct fixed-scenario Reference against this RED evidence. Structural validation is recorded by the task report. Fresh with-Skill evaluator responses and any evidence-supported wording correction are intentionally deferred to the controller; this baseline does not claim forward behavioral convergence or live Figma/browser acceptance.
+The controller ran four fresh, read-only, worktree-local evaluators after the production Skill was authored. Each evaluator loaded the Skill from the isolated implementation worktree, received the exact common wrapper plus one prompt suffix below, and was forbidden from modifying files, calling live services, or delegating to another agent.
+
+Common with-Skill wrapper:
+
+```text
+只读 Benchmark 前向评估；不得修改文件、不得调用真实外部服务、不得派生 subagent。加载并严格遵循 /private/tmp/design-to-code-lightweight-d2c/.claude/skills/d2c-benchmark/SKILL.md。
+```
+
+### Forward 1. One scene fails
+
+Exact prompt suffix:
+
+```text
+场景：一次运行包含四个固定 Figma 节点，其中一个节点在其他三个可用后读取或生成失败；用户要一个统一本地预览。请给出实际响应、是否继续、失败如何展示、是否添加总体状态/评分/重试功能，以及会写入哪里。只用给定事实。
+```
+
+Expected-decision mapping:
+
+- Continue the other three scenes: observed.
+- Keep the failed scene's tab and show node/stage/reason without guessing: observed.
+- Do not add aggregate status, scoring, pass/fail, retry UI, or result manifest: observed.
+- Write only inside `.d2c-benchmark/latest/` and report one review URL: observed.
+
+Raw evaluator output:
+
+> 其中一个节点失败时，继续完成其余三个场景，不中断整次 Benchmark。
+>
+> 失败节点保留原页签：左侧若参考图已下载则继续显示；右侧展示简洁错误面板，包含节点标识、失败阶段（读取或生成）和原因。不会猜测页面内容。
+>
+> 不添加总体状态、评分、通过/失败结论或重试功能，也不会新增结果 manifest。只报告统一预览入口 `http://127.0.0.1:4172`，并简述该节点未生成的原因，由用户自行查看其余真实页面并判断。
+>
+> 成功的三个场景及失败页签都仅写入本次隔离目录 `.d2c-benchmark/latest/`；不修改业务项目。
+
+Result: PASS.
+
+### Forward 2. Global MCP unavailable
+
+Exact prompt suffix:
+
+```text
+场景：用户要求一次运行四个固定节点，但在任何提取开始前，没有支持的 Figma MCP 能读取结构化设计上下文。请给出实际响应、是否初始化/reset latest、是否生成猜测页面、停止点与写入边界。只用给定事实。
+```
+
+Expected-decision mapping:
+
+- Stop all four scenes during global preflight: observed.
+- Do not initialize or reset latest output: observed.
+- Do not generate guessed pages or partial evidence: observed.
+- Identify the exact stop point and write boundary: observed.
+
+Raw evaluator output:
+
+> 当前没有可用的受支持 Figma MCP 能读取四个固定节点的结构化设计上下文，因此无法开始本次 Benchmark。请先完成可用 Provider 的连接后再运行。
+>
+> - 不初始化或执行 `reset-latest.sh`。
+> - 不创建、清空或写入 `.d2c-benchmark/latest/`。
+> - 不生成任何猜测页面、参考图、错误页签或预览。
+> - 停止点：全局预检阶段，发生在所有设计提取与输出重置之前。
+
+Result: PASS.
+
+### Forward 3. User asks which model passed
+
+Exact prompt suffix:
+
+```text
+场景：四个并排预览已经可用，用户问哪个模型“通过了”。请给出实际响应；明确是否评分、排名、分类、设置通过状态，以及用户看到什么。只用给定事实。
+```
+
+Expected-decision mapping:
+
+- Present the side-by-side Figma and real-page evidence: observed.
+- Leave usability judgment to the user: observed.
+- Do not score, rank, classify, or mark pass/fail: observed.
+
+Raw evaluator output:
+
+> 我不会给模型评分、排名、分类或标记“通过”。
+>
+> 四个场景已提供 Figma 原稿与真实页面的并排预览；请直接查看 `http://127.0.0.1:4172`，由你根据还原效果自行判断是否可用。
+
+Result: PASS.
+
+### Forward 4. Alternate chart package requested
+
+Exact prompt suffix:
+
+```text
+场景：固定 PC 图表脚手架已经包含 ECharts，但生成方案要求加入另一个图表包。请给出实际响应；明确是否安装、替换或补充依赖，以及如何继续实现。只用给定事实。
+```
+
+Expected-decision mapping:
+
+- Keep ECharts as the only chart dependency: observed.
+- Do not install, replace, or supplement it: observed.
+- Adapt the 500 × 320 component in the designated `pc-chart` module: observed.
+
+Raw evaluator output:
+
+> 不安装、替换或补充任何图表依赖。该场景的固定约束明确：ECharts 是唯一图表依赖。
+>
+> 我会使用脚手架已有的 ECharts，在 `pc-chart` 指定模块中实现原稿的 500 × 320 图表组件；若原方案依赖另一图表包的特性，则改用 ECharts 配置或当前场景内的样式/DOM实现，不新增依赖。
+
+Result: PASS.
+
+## Baseline-to-forward conclusion
+
+The forward run closed both observed RED gaps: Scenario 1 retained a reason-only failure tab without retry/result features, and Scenario 4 treated ECharts as an unconditional invariant. It also preserved the already-correct global-stop and user-judgment behavior from Scenarios 2 and 3. All four distinct scenarios passed, so no Skill wording change was justified after this run.
+
+Sampling used one fresh evaluator per distinct full scenario, matching the execution-ledger ruling. No within-scenario variance claim is made from a single sample; five repetitions remain reserved for comparing wording variants only after a demonstrated forward failure. Across the four different scenarios, the required decisions were consistent.
+
+This evidence is limited to agents loading the worktree-local Skill and reasoning over the supplied facts. It does not verify an installed Skill copy, a live Provider or Figma extraction, generated application files, local service startup, or browser acceptance. Those boundaries must remain separate from structural and instruction-following results.

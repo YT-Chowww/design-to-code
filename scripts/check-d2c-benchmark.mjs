@@ -13,6 +13,7 @@ const mobileTemplatePath = ".claude/skills/d2c-benchmark/templates/mobile-vue-va
 const reviewTemplatePath = ".claude/skills/d2c-benchmark/templates/review";
 const resetScriptPath = ".claude/skills/d2c-benchmark/scripts/reset-latest.sh";
 const startScriptPath = ".claude/skills/d2c-benchmark/scripts/start-preview.sh";
+const benchmarkEvidencePath = "docs/skill-evals/d2c-benchmark-baseline.md";
 const required = [
   skillPath,
   scenariosPath,
@@ -181,6 +182,45 @@ function checkActiveDocumentation() {
         errors.push(`${documentationPath} must document Benchmark marker: ${marker}`);
       }
     }
+  }
+}
+
+function checkForwardEvaluationEvidence() {
+  const evidenceFile = absolute(benchmarkEvidencePath);
+  if (!fs.existsSync(evidenceFile)) {
+    errors.push(`missing required file: ${benchmarkEvidencePath}`);
+    return;
+  }
+
+  const evidence = fs.readFileSync(evidenceFile, "utf8");
+  const requiredMarkers = [
+    "## With-Skill forward evaluation",
+    "Common with-Skill wrapper",
+    "### Forward 1.",
+    "### Forward 2.",
+    "### Forward 3.",
+    "### Forward 4.",
+    "## Baseline-to-forward conclusion",
+    "No within-scenario variance claim",
+    "worktree-local",
+    "installed Skill",
+    "live Provider",
+    "browser acceptance",
+  ];
+
+  for (const marker of requiredMarkers) {
+    if (!evidence.includes(marker)) {
+      errors.push(`${benchmarkEvidencePath} must contain forward-evidence marker: ${marker}`);
+    }
+  }
+
+  const forwardSection = evidence.split("## With-Skill forward evaluation", 2)[1] ?? "";
+  const passCount = [...forwardSection.matchAll(/^Result: PASS\.$/gmu)].length;
+  if (passCount !== 4) {
+    errors.push(`${benchmarkEvidencePath} must record exactly four forward PASS decisions`);
+  }
+  if (/PENDING|intentionally deferred/iu.test(forwardSection)) {
+    errors.push(`${benchmarkEvidencePath} must not retain pending forward-evaluation placeholders`);
   }
 }
 
@@ -537,6 +577,7 @@ checkDirectScenarioLink();
 checkScenarioReferenceDoesNotLinkToReference();
 checkBenchmarkInstructions();
 checkActiveDocumentation();
+checkForwardEvaluationEvidence();
 checkPcTemplate();
 checkMobileTemplate();
 checkReviewTemplate();
