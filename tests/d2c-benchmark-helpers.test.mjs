@@ -95,7 +95,7 @@ case "$*" in
 esac
 echo $$ > "$FAKE_PROCESS_DIR/$service.pid"
 if [ "$mode" = initial-fail ]; then exit 7; fi
-if [ "$mode" = later-fail ]; then sleep 0.35; exit 8; fi
+if [ "$mode" = later-fail ] || [ "$mode" = http-error-later-fail ]; then sleep 0.35; exit 8; fi
 trap 'touch "$FAKE_PROCESS_DIR/'"$service"'.stopped"; exit 0' INT TERM
 while :; do sleep 0.05; done
 `;
@@ -112,7 +112,7 @@ case "$*" in
   *) exit 1 ;;
 esac
 if [ "$mode" = initial-fail ]; then exit 1; fi
-if [ "$mode" = http-error ]; then printf 500; else printf 200; fi
+if [ "$mode" = http-error ] || [ "$mode" = http-error-later-fail ]; then printf 500; else printf 200; fi
 `;
   for (const [file, content] of [["node", fakeService], ["python3", fakeReview], ["curl", fakeCurl]]) {
     fs.writeFileSync(path.join(fakeBin, file), content, { mode: 0o755 });
@@ -235,6 +235,33 @@ test("PC route HTTP error becomes local evidence while review stays alive", asyn
     assert.equal(fixture.child.exitCode, null, `helper exited for an app HTTP error: ${fixture.stderr()}`);
   } finally {
     await stopFixture(fixture);
+  }
+});
+
+test("HTTP-error app exit is reaped without signaling an unrelated process", async () => {
+  const fixture = createFakePreviewFixture("pc-http-error-exit", { pc: "http-error-later-fail", mobile: "healthy" });
+  let sentinel;
+  let sentinelExit;
+  try {
+    await waitFor(() => fs.existsSync(path.join(fixture.workspace, "review/availability.json")), `availability was not written: ${fixture.stderr()}`);
+    await waitFor(() => readAvailability(fixture).pc.reason.includes("HTTP 500"), `HTTP error was not recorded: ${fixture.stderr()}`);
+    const pcPidFile = path.join(fixture.processDir, "pc.pid");
+    await waitFor(() => fs.existsSync(pcPidFile), `PC PID evidence was not written: ${fixture.stderr()}`);
+    const failedPcPid = Number(fs.readFileSync(pcPidFile, "utf8"));
+    await waitFor(() => !processExists(failedPcPid), "HTTP-error PC child did not exit");
+    assert.match(readAvailability(fixture).pc.reason, /HTTP 500/u, "process exit replaced the more precise HTTP error reason");
+    assert.equal(fixture.child.exitCode, null, `helper exited after HTTP-error app stopped: ${fixture.stderr()}`);
+
+    sentinel = spawn(process.execPath, ["-e", "setInterval(() => {}, 1000)"], { stdio: "ignore" });
+    sentinelExit = once(sentinel, "exit");
+    await waitFor(() => processExists(sentinel.pid), "unrelated sentinel did not start");
+  } finally {
+    await stopFixture(fixture);
+    if (sentinel) {
+      assert.equal(processExists(sentinel.pid), true, "cleanup signaled an unrelated sentinel after an HTTP-error child exited");
+      sentinel.kill("SIGTERM");
+      await sentinelExit;
+    }
   }
 });
 

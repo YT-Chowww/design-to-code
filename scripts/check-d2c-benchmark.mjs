@@ -521,9 +521,13 @@ function checkStartScript() {
   }
   for (const application of ["pc", "mobile"]) {
     const clearAfterStop = new RegExp(`stop_child "\\$${application}_pid"[^\\n]*\\n\\s*${application}_pid=""`, "u");
-    const clearAfterExit = new RegExp(`${application}_reason="[^"]*process exited\\."[^\\n]*\\n\\s*wait "\\$${application}_pid"[^\\n]*\\n\\s*${application}_pid=""`, "u");
+    const monitorEveryHeldPid = `if [[ -n "$${application}_pid" ]] && ! kill -0 "$${application}_pid"`;
+    const clearAfterExit = new RegExp(`wait "\\$${application}_pid"[^\\n]*\\n\\s*${application}_pid=""`, "u");
     if (!clearAfterStop.test(script) || !clearAfterExit.test(script)) {
       errors.push(`${startScriptPath} must reap and clear ${application} PID after initial or later failure`);
+    }
+    if (!script.includes(monitorEveryHeldPid)) {
+      errors.push(`${startScriptPath} must monitor ${application} PID even when its route is unavailable`);
     }
   }
   const temporaryParent = fs.mkdtempSync(path.join("/tmp", "d2c-preview-safety-"));

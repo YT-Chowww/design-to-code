@@ -276,21 +276,25 @@ while true; do
     exit 1
   fi
   availability_changed=false
-  if [[ "$pc_available" == true ]] && ! kill -0 "$pc_pid" 2>/dev/null; then
-    pc_available=false
-    pc_reason="PC preview process exited."
+  if [[ -n "$pc_pid" ]] && ! kill -0 "$pc_pid" 2>/dev/null; then
     wait "$pc_pid" 2>/dev/null || true
     pc_pid=""
-    availability_changed=true
-    echo "$pc_reason" >&2
+    if [[ "$pc_available" == true ]]; then
+      pc_available=false
+      pc_reason="PC preview process exited."
+      availability_changed=true
+      echo "$pc_reason" >&2
+    fi
   fi
-  if [[ "$mobile_available" == true ]] && ! kill -0 "$mobile_pid" 2>/dev/null; then
-    mobile_available=false
-    mobile_reason="Mobile preview process exited."
+  if [[ -n "$mobile_pid" ]] && ! kill -0 "$mobile_pid" 2>/dev/null; then
     wait "$mobile_pid" 2>/dev/null || true
     mobile_pid=""
-    availability_changed=true
-    echo "$mobile_reason" >&2
+    if [[ "$mobile_available" == true ]]; then
+      mobile_available=false
+      mobile_reason="Mobile preview process exited."
+      availability_changed=true
+      echo "$mobile_reason" >&2
+    fi
   fi
   if [[ "$availability_changed" == true ]]; then
     write_availability
