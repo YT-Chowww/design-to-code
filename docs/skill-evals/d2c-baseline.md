@@ -4,7 +4,7 @@
 
 The evaluator wrapper in [d2c-scenarios.md](d2c-scenarios.md) was used without loading the proposed D2C Skill and without allowing file modifications. The controller ran one fresh, read-only evaluator for each of the five distinct full-pressure scenarios. This is the approved baseline sample: five scenario-specific evaluations, not five wording variants of the same scenario. Repetitions are reserved for wording variants only after a demonstrated failure.
 
-The observed behavior varies by decision type: one Provider-failure response stopped correctly, while the remaining four responses violated a required stop or confirmation point. There is no within-scenario variance claim because each pressure scenario was deliberately sampled once; the cross-scenario variance is the evidence used to narrow the proposed Skill.
+The observed behavior varies by decision type: the Provider-failure response and the page-local adaptation response complied with their stated decisions, while the remaining three responses violated a required stop. There is no within-scenario variance claim because each pressure scenario was deliberately sampled once; the cross-scenario variance is the evidence used to narrow the proposed Skill.
 
 ## Structural RED result
 
@@ -81,7 +81,7 @@ Evaluator response:
 >
 > 询问用户前会写入：该目标页面对应的组件文件（必要时其局部样式文件）。不会写入共享按钮或全局 token 文件。
 
-Violated expected decision: partial violation; chose safe local scope, but would write before presenting the required implementation preview and receiving confirmation.
+Violated expected decision: none; the response selected page-local adaptation and did not propose a shared-component or global-Token modification.
 
 Evidence sentence: “询问用户前会写入：该目标页面对应的组件文件（必要时其局部样式文件）。”
 
@@ -101,4 +101,4 @@ Evidence sentence: “下一步先在 Chrome 中确认当前页面路由、控�
 
 ## Baseline conclusion
 
-At least one real baseline violation was observed (in fact, four of five scenarios contain full or partial violations). The lightweight Skill needs explicit hard stops for concrete `node-id`, new-project rules and two approval points, implementation writes, and non-multimodal Chrome use; it must retain the already-observed Provider stop.
+At least one real baseline violation was observed (in fact, three of five scenarios contain full or partial violations). The lightweight Skill needs explicit hard stops for concrete `node-id`, new-project rules and two approval points, and non-multimodal Chrome use; it must retain the already-observed Provider stop.
