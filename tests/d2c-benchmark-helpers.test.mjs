@@ -34,6 +34,14 @@ function waitFor(predicate, message, timeout = 4000) {
   });
 }
 
+function previewLogDirectories(ownerPid) {
+  return new Set(
+    fs.readdirSync("/tmp", { withFileTypes: true })
+      .filter((entry) => entry.isDirectory() && entry.name.startsWith(`d2c-preview-logs.${ownerPid}.`))
+      .map((entry) => path.join("/tmp", entry.name)),
+  );
+}
+
 test("reset authorization ignores poisoned TMPDIR and HOME", () => {
   const poisonRoot = fs.mkdtempSync(path.join(os.tmpdir(), "d2c-env-poison-"));
   const poisonTarget = path.join(poisonRoot, "victim");
@@ -96,12 +104,16 @@ esac
 echo $$ > "$FAKE_PROCESS_DIR/$service.pid"
 if [ "$mode" = initial-fail ]; then exit 7; fi
 if [ "$mode" = later-fail ] || [ "$mode" = http-error-later-fail ]; then sleep 0.35; exit 8; fi
+if [ "$mode" = ignore-signals ]; then trap '' INT TERM; else
 trap 'touch "$FAKE_PROCESS_DIR/'"$service"'.stopped"; exit 0' INT TERM
+fi
 while :; do sleep 0.05; done
 `;
   const fakeReview = `#!/bin/sh
 echo $$ > "$FAKE_PROCESS_DIR/review.pid"
+if [ "$FAKE_REVIEW_MODE" = ignore-signals ]; then trap '' INT TERM; else
 trap 'touch "$FAKE_PROCESS_DIR/review.stopped"; exit 0' INT TERM
+fi
 while :; do sleep 0.05; done
 `;
   const fakeCurl = `#!/bin/sh
@@ -126,6 +138,7 @@ if [ "$mode" = http-error ] || [ "$mode" = http-error-later-fail ]; then printf 
       TMPDIR: "/tmp",
       FAKE_PC_MODE: modes.pc,
       FAKE_MOBILE_MODE: modes.mobile,
+      FAKE_REVIEW_MODE: modes.review ?? "healthy",
       FAKE_PROCESS_DIR: processDir,
     },
     stdio: ["ignore", "pipe", "pipe"],
@@ -193,6 +206,58 @@ test("preview helper keeps all healthy services until signal and cleans children
     } else {
       removeTemporary(fixture.fixtureRoot);
     }
+  }
+});
+
+test("one interrupt bounds stubborn-child cleanup and removes runtime artifacts", async () => {
+  const fixture = createFakePreviewFixture("stubborn-pc", {
+    pc: "ignore-signals",
+    mobile: "healthy",
+  });
+  let childPids = [];
+  let runtimeLogs = [];
+  try {
+    await waitFor(() => fixture.stdout().includes("Review:"), `preview never became ready: ${fixture.stderr()}`);
+    await waitFor(
+      () => ["pc", "mobile", "review"].every((service) => fs.existsSync(path.join(fixture.processDir, `${service}.pid`))),
+      `child PID evidence was not written: ${fixture.stderr()}`,
+    );
+    childPids = ["pc", "mobile", "review"].map((service) =>
+      Number(fs.readFileSync(path.join(fixture.processDir, `${service}.pid`), "utf8")),
+    );
+    runtimeLogs = [...previewLogDirectories(fixture.child.pid)];
+    assert.ok(runtimeLogs.length >= 1, "preview runtime log directory was not created");
+
+    fixture.child.kill("SIGINT");
+    let exitTimeout;
+    try {
+      await Promise.race([
+        fixture.exit,
+        new Promise((_, reject) => {
+          exitTimeout = setTimeout(() => reject(new Error("preview helper did not exit after one SIGINT")), 4000);
+        }),
+      ]);
+    } finally {
+      clearTimeout(exitTimeout);
+    }
+
+    for (const pid of childPids) {
+      assert.equal(processExists(pid), false, `child PID ${pid} remained alive after bounded cleanup`);
+    }
+    assert.equal(fs.existsSync(path.join(fixture.workspace, "review/references")), false, "runtime reference link remained");
+    for (const directory of runtimeLogs) {
+      assert.equal(fs.existsSync(directory), false, `runtime log directory remained: ${directory}`);
+    }
+  } finally {
+    if (fixture.child.exitCode === null && fixture.child.signalCode === null) {
+      fixture.child.kill("SIGKILL");
+    }
+    for (const pid of childPids) {
+      if (processExists(pid)) process.kill(pid, "SIGKILL");
+    }
+    await fixture.exit;
+    removeTemporary(fixture.fixtureRoot);
+    for (const directory of runtimeLogs) removeTemporary(directory);
   }
 });
 

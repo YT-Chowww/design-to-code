@@ -105,7 +105,7 @@ if ! command -v python3 >/dev/null 2>&1 || ! command -v curl >/dev/null 2>&1; th
   exit 2
 fi
 
-log_dir="$(mktemp -d "$temporary_root/d2c-preview-logs.XXXXXX")"
+log_dir="$(mktemp -d "$temporary_root/d2c-preview-logs.$$.XXXXXX")"
 review_reference_link="$review_dir/references"
 review_reference_link_created=false
 availability_file="$review_dir/availability.json"
@@ -129,18 +129,116 @@ write_availability() {
   mv -f -- "$temporary_file" "$availability_file"
 }
 
-cleanup() {
-  trap - EXIT INT TERM
-  for pid in "$pc_pid" "$mobile_pid" "$review_pid"; do
-    if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
-      kill "-$shutdown_signal" "$pid" 2>/dev/null || true
+owned_child_running() {
+  local pid="$1"
+  local job_pid
+  if [[ -z "$pid" ]]; then
+    return 1
+  fi
+  for job_pid in $(jobs -pr 2>/dev/null || true); do
+    if [[ "$job_pid" == "$pid" ]]; then
+      return 0
     fi
   done
+  return 1
+}
+
+wait_for_owned_child_exit() {
+  local pid="$1"
+  local attempt
+  for attempt in {1..8}; do
+    if ! owned_child_running "$pid"; then
+      wait "$pid" 2>/dev/null || true
+      return 0
+    fi
+    sleep 0.1
+  done
+  return 1
+}
+
+stop_owned_child() {
+  local pid="$1"
+  local requested_signal="$2"
+  if [[ -z "$pid" ]]; then
+    return 0
+  fi
+  if owned_child_running "$pid"; then
+    kill "-$requested_signal" "$pid" 2>/dev/null || true
+  fi
+  if wait_for_owned_child_exit "$pid"; then
+    return 0
+  fi
+  if owned_child_running "$pid"; then
+    kill -TERM "$pid" 2>/dev/null || true
+  fi
+  if wait_for_owned_child_exit "$pid"; then
+    return 0
+  fi
+  if owned_child_running "$pid"; then
+    kill -KILL "$pid" 2>/dev/null || true
+  fi
+  wait "$pid" 2>/dev/null || true
+}
+
+signal_owned_children() {
+  local signal="$1"
+  local pid
+  for pid in "$pc_pid" "$mobile_pid" "$review_pid"; do
+    if owned_child_running "$pid"; then
+      kill "-$signal" "$pid" 2>/dev/null || true
+    fi
+  done
+}
+
+reap_exited_children() {
+  if [[ -n "$pc_pid" ]] && ! owned_child_running "$pc_pid"; then
+    wait "$pc_pid" 2>/dev/null || true
+    pc_pid=""
+  fi
+  if [[ -n "$mobile_pid" ]] && ! owned_child_running "$mobile_pid"; then
+    wait "$mobile_pid" 2>/dev/null || true
+    mobile_pid=""
+  fi
+  if [[ -n "$review_pid" ]] && ! owned_child_running "$review_pid"; then
+    wait "$review_pid" 2>/dev/null || true
+    review_pid=""
+  fi
+}
+
+wait_for_owned_children_exit() {
+  local attempt
+  for attempt in {1..8}; do
+    reap_exited_children
+    if [[ -z "$pc_pid" && -z "$mobile_pid" && -z "$review_pid" ]]; then
+      return 0
+    fi
+    sleep 0.1
+  done
+  return 1
+}
+
+reap_all_owned_children() {
+  local pid
   for pid in "$pc_pid" "$mobile_pid" "$review_pid"; do
     if [[ -n "$pid" ]]; then
       wait "$pid" 2>/dev/null || true
     fi
   done
+  pc_pid=""
+  mobile_pid=""
+  review_pid=""
+}
+
+cleanup() {
+  trap - EXIT INT TERM
+  signal_owned_children "$shutdown_signal"
+  if ! wait_for_owned_children_exit; then
+    signal_owned_children TERM
+    if ! wait_for_owned_children_exit; then
+      signal_owned_children KILL
+      reap_all_owned_children
+    fi
+  fi
   if [[ "$review_reference_link_created" == true && -L "$review_reference_link" && "$(readlink "$review_reference_link")" == "../references" ]]; then
     rm -f -- "$review_reference_link"
   fi
@@ -181,12 +279,7 @@ route_http_code() {
 
 stop_child() {
   local pid="$1"
-  if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
-    kill -TERM "$pid" 2>/dev/null || true
-  fi
-  if [[ -n "$pid" ]]; then
-    wait "$pid" 2>/dev/null || true
-  fi
+  stop_owned_child "$pid" TERM
 }
 
 trap cleanup EXIT
