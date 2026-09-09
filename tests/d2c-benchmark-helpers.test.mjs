@@ -198,6 +198,8 @@ test("preview helper keeps all healthy services until signal and cleans children
 
 test("initial PC failure leaves mobile and review available", async () => {
   const fixture = createFakePreviewFixture("initial-pc", { pc: "initial-fail", mobile: "healthy" });
+  let sentinel;
+  let sentinelExit;
   try {
     await waitFor(() => fs.existsSync(path.join(fixture.workspace, "review/availability.json")), `availability was not written: ${fixture.stderr()}`);
     await waitFor(() => readAvailability(fixture).mobile.available, `mobile never became available: ${fixture.stderr()}`);
@@ -206,8 +208,18 @@ test("initial PC failure leaves mobile and review available", async () => {
     assert.match(availability.pc.reason, /start|启动/iu);
     assert.equal(availability.mobile.available, true);
     assert.equal(fixture.child.exitCode, null, `helper exited early: ${fixture.stderr()}`);
+    const failedPcPid = Number(fs.readFileSync(path.join(fixture.processDir, "pc.pid"), "utf8"));
+    assert.equal(processExists(failedPcPid), false, "failed PC child was not reaped before review cleanup");
+    sentinel = spawn(process.execPath, ["-e", "setInterval(() => {}, 1000)"], { stdio: "ignore" });
+    sentinelExit = once(sentinel, "exit");
+    await waitFor(() => processExists(sentinel.pid), "unrelated sentinel did not start");
   } finally {
     await stopFixture(fixture);
+    if (sentinel) {
+      assert.equal(processExists(sentinel.pid), true, "review cleanup signaled an unrelated sentinel");
+      sentinel.kill("SIGTERM");
+      await sentinelExit;
+    }
   }
 });
 

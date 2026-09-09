@@ -112,7 +112,6 @@ availability_file="$review_dir/availability.json"
 pc_pid=""
 mobile_pid=""
 review_pid=""
-child_pids=()
 shutdown_signal="TERM"
 pc_available=false
 mobile_available=false
@@ -132,13 +131,15 @@ write_availability() {
 
 cleanup() {
   trap - EXIT INT TERM
-  for pid in "${child_pids[@]}"; do
-    if kill -0 "$pid" 2>/dev/null; then
+  for pid in "$pc_pid" "$mobile_pid" "$review_pid"; do
+    if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
       kill "-$shutdown_signal" "$pid" 2>/dev/null || true
     fi
   done
-  for pid in "${child_pids[@]}"; do
-    wait "$pid" 2>/dev/null || true
+  for pid in "$pc_pid" "$mobile_pid" "$review_pid"; do
+    if [[ -n "$pid" ]]; then
+      wait "$pid" 2>/dev/null || true
+    fi
   done
   if [[ "$review_reference_link_created" == true && -L "$review_reference_link" && "$(readlink "$review_reference_link")" == "../references" ]]; then
     rm -f -- "$review_reference_link"
@@ -202,7 +203,6 @@ write_availability
 
 python3 -m http.server 4172 --bind 127.0.0.1 --directory "$review_dir" >"$log_dir/review.log" 2>&1 &
 review_pid="$!"
-child_pids+=("$review_pid")
 if ! wait_for_service "$review_pid" "http://127.0.0.1:4172"; then
   echo "Review service failed to start." >&2
   cat "$log_dir/review.log" >&2
@@ -219,7 +219,6 @@ fi
 if [[ "$node_available" == true && $pc_vite_result -eq 0 ]]; then
   (cd "$pc_dir" && exec node "$pc_vite" --host 127.0.0.1 --port 4173 --strictPort) >"$log_dir/pc.log" 2>&1 &
   pc_pid="$!"
-  child_pids+=("$pc_pid")
   if wait_for_service "$pc_pid" "http://127.0.0.1:4173/data-management"; then
     pc_http_code="$(route_http_code "http://127.0.0.1:4173/data-management")"
     case "$pc_http_code" in
@@ -232,6 +231,7 @@ if [[ "$node_available" == true && $pc_vite_result -eq 0 ]]; then
   else
     pc_reason="PC preview did not start on port 4173."
     stop_child "$pc_pid"
+    pc_pid=""
   fi
 elif [[ $pc_vite_result -eq 1 ]]; then
   pc_reason="PC preview did not start because its installed Vite entry is missing."
@@ -240,7 +240,6 @@ fi
 if [[ "$node_available" == true && $mobile_vite_result -eq 0 ]]; then
   (cd "$mobile_dir" && exec node "$mobile_vite" --host 127.0.0.1 --port 4174 --strictPort) >"$log_dir/mobile.log" 2>&1 &
   mobile_pid="$!"
-  child_pids+=("$mobile_pid")
   if wait_for_service "$mobile_pid" "http://127.0.0.1:4174/content-display"; then
     mobile_http_code="$(route_http_code "http://127.0.0.1:4174/content-display")"
     case "$mobile_http_code" in
@@ -253,6 +252,7 @@ if [[ "$node_available" == true && $mobile_vite_result -eq 0 ]]; then
   else
     mobile_reason="Mobile preview did not start on port 4174."
     stop_child "$mobile_pid"
+    mobile_pid=""
   fi
 elif [[ $mobile_vite_result -eq 1 ]]; then
   mobile_reason="Mobile preview did not start because its installed Vite entry is missing."
@@ -279,12 +279,16 @@ while true; do
   if [[ "$pc_available" == true ]] && ! kill -0 "$pc_pid" 2>/dev/null; then
     pc_available=false
     pc_reason="PC preview process exited."
+    wait "$pc_pid" 2>/dev/null || true
+    pc_pid=""
     availability_changed=true
     echo "$pc_reason" >&2
   fi
   if [[ "$mobile_available" == true ]] && ! kill -0 "$mobile_pid" 2>/dev/null; then
     mobile_available=false
     mobile_reason="Mobile preview process exited."
+    wait "$mobile_pid" 2>/dev/null || true
+    mobile_pid=""
     availability_changed=true
     echo "$mobile_reason" >&2
   fi

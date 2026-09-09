@@ -7,6 +7,7 @@ const scenarios = [
 
 const tabs = document.querySelector('#scenario-tabs');
 const view = document.querySelector('#scenario-view');
+let activeScenario = scenarios[0];
 tabs.setAttribute('role', 'tablist');
 view.setAttribute('role', 'tabpanel');
 
@@ -44,37 +45,51 @@ async function checkPage(url, viewport, frame, label) {
     await fetch(url, { mode: 'no-cors', cache: 'no-store' });
   } catch {
     frame.remove();
+    viewport.dataset.pageState = 'connection-error';
     viewport.append(errorMessage(`${label} 无法访问，请检查对应预览服务。`));
   }
 }
 
-function showApplicationError(viewport, label, reason) {
+function showApplicationError(viewport, label, reason, state = 'unavailable') {
+  const nextState = `${state}:${reason}`;
+  if (viewport.dataset.pageState === nextState) return;
+  viewport.dataset.pageState = nextState;
   viewport.replaceChildren(errorMessage(`${label} 无法预览：${reason}`));
 }
 
-async function renderApplication(viewport, application, pageUrl, label, pixelWidth) {
-  const availability = await readAvailability();
-  const evidence = availability?.[application];
-  if (evidence && !evidence.available) {
-    showApplicationError(viewport, label, evidence.reason || '对应应用不可用。');
-    return;
-  }
-
+function renderApplication(viewport, pageUrl, label, pixelWidth) {
   const frame = document.createElement('iframe');
   frame.src = pageUrl;
   frame.title = `${label} 真实页面`;
   frame.style.width = pixelWidth;
   frame.addEventListener('error', () => {
-    showApplicationError(viewport, label, '页面加载失败。');
+    showApplicationError(viewport, label, '页面加载失败。', 'connection-error');
   }, { once: true });
+  viewport.dataset.pageState = 'iframe';
+  viewport.replaceChildren();
   viewport.append(frame);
   void checkPage(pageUrl, viewport, frame, label);
+}
+
+async function reconcileApplication(viewport, scenario) {
+  const [id, label, , pageUrl, application, width] = scenario;
+  const availability = await readAvailability();
+  if (view.dataset.scenario !== id) return;
+  const evidence = availability?.[application];
+  const frame = viewport.querySelector('iframe');
+  if (evidence && !evidence.available) {
+    showApplicationError(viewport, label, evidence.reason || '对应应用不可用。');
+  } else if (!frame && viewport.dataset.pageState !== 'connection-error') {
+    const pixelWidth = Number.isInteger(width) && width > 0 ? `${width}px` : '375px';
+    renderApplication(viewport, pageUrl, label, pixelWidth);
+  }
 }
 
 function renderScenario(scenario) {
   const [id, label, referencePath, pageUrl, application, width] = scenario;
   const pixelWidth = Number.isInteger(width) && width > 0 ? `${width}px` : '375px';
   view.replaceChildren();
+  activeScenario = scenario;
   view.dataset.scenario = id;
   view.setAttribute('aria-labelledby', `scenario-tab-${id}`);
 
@@ -91,7 +106,7 @@ function renderScenario(scenario) {
 
   const implementation = pane(`${label} · 真实页面`);
   implementation.viewport.dataset.application = application;
-  void renderApplication(implementation.viewport, application, pageUrl, label, pixelWidth);
+  void reconcileApplication(implementation.viewport, scenario);
 
   view.append(reference.section, implementation.section);
   for (const button of tabs.querySelectorAll('button')) {
@@ -117,11 +132,6 @@ renderScenario(scenarios[0]);
 
 setInterval(async () => {
   const viewport = view.querySelector('[data-application]');
-  const frame = viewport?.querySelector('iframe');
-  if (!viewport || !frame) return;
-  const availability = await readAvailability();
-  const evidence = availability?.[viewport.dataset.application];
-  if (evidence && !evidence.available) {
-    showApplicationError(viewport, frame.title.replace(/ 真实页面$/u, ''), evidence.reason || '对应应用不可用。');
-  }
+  if (!viewport) return;
+  await reconcileApplication(viewport, activeScenario);
 }, 500);

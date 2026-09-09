@@ -400,6 +400,12 @@ function checkReviewTemplate() {
       errors.push(`${appPath} must render per-application availability evidence: ${availabilityMarker}`);
     }
   }
+  if (!/reconcileApplication/u.test(app) || /if\s*\(\s*!viewport\s*\|\|\s*!frame\s*\)\s*return/u.test(app)) {
+    errors.push(`${appPath} must reconcile availability even when the active pane has no iframe`);
+  }
+  if (!/if\s*\(\s*!frame\b/u.test(app) || !/renderApplication/u.test(app)) {
+    errors.push(`${appPath} must restore an iframe when an active application becomes available`);
+  }
   for (const accessibilityMarker of ["aria-controls", "aria-labelledby", "tabpanel"]) {
     if (!app.includes(accessibilityMarker)) {
       errors.push(`${appPath} must preserve accessible tab linkage: ${accessibilityMarker}`);
@@ -509,6 +515,16 @@ function checkStartScript() {
   }
   if (/availability_file\.tmp\.\$\$/u.test(script) || !/mktemp\s+[^\n]*review_dir[^\n]*availability/u.test(script)) {
     errors.push(`${startScriptPath} must create availability updates with an exclusive temporary file inside review`);
+  }
+  if (/child_pids/u.test(script)) {
+    errors.push(`${startScriptPath} must not retain reaped application PIDs in a persistent cleanup list`);
+  }
+  for (const application of ["pc", "mobile"]) {
+    const clearAfterStop = new RegExp(`stop_child "\\$${application}_pid"[^\\n]*\\n\\s*${application}_pid=""`, "u");
+    const clearAfterExit = new RegExp(`${application}_reason="[^"]*process exited\\."[^\\n]*\\n\\s*wait "\\$${application}_pid"[^\\n]*\\n\\s*${application}_pid=""`, "u");
+    if (!clearAfterStop.test(script) || !clearAfterExit.test(script)) {
+      errors.push(`${startScriptPath} must reap and clear ${application} PID after initial or later failure`);
+    }
   }
   const temporaryParent = fs.mkdtempSync(path.join("/tmp", "d2c-preview-safety-"));
   const fakeBin = path.join(temporaryParent, "bin");
