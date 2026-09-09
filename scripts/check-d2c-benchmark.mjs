@@ -117,6 +117,73 @@ function checkScenarioReferenceDoesNotLinkToReference() {
   }
 }
 
+function checkBenchmarkInstructions() {
+  const skillFile = absolute(skillPath);
+  const scenariosFile = absolute(scenariosPath);
+
+  if (!fs.existsSync(skillFile) || !fs.existsSync(scenariosFile)) {
+    return;
+  }
+
+  const skill = fs.readFileSync(skillFile, "utf8");
+  const scenarios = fs.readFileSync(scenariosFile, "utf8");
+  const requiredSkillMarkers = [
+    "reset-latest.sh",
+    "start-preview.sh",
+    ".d2c-benchmark/latest/",
+    "http://127.0.0.1:4172",
+    "Figma MCP",
+    "ECharts",
+    "本地模拟数据",
+    "四个节点",
+    "四张参考图",
+    "单场景",
+    "用户自行判断",
+  ];
+
+  for (const marker of requiredSkillMarkers) {
+    if (!skill.includes(marker)) {
+      errors.push(`${skillPath} must encode Benchmark workflow marker: ${marker}`);
+    }
+  }
+
+  const expectedRows = [
+    ["pc-data", "h6yGJDAcQ4vX3fO93nYCLh", "node-id=320-13867", "width 1400, content height", "/data-management", "React + Ant Design"],
+    ["pc-chart", "Ln2fBahqlpYrUZmwQG4vNy", "node-id=212-8232", "500 × 320", "/chart-analytics", "React + Ant Design + ECharts"],
+    ["mobile-content", "oKc2utjTB5orau6YuvPi4r", "node-id=240-6278", "375 × 812", "/content-display", "Vue 3 + Vant"],
+    ["mobile-form", "oKc2utjTB5orau6YuvPi4r", "node-id=267-5066", "375 × 812", "/form-interaction", "Vue 3 + Vant"],
+  ];
+
+  for (const row of expectedRows) {
+    for (const value of row) {
+      if (!scenarios.includes(value)) {
+        errors.push(`${scenariosPath} must contain fixed scenario value: ${value}`);
+      }
+    }
+  }
+
+  for (const interaction of ["tabs", "table controls", "tooltip", "legend", "next-button", "login field", "login button"]) {
+    if (!scenarios.toLowerCase().includes(interaction)) {
+      errors.push(`${scenariosPath} must define visible interaction: ${interaction}`);
+    }
+  }
+
+  if (!scenarios.includes("500 × 320") || !scenarios.includes("真实 React 路由")) {
+    errors.push(`${scenariosPath} must preserve the pc-chart component-scope ruling`);
+  }
+}
+
+function checkActiveDocumentation() {
+  for (const documentationPath of ["README.md", "CLAUDE.md"]) {
+    const content = fs.readFileSync(absolute(documentationPath), "utf8");
+    for (const marker of ["d2c-benchmark", ".d2c-benchmark/latest/", "4172", "4173", "4174"]) {
+      if (!content.includes(marker)) {
+        errors.push(`${documentationPath} must document Benchmark marker: ${marker}`);
+      }
+    }
+  }
+}
+
 function checkPcTemplate() {
   const packagePath = path.join(pcTemplatePath, "package.json");
   const appPath = path.join(pcTemplatePath, "src/App.tsx");
@@ -468,6 +535,8 @@ checkRequiredFiles();
 checkLatestIsIgnored();
 checkDirectScenarioLink();
 checkScenarioReferenceDoesNotLinkToReference();
+checkBenchmarkInstructions();
+checkActiveDocumentation();
 checkPcTemplate();
 checkMobileTemplate();
 checkReviewTemplate();

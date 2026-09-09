@@ -38,6 +38,12 @@ MCP 的安装、配置和认证由用户管理。Skill 不读取、保存、复�
 
 Chrome MCP 只在已经识别出具体视觉偏差后用于检查相关元素的尺寸、盒模型、计算样式、父级布局、资源和源码；它不是每次执行的固定步骤。页面无法打开或当前能力不足时，交付结果会明确标注未验证范围和原因。
 
+## 可选 Benchmark
+
+`d2c-benchmark` 与日常 `d2c` 相互独立。它一次使用四个固定节点生成 PC 数据、PC 图表、移动内容和移动表单场景，只写入每轮重建的 `.d2c-benchmark/latest/`，不修改业务项目。PC 使用 React + Ant Design + ECharts，移动端使用 Vue 3 + Vant，场景数据均为本地模拟数据。
+
+统一预览在 `http://127.0.0.1:4172`，左右并排显示 Figma 原稿与真实页面；PC 页面运行在 `4173`，移动页面运行在 `4174`。预览不评分、不排名、不判定通过，结果由用户自行判断。若单场景失败，其余场景继续并保留失败页签；全局 Figma MCP 或脚手架前置条件缺失时整轮停止。
+
 ## 安装与仓库检查
 
 把仓库内的 Skills 同步到 Claude Code 或 Codex：
@@ -47,8 +53,9 @@ bash scripts/sync-claude-skills.sh
 bash scripts/sync-codex-skills.sh
 ```
 
-修改 D2C Skill 后运行静态检查：
+修改日常或 Benchmark Skill 后运行静态检查：
 
 ```bash
 npm run check:d2c-skill
+npm run check:d2c-benchmark
 ```

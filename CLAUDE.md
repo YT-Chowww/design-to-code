@@ -59,11 +59,18 @@ Do not update an existing `D2C.md` without the user's request. Page-specific rou
 
 ```bash
 npm run check:d2c-skill
+npm run check:d2c-benchmark
 bash scripts/sync-claude-skills.sh
 bash scripts/sync-codex-skills.sh
 ```
 
-`npm test` runs the lightweight D2C static contract. The sync scripts publish the repository Skills to the corresponding local runtime.
+`npm test` runs the daily and Benchmark contracts. The sync scripts publish the repository Skills to the corresponding local runtime.
+
+## Optional Benchmark
+
+Use `d2c-benchmark` only for the isolated four-scene visual preview, not for daily business-project implementation. It resets `.d2c-benchmark/latest/` once, generates the fixed PC data/chart and mobile content/form scenes with local mock data, and preserves scene-level failures without deriving an overall verdict. The chart dependency is fixed to ECharts.
+
+The review shell is `http://127.0.0.1:4172`; React + Ant Design routes use port `4173`, and Vue 3 + Vant routes use port `4174`. It shows Figma and real pages side by side. Never score, rank, classify, or declare pass/fail; the user judges the preview. A global Figma MCP or scaffold preflight failure stops the run before reset, while one node failure does not stop other scenes.
 
 ## Important locations
 
@@ -73,4 +80,9 @@ bash scripts/sync-codex-skills.sh
 - `.claude/skills/d2c/references/project-analysis-guide.md` — bounded project analysis and impact assessment.
 - `.claude/skills/d2c/references/visual-review.md` — real-page review and conditional Chrome diagnostics.
 - `.claude/skills/d2c/templates/D2C.md` — neutral project-rule skeleton.
+- `.claude/skills/d2c-benchmark/SKILL.md` — optional four-scenario Benchmark workflow and failure isolation rules.
+- `.claude/skills/d2c-benchmark/references/scenarios.md` — fixed Figma nodes, routes, targets, and visible interactions.
+- `.claude/skills/d2c-benchmark/templates/` — committed PC, mobile, and review scaffolds.
+- `.claude/skills/d2c-benchmark/scripts/` — safe latest-workspace reset and preview startup helpers.
 - `scripts/check-lightweight-d2c.mjs` — active Skill and repository guidance checks.
+- `scripts/check-d2c-benchmark.mjs` — Benchmark structure, scaffold, helper, and instruction checks.

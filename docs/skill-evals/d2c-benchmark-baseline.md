@@ -160,3 +160,7 @@ The baseline demonstrates two concrete instruction gaps before the production Be
 - A fixed dependency may be treated as negotiable instead of an invariant of the comparison scaffold.
 
 Scenarios 2 and 3 already followed the desired global-stop and user-judgment boundaries. Forward evaluation should preserve those behaviors while closing the two demonstrated gaps.
+
+## Initial GREEN authoring boundary
+
+Task 5 adds the production `d2c-benchmark` Skill and its direct fixed-scenario Reference against this RED evidence. Structural validation is recorded by the task report. Fresh with-Skill evaluator responses and any evidence-supported wording correction are intentionally deferred to the controller; this baseline does not claim forward behavioral convergence or live Figma/browser acceptance.
