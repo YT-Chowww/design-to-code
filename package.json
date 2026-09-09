@@ -9,7 +9,7 @@
   },
   "scripts": {
     "check:d2c-skill": "node scripts/check-lightweight-d2c.mjs",
-    "test": "npm run check:d2c-skill"
+    "test": "node --test tests/check-lightweight-d2c.test.mjs && npm run check:d2c-skill"
   },
   "keywords": [],
   "author": "",

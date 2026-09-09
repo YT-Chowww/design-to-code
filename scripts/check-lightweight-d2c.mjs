@@ -31,11 +31,8 @@ const forbiddenLegacyLanguage = [
   { label: "manifest.json", pattern: /manifest\.json/iu },
   { label: "normalized design", pattern: /normalized\s+(?:design|artifact|JSON)|标准化设计/iu },
   { label: "/d2c-init", pattern: /\/d2c-init\b/iu },
-  { label: "90% threshold", pattern: /\b90\s*%/u },
-  {
-    label: "automatic Provider degradation",
-    pattern: /(?:automatic(?:ally)?|explicit)\s+(?:Provider\s+)?degradations?\b|\bdegradation paths?\b|(?:自动|静默)(?:\s*Provider)?(?:降级|切换)/iu,
-  },
+  { label: "numeric visual gate", matches: hasNumericVisualGate },
+  { label: "automatic Provider degradation", matches: hasAutomaticProviderSwitch },
 ];
 const errors = [];
 
@@ -67,6 +64,59 @@ function markdownLinkTargets(markdown) {
   }
 
   return targets;
+}
+
+function proseSegments(document) {
+  return document
+    .split(/[\r\n!?。！？；;]+|(?<!\d)\.(?!\d)/u)
+    .map((segment) => segment.trim())
+    .filter(Boolean);
+}
+
+function hasGateNumber(segment) {
+  return [...segment.matchAll(/\d+(?:\.\d+)?/gu)]
+    .some(([rawNumber]) => {
+      const value = Number(rawNumber);
+      return value >= 0 && value <= 100;
+    });
+}
+
+function hasNumericVisualGate(document) {
+  const visualMetric = /\b(?:visual|similarity|fidelity|matching|pixel)\b|视觉|相似度|匹配度|还原度|评分|得分/iu;
+  const gateDecision = /\b(?:pass(?:es|ed)?|fail(?:s|ed)?|threshold|gate|minimum|maximum|at least|below|above|exceed(?:s|ed)?|reach(?:es|ed)?|qualif(?:y|ies|ied)|accept(?:ed|ance)?)\b|通过|失败|阈值|门槛|合格|达标|至少|不低于|低于|高于|达到|超过|小于|大于|判定|(?:>=|<=|>|<|≥|≤)/iu;
+
+  return proseSegments(document).some((segment) => (
+    visualMetric.test(segment)
+    && gateDecision.test(segment)
+    && hasGateNumber(segment)
+  ));
+}
+
+function explicitlyNegatesProviderSwitch(segment) {
+  const englishNegation = /\b(?:no|never)\s+(?:automatic(?:ally)?\s+)?(?:Provider\s+)?(?:fallback|fall\s+back|switch(?:ing)?|degradation paths?)\b|\b(?:do(?:es)?|will|must|should|can|is|are)\s+not\b.{0,40}\b(?:automatically\s+)?(?:fall\s+back|switch|degrad\w*|use\b.{0,24}\binstead)\b|\b(?:fallback|fall\s+back|switch(?:ing)?|degradation paths?)\b.{0,24}\b(?:(?:is|are)\s+not|isn['’]t|aren['’]t)\s+automatic\b/iu;
+  const chineseNegation = /(?:不会|不得|禁止|无|没有|不允许)[^。！？；\n]{0,32}(?:自动|静默)?(?:回退|降级|切换|改用|转用|兜底)|不(?:再)?(?:自动|静默)?(?:回退|降级|切换|改用|转用|兜底)/u;
+
+  return englishNegation.test(segment) || chineseNegation.test(segment);
+}
+
+function hasAutomaticProviderSwitch(document) {
+  const provider = /\bProvider\b|\bFigma(?:-Context)?-MCP\b|\b(?:official|context)\s+(?:Figma\s+)?MCP\b|官方\s*(?:Figma\s*)?(?:MCP|Provider)|上下文\s*MCP/iu;
+  const switchAction = /\b(?:fallback|fall(?:s|ing)?\s+back|switch(?:es|ed|ing)?|degrad\w*|use\b.{0,40}\binstead)\b|回退|降级|切换|改用|转用|兜底/iu;
+  const automaticTrigger = /\bautomatic(?:ally)?\b|\b(?:if|when|on)\b.{0,80}\b(?:fail(?:s|ed|ure)?|unavailable|missing)\b|(?:失败|不可用|缺失|异常)(?:时|后)?|自动|静默/iu;
+  const implicitFallback = /\b(?:fallback|fall(?:s|ing)?\s+back|degradation paths?)\b|回退|降级|兜底/iu;
+
+  return proseSegments(document).some((segment) => {
+    if (explicitlyNegatesProviderSwitch(segment) || !switchAction.test(segment)) {
+      return false;
+    }
+
+    if (/\bdegradation paths?\b/iu.test(segment)) {
+      return true;
+    }
+
+    return provider.test(segment)
+      && (automaticTrigger.test(segment) || implicitFallback.test(segment));
+  });
 }
 
 function checkRequiredFiles() {
@@ -146,8 +196,8 @@ function checkActiveRepositoryDocuments() {
     }
 
     const document = fs.readFileSync(filePath, "utf8");
-    for (const { label, pattern } of forbiddenLegacyLanguage) {
-      if (pattern.test(document)) {
+    for (const { label, pattern, matches } of forbiddenLegacyLanguage) {
+      if ((pattern && pattern.test(document)) || (matches && matches(document))) {
         errors.push(`active repository document describes legacy ${label}: ${relativePath}`);
       }
     }
