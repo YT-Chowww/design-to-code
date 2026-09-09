@@ -8,7 +8,8 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "check:d2c-skill": "node scripts/check-lightweight-d2c.mjs",
+    "test": "npm run check:d2c-skill"
   },
   "keywords": [],
   "author": "",
