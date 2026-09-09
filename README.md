@@ -1,107 +1,54 @@
 # design-to-code
 
-D2C 是一组 Claude Code / Codex 可用的 Design-to-Code skills，用于把 Figma 设计稿转换为 Vue 3 或 React 前端代码。新版流程以文件工件为中心：每次运行都会生成 `runId`、`designId`、`manifest.json`、标准化设计 JSON、生成日志、校验报告、视觉验证报告和合并报告。
+D2C 是一个面向现有 React 或 Vue Web 项目的轻量 Design-to-Code Skill。它读取指定 Figma 节点和当前项目证据，先让用户确认实现方案，再修改代码并在真实页面中验证结果。
 
-## 安装
+## 日常入口
 
-在本仓库内可以用脚本把 skills 链接到本机：
+日常实现只使用一个入口：
+
+```text
+/d2c https://www.figma.com/design/file-key/name?node-id=1-2 [target-directory]
+```
+
+- Figma URL 必须包含具体 `node-id`。
+- 未提供 `target-directory` 时，以当前工作目录作为目标项目。
+- 目标必须是可识别的现有 React 或 Vue Web 前端项目。
+- 日常流程不创建独立预览工作区，也不生成阶段报告链。
+
+## Figma Provider 与认证
+
+D2C 支持官方 Figma MCP 和 Figma-Context-MCP，选择顺序为：用户明确指定、官方 Figma MCP、Figma-Context-MCP。两者都可用且用户未指定时使用官方 Figma MCP；必需工具不可用时停止并说明缺失能力。
+
+MCP 的安装、配置和认证由用户管理。Skill 不读取、保存、复制或输出 OAuth、Token 等凭据。Provider 不可用或认证失败时，D2C 会停止，由用户决定修复当前 Provider 或明确改选另一 Provider。
+
+## 首次使用的两次确认
+
+项目根目录使用 `D2C.md` 保存团队长期维护的技术栈、组件、Token、布局、资源、修改边界和验证规则。
+
+首次执行时：
+
+1. D2C 对当前项目做有界分析，在对话中展示 `D2C.md` 候选内容；用户确认后才写入项目根目录。
+2. D2C 读取指定设计节点和任务相关代码，在对话中展示 ASCII 结构图、组件与 Token 方案、资源与数据边界、预计修改文件；用户确认后才修改业务代码。
+
+后续执行会读取已有 `D2C.md`，但不会自行更新它。若规则与当前代码冲突，以当前代码为事实，并在实现预览中说明。
+
+## 验证方式
+
+实现后按目标项目提供的命令执行适用的类型检查、Lint、测试和构建，并在目标项目的真实路由进行视觉复核。独立演示页不能替代真实页面验证。
+
+Chrome MCP 只在已经识别出具体视觉偏差后用于检查相关元素的尺寸、盒模型、计算样式、父级布局、资源和源码；它不是每次执行的固定步骤。页面无法打开或当前能力不足时，交付结果会明确标注未验证范围和原因。
+
+## 安装与仓库检查
+
+把仓库内的 Skills 同步到 Claude Code 或 Codex：
 
 ```bash
 bash scripts/sync-claude-skills.sh
 bash scripts/sync-codex-skills.sh
 ```
 
-也可以手动复制到业务项目：
+修改 D2C Skill 后运行静态检查：
 
 ```bash
-mkdir -p .claude/skills
-cp -r /path/to/design-to-code/.claude/skills/d2c* .claude/skills/
+npm run check:d2c-skill
 ```
-
-## 初始化
-
-在业务项目根目录运行：
-
-```text
-/d2c-init
-```
-
-初始化会创建 `.d2c/`：
-
-```text
-.d2c/
-├── preview/               # Vite 预览项目
-├── context/               # JSON 优先的项目上下文
-│   ├── project-config.json
-│   ├── design-system.json
-│   ├── component-library.json
-│   ├── project-adapter.json
-│   ├── project-config.md
-│   ├── design-system.md
-│   └── component-library.md
-├── assets/                # Figma 图片资源
-└── docs/                  # 每次运行的工件和报告
-    ├── reference/
-    ├── design-specs/
-    ├── generation-logs/
-    ├── validation-reports/
-    ├── verification-reports/
-    ├── merge-reports/
-    └── sessions/
-```
-
-机器读取以 `.json` 为准，`.md` 文件用于人工说明和备注。
-
-## 使用方式
-
-完整流程：
-
-```text
-/d2c https://www.figma.com/design/xxxxx/MyDesign?node-id=1-100
-```
-
-指定目标目录：
-
-```text
-/d2c https://www.figma.com/design/xxxxx/MyDesign?node-id=1-100 /path/to/project
-```
-
-流程阶段：
-
-```text
-1. 初始化 manifest
-2. Extract：raw Figma、assets、normalized design、design spec
-3. Generate：preview 代码、tokenHints、componentMappings、styleFit
-4. Preview Validate：类型、lint、构建、预览服务
-5. Preview Verify：截图对比和迭代修正
-6. Merge：合入目标项目，解析 resolvedTokens
-7. Target Validate / Target Verify：合入后的真实校验和视觉复核
-```
-
-单独调用子 skill：
-
-```text
-/d2c-extract <figma-url>
-/d2c-generate
-/d2c-validate phase=preview
-/d2c-verify phase=preview
-/d2c-merge [/path/to/project]
-/d2c-validate phase=target
-/d2c-verify phase=target
-```
-
-## MCP 配置
-
-- Figma MCP：用于读取设计数据和下载资源。不可用时进入手动输入模式。
-- Chrome DevTools MCP：用于视觉验证。不可用时 verify 标记为 `SKIPPED`，并在报告中记录人工检查入口。
-
-## 关键工件
-
-- `.d2c/docs/sessions/<runId>/manifest.json`：整次运行的机器索引。
-- `.d2c/docs/design-specs/<designId>/<runId>-normalized.json`：代码生成主输入。
-- `.d2c/docs/generation-logs/<designId>/<runId>.md`：生成决策、token hints、组件映射和 style fit。
-- `.d2c/docs/merge-reports/<designId>/<runId>.md`：目标项目合并、token 解析和文件清单。
-
-## 测试建议
-
-先用简单卡片或按钮设计跑 `/d2c`，确认 manifest、normalized design、preview build、preview verify 都能生成，再测试复杂页面和 target merge。

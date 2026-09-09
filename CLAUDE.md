@@ -3,85 +3,74 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project purpose
-D2C is a Claude Code skill suite that converts Figma designs into Vue 3 or React frontend code. The current workflow is artifact-driven: every run creates a manifest, normalized design JSON, preview output, validation reports, visual verification reports, and merge reports so the process can be resumed and audited.
 
-## Common commands
+D2C is a lightweight Skill for implementing a concrete Figma node in an existing React or Vue Web project. It uses structured design context and current-project evidence, requires confirmation before writes, and validates the result in the target project's real page.
 
-### Skill entrypoints (run inside Claude Code)
-- `/d2c-init` — initialize `.d2c/` workspace, detect target stack, scaffold preview project
-- `/d2c <figma-url> [target-directory]` — end-to-end orchestrated flow
-- `/d2c-extract <figma-url>` — extract raw Figma data, assets, normalized design JSON, and readable design spec
-- `/d2c-generate` — generate Vue 3 or React preview code into `.d2c/preview/src/`
-- `/d2c-validate [phase=preview|target]` — type/lint/build checks and runtime startup for preview or target project
-- `/d2c-verify [phase=preview|target]` — screenshot-based visual comparison for preview or merged target output
-- `/d2c-merge [target-directory]` — merge generated output into target project
+## Daily entrypoint
 
-### Local script commands
-- `bash tests/test-structure.sh` — fast structural checks for skill files, templates, rules, docs
-- `bash tests/test-template-build.sh` — validate preview template can install, type-check, and build
-- `RUN_E2E=1 bash tests/e2e/test-simple-card.sh` — single E2E scenario using fixture spec
-- `RUN_E2E=1 bash tests/e2e/test-figma-workflow.sh` — full E2E workflow with real Figma URL
-- `bash scripts/create-preview-project.sh [target-dir]` — ensure preview skeleton/deps
-- `bash scripts/validate.sh [preview-dir]` — run type-check/lint/build against the preview project helper path
+Use only:
 
-### Preview project commands (`.d2c/preview/`)
-- `npm install`
-- `npm run dev` (Vite on port `5173`)
-- `npm run type-check`
-- `npm run lint`
-- `npm run build`
+```text
+/d2c https://www.figma.com/design/file-key/name?node-id=1-2 [target-directory]
+```
 
-## High-level architecture
+The URL must contain a concrete `node-id`. The target defaults to the current working directory and must be a recognizable existing React or Vue Web frontend project. Daily use does not create a separate preview workspace or a chain of stage reports.
 
-### 1) Skill-based pipeline (main architecture)
-- The workflow is implemented as composable Claude skills under `.claude/skills/`.
-- `d2c` is the orchestrator skill that sequences: manifest initialization → `d2c-extract` → `d2c-generate` → preview `d2c-validate` → preview `d2c-verify` → `d2c-merge` → target `d2c-validate` → target `d2c-verify`.
-- Iteration logic is owned by the orchestrator: visual verify can trigger regenerate/revalidate loops (max 3 iterations, pass threshold 90%).
+## Workflow
 
-### 2) Artifact contract
-- Each run has a `runId` and `designId`.
-- `.d2c/docs/sessions/<runId>/manifest.json` is the machine-readable index for all phases.
-- `d2c-extract` writes raw Figma JSON, assets manifest, normalized design JSON, and a readable design spec.
-- `d2c-generate` must read normalized design from the manifest, then write preview code and a generation log containing `tokenHints`, `componentMappings`, and `styleFit`.
-- `d2c-merge` resolves target-project decisions such as `resolvedTokens`, import paths, assets, and business component adaptation.
+1. Validate the Figma node scope and target project.
+2. Select a usable Figma Provider and obtain structured design context.
+3. Read the project-root `D2C.md`, or prepare it on first use.
+4. Inspect only task-relevant components, Tokens, resources, business behavior, routes, and validation commands.
+5. Show an ASCII structure and implementation preview; wait for confirmation.
+6. Modify only the confirmed files and impact surface.
+7. Run changed-surface engineering checks and review the target project's real page.
+8. Deliver commands, results, known differences, and manual validation boundaries.
 
-### 3) Framework adaptation contract
-- Stack detection and runtime branching are driven by `.d2c/context/project-config.json` (written by `/d2c-init`), with `.md` files as human-readable mirrors.
-- Generate/validate/merge skills read the JSON context and switch file formats, lint/type/build commands, style strategy, and merge mapping by framework.
-- Supported generation targets are Vue 3 and React. Default fallback is Vue 3 + TypeScript + Vite when detection/context is missing.
+## Provider and authentication boundaries
 
-### 4) Separation of responsibilities
-- **Skills (`.claude/skills/*/SKILL.md`)** define behavior and step-by-step execution contracts.
-- **Rules (`.claude/rules/*.md`)** define coding conventions and workflow constraints shared across skills.
-- **Templates (`.claude/skills/d2c-init/templates/`)** provide canonical preview/context scaffolding.
-- **Scripts (`scripts/*.sh`)** provide shell-level helpers for preview creation and validation.
-- **Tests (`tests/`)** validate repository integrity at 3 layers:
-  - structure checks
-  - template build checks
-  - E2E skill-driven workflow checks
+- Supported sources are the official Figma MCP and Figma-Context-MCP.
+- Selection order is: explicit user choice, official Figma MCP, Figma-Context-MCP, then stop.
+- Availability is determined from tools callable in the current session, not server names or local configuration.
+- When both are usable and the user did not choose, use the official Figma MCP.
+- MCP installation, configuration, OAuth, and Token management belong to the user. Do not read, store, copy, or output credentials.
+- If the selected Provider is unavailable, authentication fails, or structured context cannot be obtained, stop and let the user decide how to proceed.
 
-### 5) Stateful workspace model
-- Runtime artifacts are centered in `.d2c/`:
-  - `.d2c/preview/` — generated code + runnable preview app
-  - `.d2c/context/` — JSON-first design system, component library, project config, and project adapter inputs
-  - `.d2c/assets/` — downloaded Figma assets
-  - `.d2c/docs/` — run artifacts, reports, manifest files, and summaries
-- Repo-level `docs/` documents architecture/operation; skills also instruct writing run artifacts/reports during execution.
+## Project `D2C.md` and approvals
 
-### 6) External integrations and degradations
-- Figma MCP is used for design extraction and image downloads.
-- Chrome DevTools MCP is used for visual verification screenshots/comparison.
-- Workflow has explicit degradation paths:
-  - no Figma MCP → manual design input mode
-  - no Chrome MCP → skip visual verify and continue with static validation outcome
+`D2C.md` lives at the target project root and contains stable project rules: stack, component usage, Tokens and theme, layout, resources, data conventions, code boundaries, and validation entrypoints.
 
-## Important code locations
-- `.claude/skills/d2c/SKILL.md` — orchestrator and iteration control
-- `.claude/skills/d2c-init/SKILL.md` — stack detection + workspace/template bootstrap
-- `.claude/skills/d2c-generate/SKILL.md` — framework-specific codegen strategy
-- `.claude/skills/d2c-validate/SKILL.md` — framework-specific validation commands and dev server behavior
-- `.claude/skills/d2c-verify/SKILL.md` — visual scoring and deviation report format
-- `.claude/skills/d2c-merge/SKILL.md` — target-project merge mapping and protection rules
-- `.claude/rules/coding-conventions.md` — framework coding style contract
-- `.claude/rules/d2c-workflow.md` — shared workflow limits/quality gates
-- `tests/e2e/config.sh` — E2E configuration (URL, framework detection helpers, shared assertions)
+On first use there are two distinct approvals:
+
+1. Inspect the project, show the proposed `D2C.md` content, and write it only after user confirmation.
+2. Show the implementation preview and modify business code only after a separate confirmation.
+
+Do not update an existing `D2C.md` without the user's request. Page-specific routes, APIs, permissions, tracking, or temporary compatibility notes do not belong there.
+
+## Validation boundaries
+
+- Use validation commands from `D2C.md`, then package scripts and project guidance, then ask the user if still unclear.
+- Run the applicable type, Lint, test, and build checks for the changed surface.
+- Review the target project's real route at the Figma Frame viewport; do not substitute a standalone daily preview project.
+- Use Chrome MCP only after a concrete visual mismatch has been identified. Inspect only the affected element, layout, resource, and source code.
+- If the real page cannot be opened because of authentication, permissions, data, startup, or environment limits, report it as not visually verified.
+
+## Repository commands
+
+```bash
+npm run check:d2c-skill
+bash scripts/sync-claude-skills.sh
+bash scripts/sync-codex-skills.sh
+```
+
+`npm test` runs the lightweight D2C static contract. The sync scripts publish the repository Skills to the corresponding local runtime.
+
+## Important locations
+
+- `.claude/skills/d2c/SKILL.md` — daily workflow, stops, approvals, write boundaries, and delivery requirements.
+- `.claude/skills/d2c/references/provider-official.md` — official Figma MCP evidence and failure handling.
+- `.claude/skills/d2c/references/provider-context-mcp.md` — Figma-Context-MCP evidence and failure handling.
+- `.claude/skills/d2c/references/project-analysis-guide.md` — bounded project analysis and impact assessment.
+- `.claude/skills/d2c/references/visual-review.md` — real-page review and conditional Chrome diagnostics.
+- `.claude/skills/d2c/templates/D2C.md` — neutral project-rule skeleton.
+- `scripts/check-lightweight-d2c.mjs` — active Skill and repository guidance checks.

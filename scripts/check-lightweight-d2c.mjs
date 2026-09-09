@@ -25,6 +25,18 @@ const root = process.cwd();
 const skillPath = ".claude/skills/d2c/SKILL.md";
 const referencesDirectory = ".claude/skills/d2c/references";
 const forbiddenTemplateTerms = ["Ant Design", "Vant", "E-Space", "React", "Vue"];
+const activeRepositoryDocuments = ["README.md", "CLAUDE.md", "package.json"];
+const forbiddenLegacyLanguage = [
+  { label: "runId", pattern: /\brunId\b/u },
+  { label: "manifest.json", pattern: /manifest\.json/iu },
+  { label: "normalized design", pattern: /normalized\s+(?:design|artifact|JSON)|标准化设计/iu },
+  { label: "/d2c-init", pattern: /\/d2c-init\b/iu },
+  { label: "90% threshold", pattern: /\b90\s*%/u },
+  {
+    label: "automatic Provider degradation",
+    pattern: /(?:automatic(?:ally)?|explicit)\s+(?:Provider\s+)?degradations?\b|\bdegradation paths?\b|(?:自动|静默)(?:\s*Provider)?(?:降级|切换)/iu,
+  },
+];
 const errors = [];
 
 function absolute(relativePath) {
@@ -125,11 +137,29 @@ function checkTemplateNeutrality() {
   }
 }
 
+function checkActiveRepositoryDocuments() {
+  for (const relativePath of activeRepositoryDocuments) {
+    const filePath = absolute(relativePath);
+    if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+      errors.push(`missing active repository document: ${relativePath}`);
+      continue;
+    }
+
+    const document = fs.readFileSync(filePath, "utf8");
+    for (const { label, pattern } of forbiddenLegacyLanguage) {
+      if (pattern.test(document)) {
+        errors.push(`active repository document describes legacy ${label}: ${relativePath}`);
+      }
+    }
+  }
+}
+
 checkRequiredFiles();
 checkRetiredDirectories();
 checkSkillLinks();
 checkReferenceLinks();
 checkTemplateNeutrality();
+checkActiveRepositoryDocuments();
 
 if (errors.length > 0) {
   console.error("Lightweight D2C skill contract failed:");
