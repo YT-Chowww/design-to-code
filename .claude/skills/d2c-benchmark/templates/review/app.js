@@ -1,12 +1,14 @@
 const scenarios = [
-  ['pc-data', 'PC 数据管理', 'references/pc-data.png', 'http://127.0.0.1:4173/data-management'],
-  ['pc-chart', 'PC 图表分析', 'references/pc-chart.png', 'http://127.0.0.1:4173/chart-analytics'],
-  ['mobile-content', '移动内容展示', 'references/mobile-content.png', 'http://127.0.0.1:4174/content-display'],
-  ['mobile-form', '移动表单交互', 'references/mobile-form.png', 'http://127.0.0.1:4174/form-interaction'],
+  ['pc-data', 'PC 数据管理', 'references/pc-data.png', 'http://127.0.0.1:4173/data-management', 1400],
+  ['pc-chart', 'PC 图表分析', 'references/pc-chart.png', 'http://127.0.0.1:4173/chart-analytics', 500],
+  ['mobile-content', '移动内容展示', 'references/mobile-content.png', 'http://127.0.0.1:4174/content-display', 375],
+  ['mobile-form', '移动表单交互', 'references/mobile-form.png', 'http://127.0.0.1:4174/form-interaction', 375],
 ];
 
 const tabs = document.querySelector('#scenario-tabs');
 const view = document.querySelector('#scenario-view');
+tabs.setAttribute('role', 'tablist');
+view.setAttribute('role', 'tabpanel');
 
 function errorMessage(message) {
   const error = document.createElement('p');
@@ -38,14 +40,17 @@ async function checkPage(url, viewport, frame, label) {
 }
 
 function renderScenario(scenario) {
-  const [id, label, referencePath, pageUrl] = scenario;
+  const [id, label, referencePath, pageUrl, width] = scenario;
+  const pixelWidth = Number.isInteger(width) && width > 0 ? `${width}px` : '375px';
   view.replaceChildren();
   view.dataset.scenario = id;
+  view.setAttribute('aria-labelledby', `scenario-tab-${id}`);
 
   const reference = pane(`${label} · Figma`);
   const image = document.createElement('img');
   image.src = referencePath;
   image.alt = `${label} Figma 原稿`;
+  image.style.width = pixelWidth;
   image.addEventListener('error', () => {
     image.remove();
     reference.viewport.append(errorMessage(`${label} 的 Figma 图片不存在或无法读取。`));
@@ -56,6 +61,7 @@ function renderScenario(scenario) {
   const frame = document.createElement('iframe');
   frame.src = pageUrl;
   frame.title = `${label} 真实页面`;
+  frame.style.width = pixelWidth;
   frame.addEventListener('error', () => {
     frame.remove();
     implementation.viewport.append(errorMessage(`${label} 页面加载失败。`));
@@ -74,9 +80,11 @@ for (const scenario of scenarios) {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'scenario-tab';
+  button.id = `scenario-tab-${id}`;
   button.dataset.scenario = id;
   button.textContent = label;
   button.setAttribute('role', 'tab');
+  button.setAttribute('aria-controls', 'scenario-view');
   button.addEventListener('click', () => renderScenario(scenario));
   tabs.append(button);
 }

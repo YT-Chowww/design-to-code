@@ -111,13 +111,11 @@ h1 {
 .pane__viewport img {
   display: block;
   max-width: none;
-  min-width: 100%;
   height: auto;
 }
 
 .pane__viewport iframe {
   display: block;
-  width: 100%;
   min-width: 375px;
   height: 100%;
   min-height: 680px;

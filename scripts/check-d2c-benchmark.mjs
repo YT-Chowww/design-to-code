@@ -332,10 +332,10 @@ function checkReviewTemplate() {
   const style = fs.readFileSync(absolute(stylePath), "utf8");
   const app = fs.readFileSync(absolute(appPath), "utf8");
   const expectedScenarios = [
-    ["pc-data", "references/pc-data.png", "http://127.0.0.1:4173/data-management"],
-    ["pc-chart", "references/pc-chart.png", "http://127.0.0.1:4173/chart-analytics"],
-    ["mobile-content", "references/mobile-content.png", "http://127.0.0.1:4174/content-display"],
-    ["mobile-form", "references/mobile-form.png", "http://127.0.0.1:4174/form-interaction"],
+    ["pc-data", "references/pc-data.png", "http://127.0.0.1:4173/data-management", 1400],
+    ["pc-chart", "references/pc-chart.png", "http://127.0.0.1:4173/chart-analytics", 500],
+    ["mobile-content", "references/mobile-content.png", "http://127.0.0.1:4174/content-display", 375],
+    ["mobile-form", "references/mobile-form.png", "http://127.0.0.1:4174/form-interaction", 375],
   ];
   const declaredScenarioIds = [...app.matchAll(/^\s*\[['"]([^'"]+)['"],/gmu)]
     .map((match) => match[1]);
@@ -345,10 +345,17 @@ function checkReviewTemplate() {
   }
 
   for (const scenario of expectedScenarios) {
-    for (const value of scenario) {
+    for (const value of scenario.slice(0, 3)) {
       if (!app.includes(value)) {
         errors.push(`${appPath} must contain stable scenario value: ${value}`);
       }
+    }
+  }
+
+  for (const [id, , , width] of expectedScenarios) {
+    const widthEntry = new RegExp(`\\[['\"]${id}['\"][^\\n]*,\\s*${width}\\s*\\]`, "u");
+    if (!widthEntry.test(app)) {
+      errors.push(`${appPath} must map ${id} to exact review width ${width}px`);
     }
   }
 
@@ -365,6 +372,17 @@ function checkReviewTemplate() {
   }
   if (!/(onerror|addEventListener\(["']error)/u.test(app) || !/error/iu.test(app)) {
     errors.push(`${appPath} must display per-scenario load errors`);
+  }
+  if (!/image\.style\.width\s*=\s*[^;]*pixelWidth/u.test(app) || !/frame\.style\.width\s*=\s*[^;]*pixelWidth/u.test(app)) {
+    errors.push(`${appPath} must apply the controlled scenario width to both image and iframe`);
+  }
+  if (!/Number\.isInteger\(width\)/u.test(app)) {
+    errors.push(`${appPath} must validate numeric width metadata before inline style assignment`);
+  }
+  for (const accessibilityMarker of ["aria-controls", "aria-labelledby", "tabpanel"]) {
+    if (!app.includes(accessibilityMarker)) {
+      errors.push(`${appPath} must preserve accessible tab linkage: ${accessibilityMarker}`);
+    }
   }
   if (/\b(score|threshold|ranking|classification)\b/iu.test(`${index}\n${app}`)) {
     errors.push(`${reviewTemplatePath} must not calculate or display model evaluation`);
