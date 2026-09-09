@@ -7,6 +7,7 @@ const root = process.cwd();
 const skillPath = ".claude/skills/d2c-benchmark/SKILL.md";
 const scenariosPath = ".claude/skills/d2c-benchmark/references/scenarios.md";
 const pcTemplatePath = ".claude/skills/d2c-benchmark/templates/pc-react-antd";
+const mobileTemplatePath = ".claude/skills/d2c-benchmark/templates/mobile-vue-vant";
 const required = [
   skillPath,
   scenariosPath,
@@ -154,11 +155,64 @@ function checkPcTemplate() {
   }
 }
 
+function checkMobileTemplate() {
+  const packagePath = path.join(mobileTemplatePath, "package.json");
+  const appPath = path.join(mobileTemplatePath, "src/App.vue");
+  const indexPath = path.join(mobileTemplatePath, "index.html");
+
+  if (!fs.existsSync(absolute(packagePath))) {
+    return;
+  }
+
+  let packageJson;
+  try {
+    packageJson = JSON.parse(fs.readFileSync(absolute(packagePath), "utf8"));
+  } catch (error) {
+    errors.push(`invalid JSON: ${packagePath} (${error.message})`);
+    return;
+  }
+
+  const dependencies = {
+    ...packageJson.dependencies,
+    ...packageJson.devDependencies,
+  };
+  for (const dependency of ["vue", "vant", "echarts"]) {
+    if (!dependencies[dependency]) {
+      errors.push(`${packagePath} must declare ${dependency}`);
+    }
+  }
+
+  if (dependencies["vue-router"]) {
+    errors.push(`${packagePath} must not add Vue Router`);
+  }
+
+  if (!fs.existsSync(absolute(appPath))) {
+    errors.push(`missing required file: ${appPath}`);
+  } else {
+    const app = fs.readFileSync(absolute(appPath), "utf8");
+    for (const route of ["/content-display", "/form-interaction"]) {
+      if (!app.includes(route)) {
+        errors.push(`${appPath} must expose route: ${route}`);
+      }
+    }
+  }
+
+  if (!fs.existsSync(absolute(indexPath))) {
+    errors.push(`missing required file: ${indexPath}`);
+  } else {
+    const index = fs.readFileSync(absolute(indexPath), "utf8");
+    if (!/<meta\s+[^>]*name=["']viewport["'][^>]*>/iu.test(index)) {
+      errors.push(`${indexPath} must declare viewport metadata`);
+    }
+  }
+}
+
 checkRequiredFiles();
 checkLatestIsIgnored();
 checkDirectScenarioLink();
 checkScenarioReferenceDoesNotLinkToReference();
 checkPcTemplate();
+checkMobileTemplate();
 
 if (errors.length > 0) {
   console.error("D2C Benchmark contract failed:");
