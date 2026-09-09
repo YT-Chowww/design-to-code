@@ -16,6 +16,10 @@ temporary_root="$(cd "${TMPDIR:-/tmp}" && pwd -P)"
 home_root="$(cd "${HOME:?HOME is required for safety validation}" && pwd -P)"
 
 raw_target="$1"
+if [[ "/$raw_target/" == *"/./"* || "/$raw_target/" == *"/../"* ]]; then
+  echo "Target path must name an unambiguous leaf without dot components: $raw_target" >&2
+  exit 2
+fi
 if [[ "$raw_target" != /* ]]; then
   raw_target="$PWD/$raw_target"
 fi
@@ -39,7 +43,12 @@ if [[ -e "$target" ]]; then
     echo "Target must be a real directory or an absent path: $target" >&2
     exit 2
   fi
-  target="$(cd "$target" && pwd -P)"
+  canonical_target="$(cd "$target" && pwd -P)"
+  if [[ "$canonical_target" != "$target" ]]; then
+    echo "Canonical target does not match the explicit leaf: $target" >&2
+    exit 2
+  fi
+  target="$canonical_target"
 fi
 
 if [[ "$target" == "/" || "$target" == "$home_root" || "$target" == "$repo_root" || "$target" == "$repo_workspace_root" || "$target" == "$temporary_root" ]]; then

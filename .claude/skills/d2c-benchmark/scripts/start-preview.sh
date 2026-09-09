@@ -36,32 +36,64 @@ case "$workspace" in
     ;;
 esac
 
+pc_dir=""
+mobile_dir=""
+review_dir=""
+references_dir=""
 for directory in pc mobile review references; do
-  if [[ ! -d "$workspace/$directory" ]]; then
-    echo "Missing workspace directory: $workspace/$directory" >&2
+  child="$workspace/$directory"
+  if [[ ! -d "$child" || -L "$child" ]]; then
+    echo "Unsafe workspace child; expected a real directory: $child" >&2
     exit 2
   fi
+  canonical_child="$(cd "$child" && pwd -P)"
+  if [[ "$canonical_child" != "$child" ]]; then
+    echo "Unsafe workspace child; canonical path escaped or changed: $child" >&2
+    exit 2
+  fi
+  case "$canonical_child" in
+    "$workspace"/*) ;;
+    *)
+      echo "Unsafe workspace child outside workspace: $child" >&2
+      exit 2
+      ;;
+  esac
+  case "$directory" in
+    pc) pc_dir="$canonical_child" ;;
+    mobile) mobile_dir="$canonical_child" ;;
+    review) review_dir="$canonical_child" ;;
+    references) references_dir="$canonical_child" ;;
+  esac
 done
-if [[ ! -f "$workspace/pc/node_modules/vite/bin/vite.js" || ! -f "$workspace/mobile/node_modules/vite/bin/vite.js" ]]; then
-  echo "Install the copied PC and mobile scaffold dependencies before starting preview." >&2
-  exit 2
-fi
+
+validate_vite() {
+  local application_dir="$1"
+  local application_vite="$application_dir/node_modules/vite/bin/vite.js"
+  if [[ ! -f "$application_vite" || -L "$application_vite" ]]; then
+    echo "Unsafe Vite executable; expected a real installed file: $application_vite" >&2
+    return 2
+  fi
+  local vite_parent
+  local canonical_vite
+  vite_parent="$(cd "$(dirname "$application_vite")" && pwd -P)"
+  canonical_vite="$vite_parent/$(basename "$application_vite")"
+  case "$canonical_vite" in
+    "$application_dir"/*) ;;
+    *)
+      echo "Unsafe Vite executable outside its application directory: $application_vite" >&2
+      return 2
+      ;;
+  esac
+  printf '%s\n' "$canonical_vite"
+}
+
+pc_vite="$(validate_vite "$pc_dir")"
+mobile_vite="$(validate_vite "$mobile_dir")"
 
 log_dir="$(mktemp -d "${TMPDIR:-/tmp}/d2c-preview-logs.XXXXXX")"
 child_pids=()
-review_reference_link="$workspace/review/references"
-
-if [[ -L "$review_reference_link" ]]; then
-  if [[ "$(readlink "$review_reference_link")" != "../references" ]]; then
-    echo "Refusing unexpected review reference link: $review_reference_link" >&2
-    exit 2
-  fi
-  rm -f -- "$review_reference_link"
-elif [[ -e "$review_reference_link" ]]; then
-  echo "Review reference path must not already exist: $review_reference_link" >&2
-  exit 2
-fi
-ln -s ../references "$review_reference_link"
+review_reference_link="$review_dir/references"
+review_reference_link_created=false
 
 cleanup() {
   trap - EXIT INT TERM
@@ -69,7 +101,9 @@ cleanup() {
     kill -TERM "${child_pids[@]}" 2>/dev/null || true
     wait "${child_pids[@]}" 2>/dev/null || true
   fi
-  rm -f -- "$review_reference_link"
+  if [[ "$review_reference_link_created" == true && -L "$review_reference_link" && "$(readlink "$review_reference_link")" == "../references" ]]; then
+    rm -f -- "$review_reference_link"
+  fi
   rm -rf -- "$log_dir"
 }
 
@@ -85,11 +119,18 @@ trap cleanup EXIT
 trap 'handle_signal INT' INT
 trap 'handle_signal TERM' TERM
 
-(cd "$workspace/pc" && exec node ./node_modules/vite/bin/vite.js --host 127.0.0.1 --port 4173 --strictPort) >"$log_dir/pc.log" 2>&1 &
+if [[ -e "$review_reference_link" || -L "$review_reference_link" ]]; then
+  echo "Review reference path must not already exist: $review_reference_link" >&2
+  exit 2
+fi
+ln -s ../references "$review_reference_link"
+review_reference_link_created=true
+
+(cd "$pc_dir" && exec node "$pc_vite" --host 127.0.0.1 --port 4173 --strictPort) >"$log_dir/pc.log" 2>&1 &
 child_pids+=("$!")
-(cd "$workspace/mobile" && exec node ./node_modules/vite/bin/vite.js --host 127.0.0.1 --port 4174 --strictPort) >"$log_dir/mobile.log" 2>&1 &
+(cd "$mobile_dir" && exec node "$mobile_vite" --host 127.0.0.1 --port 4174 --strictPort) >"$log_dir/mobile.log" 2>&1 &
 child_pids+=("$!")
-python3 -m http.server 4172 --bind 127.0.0.1 --directory "$workspace/review" >"$log_dir/review.log" 2>&1 &
+python3 -m http.server 4172 --bind 127.0.0.1 --directory "$review_dir" >"$log_dir/review.log" 2>&1 &
 child_pids+=("$!")
 
 urls=(

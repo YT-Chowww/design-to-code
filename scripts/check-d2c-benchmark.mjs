@@ -298,15 +298,38 @@ function checkResetScriptBehavior() {
     if (noTarget.status === 0) {
       errors.push(`${resetScriptPath} must reject a missing target`);
     }
-    const repoRoot = spawnSync("bash", [script, root], { cwd: root, encoding: "utf8" });
-    if (repoRoot.status === 0) {
-      errors.push(`${resetScriptPath} must reject the repository root`);
+    const traversalParent = path.join(temporaryParent, "traversal-parent");
+    const traversalChild = path.join(traversalParent, "child");
+    const traversalMarker = path.join(traversalParent, "parent-marker.txt");
+    fs.mkdirSync(traversalChild, { recursive: true });
+    fs.writeFileSync(traversalMarker, "must survive\n");
+    const traversal = spawnSync("bash", [script, `${traversalChild}${path.sep}..`], {
+      cwd: root,
+      encoding: "utf8",
+    });
+    if (traversal.status === 0 || !fs.existsSync(traversalMarker)) {
+      errors.push(`${resetScriptPath} must reject child/.. without replacing its parent`);
     }
-    for (const unsafeTarget of ["/", os.homedir(), "/Applications/d2c-benchmark-outside-check"]) {
-      const unsafe = spawnSync("bash", [script, unsafeTarget], { cwd: root, encoding: "utf8" });
-      if (unsafe.status === 0) {
-        errors.push(`${resetScriptPath} must reject unsafe target: ${unsafeTarget}`);
-      }
+
+    const dotParent = path.join(temporaryParent, "dot-parent");
+    fs.mkdirSync(dotParent, { recursive: true });
+    const dotted = spawnSync("bash", [script, `${dotParent}${path.sep}.${path.sep}latest`], {
+      cwd: root,
+      encoding: "utf8",
+    });
+    if (dotted.status === 0 || fs.existsSync(path.join(dotParent, "latest"))) {
+      errors.push(`${resetScriptPath} must reject explicit dot path components`);
+    }
+
+    const duplicateParent = path.join(temporaryParent, "duplicate-parent");
+    fs.mkdirSync(duplicateParent);
+    const duplicateTarget = `${temporaryParent}${path.sep}${path.sep}duplicate-parent${path.sep}${path.sep}latest${path.sep}`;
+    const duplicate = spawnSync("bash", [script, duplicateTarget], {
+      cwd: root,
+      encoding: "utf8",
+    });
+    if (duplicate.status !== 0 || !fs.existsSync(path.join(duplicateParent, "latest/review"))) {
+      errors.push(`${resetScriptPath} must preserve a safe explicit leaf across duplicate or trailing separators`);
     }
   } finally {
     fs.rmSync(temporaryParent, { recursive: true, force: true });
@@ -333,9 +356,111 @@ function checkStartScript() {
   if (/curl\s+-[^\n]*f/u.test(script)) {
     errors.push(`${startScriptPath} must not stop all review services for one scenario HTTP error`);
   }
-  const invalid = spawnSync("bash", [scriptPath, root], { cwd: root, encoding: "utf8" });
-  if (invalid.status === 0) {
-    errors.push(`${startScriptPath} must reject an invalid workspace`);
+  const temporaryParent = fs.mkdtempSync(path.join(os.tmpdir(), "d2c-preview-safety-"));
+  const fakeBin = path.join(temporaryParent, "bin");
+  const externalMutationMarker = path.join(temporaryParent, "external-mutated.txt");
+  const externalReview = path.join(temporaryParent, "external-review");
+  const externalReviewLink = path.join(externalReview, "references");
+  const testEnvironment = {
+    ...process.env,
+    D2C_EXTERNAL_LINK: externalReviewLink,
+    D2C_MUTATION_MARKER: externalMutationMarker,
+  };
+
+  function writeExecutable(name, content) {
+    const executable = path.join(fakeBin, name);
+    fs.writeFileSync(executable, content, { mode: 0o755 });
+    return executable;
+  }
+
+  function createWorkspace(name) {
+    const workspace = path.join(temporaryParent, name);
+    for (const directory of ["pc", "mobile", "review", "references"]) {
+      fs.mkdirSync(path.join(workspace, directory), { recursive: true });
+    }
+    for (const application of ["pc", "mobile"]) {
+      const vite = path.join(workspace, application, "node_modules/vite/bin/vite.js");
+      fs.mkdirSync(path.dirname(vite), { recursive: true });
+      fs.writeFileSync(vite, "// isolated validation fixture\n");
+    }
+    return workspace;
+  }
+
+  try {
+    fs.mkdirSync(fakeBin);
+    writeExecutable("node", "#!/bin/sh\nif [ -L \"$D2C_EXTERNAL_LINK\" ]; then touch \"$D2C_MUTATION_MARKER\"; fi\nexit 1\n");
+    writeExecutable("python3", "#!/bin/sh\nexit 1\n");
+    writeExecutable("curl", "#!/bin/sh\nexit 0\n");
+    testEnvironment.PATH = `${fakeBin}${path.delimiter}${process.env.PATH}`;
+
+    const invalid = spawnSync("bash", [scriptPath, temporaryParent], {
+      cwd: root,
+      encoding: "utf8",
+      env: testEnvironment,
+    });
+    if (invalid.status === 0) {
+      errors.push(`${startScriptPath} must reject an invalid isolated workspace`);
+    }
+
+    const symlinkWorkspace = createWorkspace("symlink-child");
+    const externalPc = path.join(temporaryParent, "external-pc");
+    fs.renameSync(path.join(symlinkWorkspace, "pc"), externalPc);
+    fs.symlinkSync(externalPc, path.join(symlinkWorkspace, "pc"), "dir");
+    const symlinkChild = spawnSync("bash", [scriptPath, symlinkWorkspace], {
+      cwd: root,
+      encoding: "utf8",
+      env: testEnvironment,
+    });
+    if (symlinkChild.status !== 2 || !symlinkChild.stderr.includes("Unsafe workspace child")) {
+      errors.push(`${startScriptPath} must reject a symlinked workspace child before launch`);
+    }
+
+    const escapedExecutableWorkspace = createWorkspace("escaped-executable");
+    const pcVite = path.join(escapedExecutableWorkspace, "pc/node_modules/vite/bin/vite.js");
+    const externalVite = path.join(temporaryParent, "external-vite.js");
+    fs.writeFileSync(externalVite, "// must never execute\n");
+    fs.rmSync(pcVite);
+    fs.symlinkSync(externalVite, pcVite);
+    const escapedExecutable = spawnSync("bash", [scriptPath, escapedExecutableWorkspace], {
+      cwd: root,
+      encoding: "utf8",
+      env: testEnvironment,
+    });
+    if (escapedExecutable.status !== 2 || !escapedExecutable.stderr.includes("Unsafe Vite executable")) {
+      errors.push(`${startScriptPath} must reject a Vite executable escaping its application directory`);
+    }
+
+    const crossedExecutableWorkspace = createWorkspace("crossed-executable");
+    const crossedPcNodeModules = path.join(crossedExecutableWorkspace, "pc/node_modules");
+    fs.rmSync(crossedPcNodeModules, { recursive: true });
+    fs.symlinkSync(path.join(crossedExecutableWorkspace, "mobile/node_modules"), crossedPcNodeModules, "dir");
+    const crossedExecutable = spawnSync("bash", [scriptPath, crossedExecutableWorkspace], {
+      cwd: root,
+      encoding: "utf8",
+      env: testEnvironment,
+    });
+    if (crossedExecutable.status !== 2 || !crossedExecutable.stderr.includes("Unsafe Vite executable")) {
+      errors.push(`${startScriptPath} must keep each Vite executable inside its own application directory`);
+    }
+
+    const externalReviewWorkspace = createWorkspace("external-review-workspace");
+    fs.mkdirSync(externalReview);
+    fs.rmSync(path.join(externalReviewWorkspace, "review"), { recursive: true });
+    fs.symlinkSync(externalReview, path.join(externalReviewWorkspace, "review"), "dir");
+    const externalReviewResult = spawnSync("bash", [scriptPath, externalReviewWorkspace], {
+      cwd: root,
+      encoding: "utf8",
+      env: testEnvironment,
+    });
+    if (
+      externalReviewResult.status !== 2
+      || !externalReviewResult.stderr.includes("Unsafe workspace child")
+      || fs.existsSync(externalMutationMarker)
+    ) {
+      errors.push(`${startScriptPath} must reject an external review directory without mutating it`);
+    }
+  } finally {
+    fs.rmSync(temporaryParent, { recursive: true, force: true });
   }
 }
 
