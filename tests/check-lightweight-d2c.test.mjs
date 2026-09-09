@@ -14,6 +14,7 @@ const requiredFiles = [
   ".claude/skills/d2c/references/project-analysis-guide.md",
   ".claude/skills/d2c/references/visual-review.md",
   ".claude/skills/d2c/templates/D2C.md",
+  "docs/skill-evals/d2c-forward-extended.md",
 ];
 
 const validSkill = `---
@@ -127,6 +128,16 @@ function runChecker(relativePath, phrase) {
     fs.rmSync(root, { recursive: true, force: true });
   }
 }
+
+test("rejects unresolved forward-evaluation placeholders", () => {
+  const result = runChecker(
+    "docs/skill-evals/d2c-scenarios.md",
+    `${validScenarios}\nForward evaluation: PENDING.\n`,
+  );
+
+  assert.equal(result.status, 1, result.stdout || result.stderr);
+  assert.match(result.stderr, /forward evaluation remains PENDING/u);
+});
 
 test("rejects legacy pipeline guidance from active operational docs", () => {
   const result = runChecker("docs/operation-guide.md", "Run /d2c-extract and resume from the stage report.");

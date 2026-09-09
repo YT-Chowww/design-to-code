@@ -10,6 +10,7 @@ const required = [
   ".claude/skills/d2c/references/project-analysis-guide.md",
   ".claude/skills/d2c/references/visual-review.md",
   ".claude/skills/d2c/templates/D2C.md",
+  "docs/skill-evals/d2c-forward-extended.md",
 ];
 
 const retired = [
@@ -247,6 +248,9 @@ function checkBehaviorScenarios() {
   }
 
   const document = fs.readFileSync(filePath, "utf8");
+  if (/Forward evaluation:\s*`?PENDING`?/iu.test(document)) {
+    errors.push(`forward evaluation remains PENDING: ${relativePath}`);
+  }
   for (const scenario of behaviorScenarios) {
     if (!scenario.pattern.test(document)) {
       errors.push(`behavior scenario is missing: ${scenario.label}`);
