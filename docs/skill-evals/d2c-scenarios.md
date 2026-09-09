@@ -1,6 +1,6 @@
 # Lightweight D2C behavioral scenarios
 
-Use every scenario with this wrapper verbatim:
+下面的无 Skill wrapper 仅用于 RED 基线，不能用于加载 Skill 后的前向评估：
 
 ```text
 You are evaluating default agent behavior. Do not load any D2C skill and do not modify files.
@@ -9,6 +9,8 @@ Then list any code or project files you would write before asking the user.
 
 SCENARIO follows this wrapper verbatim.
 ```
+
+加载 Skill 的公共 wrapper、精确 prompt 和原始输出见[扩展前向评估](d2c-forward-extended.md)。两种 wrapper 不得混用。
 
 ## 1. Missing node-id
 

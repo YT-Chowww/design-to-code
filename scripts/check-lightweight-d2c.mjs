@@ -33,6 +33,7 @@ const activeRepositoryDocuments = [
   "docs/README.md",
   "docs/operation-guide.md",
   "docs/verification.md",
+  "docs/提供外部使用.md",
 ];
 const forbiddenLegacyLanguage = [
   { label: "runId", pattern: /\brunId\b/u },
@@ -250,6 +251,11 @@ function checkBehaviorScenarios() {
   const document = fs.readFileSync(filePath, "utf8");
   if (/Forward evaluation:\s*`?PENDING`?/iu.test(document)) {
     errors.push(`forward evaluation remains PENDING: ${relativePath}`);
+  }
+  const baselineOnly = /baseline[- ]only wrapper|仅用于[^\n。]{0,24}(?:baseline|基线)|基线专用/iu;
+  const forwardEvidenceLink = /\[[^\]]+\]\(d2c-forward-extended\.md\)/iu;
+  if (!baselineOnly.test(document) || !forwardEvidenceLink.test(document)) {
+    errors.push(`scenario wrapper boundary must label the no-Skill wrapper as baseline-only and link forward evidence: ${relativePath}`);
   }
   for (const scenario of behaviorScenarios) {
     if (!scenario.pattern.test(document)) {

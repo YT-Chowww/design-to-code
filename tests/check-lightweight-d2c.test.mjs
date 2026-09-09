@@ -43,6 +43,8 @@ When a known mismatch exists but Chrome is unavailable, preserve the mismatch, r
 
 const validScenarios = `# Scenarios
 
+Baseline-only wrapper: do not load the Skill. Skill-loading forward evidence uses a separate wrapper in [forward evidence](d2c-forward-extended.md).
+
 ## Missing node-id
 Stop before writes when node-id is missing.
 
@@ -86,6 +88,7 @@ const activeDocs = [
   "docs/README.md",
   "docs/operation-guide.md",
   "docs/verification.md",
+  "docs/提供外部使用.md",
 ];
 
 function writeFile(root, relativePath, content) {
@@ -137,6 +140,23 @@ test("rejects unresolved forward-evaluation placeholders", () => {
 
   assert.equal(result.status, 1, result.stdout || result.stderr);
   assert.match(result.stderr, /forward evaluation remains PENDING/u);
+});
+
+test("rejects retired installation guidance from the current external-use document", () => {
+  const result = runChecker("docs/提供外部使用.md", "Run /d2c-init, then store output under .d2c/context/.");
+
+  assert.equal(result.status, 1, result.stdout || result.stderr);
+  assert.match(result.stderr, /active repository document describes legacy/u);
+});
+
+test("requires the no-Skill wrapper to be baseline-only and links forward evidence", () => {
+  const result = runChecker(
+    "docs/skill-evals/d2c-scenarios.md",
+    validScenarios.replace(/Baseline-only wrapper:[^\n]+\n/u, ""),
+  );
+
+  assert.equal(result.status, 1, result.stdout || result.stderr);
+  assert.match(result.stderr, /scenario wrapper boundary/u);
 });
 
 test("rejects legacy pipeline guidance from active operational docs", () => {
