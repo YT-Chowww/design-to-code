@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 
@@ -140,6 +139,13 @@ function checkBenchmarkInstructions() {
     "四张参考图",
     "单场景",
     "用户自行判断",
+    "Bash",
+    "Git",
+    "Python 3",
+    "curl",
+    "Node/npm",
+    "4173",
+    "4174",
   ];
 
   for (const marker of requiredSkillMarkers) {
@@ -227,6 +233,7 @@ function checkForwardEvaluationEvidence() {
 function checkPcTemplate() {
   const packagePath = path.join(pcTemplatePath, "package.json");
   const appPath = path.join(pcTemplatePath, "src/App.tsx");
+  const stylePath = path.join(pcTemplatePath, "src/style.css");
 
   if (!fs.existsSync(absolute(packagePath))) {
     return;
@@ -263,6 +270,15 @@ function checkPcTemplate() {
   for (const route of ["/data-management", "/chart-analytics"]) {
     if (!app.includes(route)) {
       errors.push(`${appPath} must expose route: ${route}`);
+    }
+  }
+  const style = fs.readFileSync(absolute(stylePath), "utf8");
+  if (/html,\s*\nbody,\s*\n#root\s*\{[^}]*min-width\s*:\s*1024px/su.test(style)) {
+    errors.push(`${stylePath} must not force the 500px chart route to 1024px`);
+  }
+  for (const [route, width] of [["data-management", 1400], ["chart-analytics", 500]]) {
+    if (!app.includes(`benchmarkRoute = \"${route}\"`) || !style.includes(`[data-benchmark-route="${route}"]`) || !style.includes(`min-width: ${width}px`)) {
+      errors.push(`${pcTemplatePath} must preserve ${route} at ${width}px`);
     }
   }
 }
@@ -379,6 +395,11 @@ function checkReviewTemplate() {
   if (!/Number\.isInteger\(width\)/u.test(app)) {
     errors.push(`${appPath} must validate numeric width metadata before inline style assignment`);
   }
+  for (const availabilityMarker of ["availability.json", "available", "reason", "application"]) {
+    if (!app.includes(availabilityMarker)) {
+      errors.push(`${appPath} must render per-application availability evidence: ${availabilityMarker}`);
+    }
+  }
   for (const accessibilityMarker of ["aria-controls", "aria-labelledby", "tabpanel"]) {
     if (!app.includes(accessibilityMarker)) {
       errors.push(`${appPath} must preserve accessible tab linkage: ${accessibilityMarker}`);
@@ -395,7 +416,7 @@ function checkResetScriptBehavior() {
     return;
   }
 
-  const temporaryParent = fs.mkdtempSync(path.join(os.tmpdir(), "d2c-benchmark-check-"));
+  const temporaryParent = fs.mkdtempSync(path.join("/tmp", "d2c-benchmark-check-"));
   const target = path.join(temporaryParent, "latest");
 
   try {
@@ -481,7 +502,15 @@ function checkStartScript() {
   if (/curl\s+-[^\n]*f/u.test(script)) {
     errors.push(`${startScriptPath} must not stop all review services for one scenario HTTP error`);
   }
-  const temporaryParent = fs.mkdtempSync(path.join(os.tmpdir(), "d2c-preview-safety-"));
+  for (const availabilityMarker of ["availability.json", "pc_available", "mobile_available", "pc_reason", "mobile_reason"]) {
+    if (!script.includes(availabilityMarker)) {
+      errors.push(`${startScriptPath} must persist application availability: ${availabilityMarker}`);
+    }
+  }
+  if (/availability_file\.tmp\.\$\$/u.test(script) || !/mktemp\s+[^\n]*review_dir[^\n]*availability/u.test(script)) {
+    errors.push(`${startScriptPath} must create availability updates with an exclusive temporary file inside review`);
+  }
+  const temporaryParent = fs.mkdtempSync(path.join("/tmp", "d2c-preview-safety-"));
   const fakeBin = path.join(temporaryParent, "bin");
   const externalMutationMarker = path.join(temporaryParent, "external-mutated.txt");
   const externalReview = path.join(temporaryParent, "external-review");

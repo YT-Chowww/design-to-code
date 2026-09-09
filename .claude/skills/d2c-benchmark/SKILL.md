@@ -13,7 +13,7 @@ description: Use when a user wants to preview the current model's Figma-to-code 
 
 ## 一次执行流程
 
-1. **全局预检。** 在提取设计或重置目录前，确认一个受支持的 Figma MCP Provider 能读取四个节点的结构化上下文并导出参考图。按“用户指定 → 官方 Figma MCP → Figma-Context-MCP”选择并明确提示。再确认两个提交内脚手架、`reset-latest.sh`、`start-preview.sh`、Node/npm、锁文件和构建命令可用。不得读取配置、OAuth、Token、环境变量或凭据文件。全局失败时停止全部场景，不创建或重置输出。
+1. **全局预检。** 在提取设计或重置目录前，确认一个受支持的 Figma MCP Provider 能读取四个节点的结构化上下文并导出参考图。按“用户指定 → 官方 Figma MCP → Figma-Context-MCP”选择并明确提示。再确认两个提交内脚手架、`reset-latest.sh`、`start-preview.sh`、Bash、Git、Python 3、curl、Node/npm、锁文件和构建命令可用，并确认本机端口 `4172`、`4173`、`4174` 可用。不得读取配置、OAuth、Token、环境变量或凭据文件。全局失败时停止全部场景，不创建或重置输出。
 2. **只重置一次。** 以仓库的 `.d2c-benchmark/latest/` 为参数运行 `scripts/reset-latest.sh`。场景之间不再重置，也不保留历史。
 3. **读取全部设计。** 只使用已选 Provider，分别取得四个节点的结构化上下文和 PNG。完整成功时，将四张参考图写到 `references/pc-data.png`、`references/pc-chart.png`、`references/mobile-content.png`、`references/mobile-form.png`。仅临时超时、限流或资源下载失败可安全重试一次；不得自动切换 Provider 或混用部分结果。
 4. **隔离生成。** 即使发生单场景失败，也继续处理其他场景。PC 只写 React + Ant Design 脚手架的指定模块，移动端只写 Vue 3 + Vant 脚手架的指定模块；样式必须限定在当前场景。只使用页面内本地模拟数据和可见交互，不虚构 API、认证、权限、Store、路由或埋点。ECharts 是固定依赖，不得安装、替换或补充其他图表库。

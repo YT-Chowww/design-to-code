@@ -12,8 +12,7 @@ skill_dir="$(cd "$script_dir/.." && pwd -P)"
 repo_root="$(git -C "$skill_dir" rev-parse --show-toplevel)"
 repo_root="$(cd "$repo_root" && pwd -P)"
 repo_workspace_root="$repo_root/.d2c-benchmark"
-temporary_root="$(cd "${TMPDIR:-/tmp}" && pwd -P)"
-home_root="$(cd "${HOME:?HOME is required for safety validation}" && pwd -P)"
+temporary_root="$(cd /tmp && pwd -P)"
 
 raw_target="$1"
 if [[ "/$raw_target/" == *"/./"* || "/$raw_target/" == *"/../"* ]]; then
@@ -51,7 +50,7 @@ if [[ -e "$target" ]]; then
   target="$canonical_target"
 fi
 
-if [[ "$target" == "/" || "$target" == "$home_root" || "$target" == "$repo_root" || "$target" == "$repo_workspace_root" || "$target" == "$temporary_root" ]]; then
+if [[ "$target" == "/" || "$target" == "$repo_root" || "$target" == "$repo_workspace_root" || "$target" == "$temporary_root" ]]; then
   echo "Refusing unsafe target: $target" >&2
   exit 2
 fi

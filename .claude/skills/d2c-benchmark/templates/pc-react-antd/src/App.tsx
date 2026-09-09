@@ -46,6 +46,13 @@ function FailurePanel({ path, message }: { path: string; message: string }) {
 export default function App() {
   const path = window.location.pathname.replace(/\/+$/u, "") || "/";
   const route = routes[path];
+  let benchmarkRoute = "fallback";
+  if (path === "/data-management") {
+    benchmarkRoute = "data-management";
+  } else if (path === "/chart-analytics") {
+    benchmarkRoute = "chart-analytics";
+  }
+  document.documentElement.dataset.benchmarkRoute = benchmarkRoute;
 
   if (!route) {
     return <FailurePanel path={path} message="未配置该基准场景" />;

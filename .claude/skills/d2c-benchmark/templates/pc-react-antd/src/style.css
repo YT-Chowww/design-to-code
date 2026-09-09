@@ -15,9 +15,20 @@
 html,
 body,
 #root {
-  min-width: 1024px;
   min-height: 100%;
   margin: 0;
+}
+
+html[data-benchmark-route="data-management"],
+html[data-benchmark-route="data-management"] body,
+html[data-benchmark-route="data-management"] #root {
+  min-width: 1400px;
+}
+
+html[data-benchmark-route="chart-analytics"],
+html[data-benchmark-route="chart-analytics"] body,
+html[data-benchmark-route="chart-analytics"] #root {
+  min-width: 500px;
 }
 
 body {
