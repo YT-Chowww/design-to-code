@@ -25,16 +25,38 @@ const root = process.cwd();
 const skillPath = ".claude/skills/d2c/SKILL.md";
 const referencesDirectory = ".claude/skills/d2c/references";
 const forbiddenTemplateTerms = ["Ant Design", "Vant", "E-Space", "React", "Vue"];
-const activeRepositoryDocuments = ["README.md", "CLAUDE.md", "package.json"];
+const activeRepositoryDocuments = [
+  "README.md",
+  "CLAUDE.md",
+  "package.json",
+  "docs/README.md",
+  "docs/operation-guide.md",
+  "docs/verification.md",
+];
 const forbiddenLegacyLanguage = [
   { label: "runId", pattern: /\brunId\b/u },
   { label: "manifest.json", pattern: /manifest\.json/iu },
   { label: "normalized design", pattern: /normalized\s+(?:design|artifact|JSON)|标准化设计/iu },
   { label: "/d2c-init", pattern: /\/d2c-init\b/iu },
+  { label: "retired D2C sub-skill", pattern: /\/d2c-(?:extract|generate|merge|validate|verify)\b/iu },
+  { label: ".d2c artifact workspace", pattern: /\.d2c\//iu },
+  { label: "artifact-stage pipeline", matches: hasActiveArtifactPipeline },
+  { label: "credential probing or storage", matches: hasUnsafeCredentialGuidance },
   { label: "numeric visual gate", matches: hasNumericVisualGate },
   { label: "automatic Provider degradation", matches: hasAutomaticProviderSwitch },
 ];
 const errors = [];
+
+const behaviorScenarios = [
+  { label: "both Providers", pattern: /both providers|两种 Provider|两个 Provider/iu },
+  { label: "official-only Provider", pattern: /official[- ]only|只有官方|仅官方/iu },
+  { label: "Context-only Provider", pattern: /context[- ]only|只有 Context|仅 Context/iu },
+  { label: "neither Provider", pattern: /neither provider|两者都不可用|均不可用/iu },
+  { label: "explicit Provider unavailable/auth failure", pattern: /explicit provider unavailable|显式指定.{0,20}不可用|authentication failure|认证失败/iu },
+  { label: "user adjustment conflicts with Figma", pattern: /adjustment conflicts with Figma|用户调整.{0,20}Figma|最新用户要求.{0,20}Figma/iu },
+  { label: "missing fonts/assets", pattern: /missing fonts? or assets?|字体或资源缺失|缺少字体|资源缺失/iu },
+  { label: "known mismatch with Chrome unavailable", pattern: /known mismatch with Chrome unavailable|已知偏差.{0,24}Chrome.{0,16}不可用/iu },
+];
 
 function absolute(relativePath) {
   return path.resolve(root, relativePath);
@@ -117,6 +139,18 @@ function hasAutomaticProviderSwitch(document) {
     return provider.test(segment)
       && (automaticTrigger.test(segment) || implicitFallback.test(segment));
   });
+}
+
+function hasActiveArtifactPipeline(document) {
+  const pipeline = /(?:file artifacts?|stage reports?|artifact pipeline|工件链|运行工件|阶段报告|阶段状态)/iu;
+  const negation = /(?:do(?:es)? not|never|no longer|without|不|不会|不再|无需|没有)[^\n。]{0,32}(?:file artifacts?|stage reports?|artifact pipeline|工件链|运行工件|阶段报告|阶段状态)/iu;
+  return proseSegments(document).some((segment) => pipeline.test(segment) && !negation.test(segment));
+}
+
+function hasUnsafeCredentialGuidance(document) {
+  const credentialAction = /(?:figma[- ]token[- ]probe|--figma-api-key|X-Figma-Token)|(?:read|store|save|copy|output|读取|保存|复制|输出)[^\n。]{0,32}(?:credentials?|OAuth|凭据)/iu;
+  const negation = /(?:do(?:es)? not|never|不|不会|不得|禁止)[^\n。]{0,32}(?:read|store|save|copy|output|读取|保存|复制|输出)[^\n。]{0,32}(?:credentials?|OAuth|凭据)/iu;
+  return proseSegments(document).some((segment) => credentialAction.test(segment) && !negation.test(segment));
 }
 
 function checkRequiredFiles() {
@@ -204,12 +238,81 @@ function checkActiveRepositoryDocuments() {
   }
 }
 
+function checkBehaviorScenarios() {
+  const relativePath = "docs/skill-evals/d2c-scenarios.md";
+  const filePath = absolute(relativePath);
+  if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+    errors.push(`missing behavior scenarios: ${relativePath}`);
+    return;
+  }
+
+  const document = fs.readFileSync(filePath, "utf8");
+  for (const scenario of behaviorScenarios) {
+    if (!scenario.pattern.test(document)) {
+      errors.push(`behavior scenario is missing: ${scenario.label}`);
+    }
+  }
+}
+
+function checkFrameworkScope() {
+  const document = fs.readFileSync(absolute(skillPath), "utf8");
+  const description = document.match(/^description:\s*(.+)$/mu)?.[1] ?? "";
+  const identifiableWebProject = /identifiable existing Web frontend project|可识别的现有 Web 前端项目/iu;
+  const initialValidatedScope = /initial validated scope[^\n]*(?:React[^\n]*TypeScript[^\n]*Vue\s*3[^\n]*TypeScript)|首版实际验证范围[^\n]*(?:React[^\n]*TypeScript[^\n]*Vue\s*3[^\n]*TypeScript)/iu;
+
+  if (!identifiableWebProject.test(description) || !initialValidatedScope.test(document)) {
+    errors.push(`framework scope must target an identifiable existing Web frontend project and state the initial validated scope: ${skillPath}`);
+  }
+}
+
+function checkCodeConnectGuidance() {
+  const relativePath = ".claude/skills/d2c/references/provider-official.md";
+  const document = fs.readFileSync(absolute(relativePath), "utf8");
+  const verifiesCurrentCode = /Code Connect[^\n。]*(?:verify|match|核对|验证)[^\n。]*(?:current project code|当前项目代码)/iu;
+  const creationDeferred = /(?:creat(?:e|ing)|创建)[^\n。]*(?:out of scope|TODO|待办|不在本次范围)/iu;
+
+  if (!verifiesCurrentCode.test(document) || !creationDeferred.test(document)) {
+    errors.push(`Code Connect guidance must verify mappings against current project code and defer creation: ${relativePath}`);
+  }
+}
+
+function checkSkillBehaviorRules() {
+  const skill = fs.readFileSync(absolute(skillPath), "utf8");
+  const providers = [
+    skill,
+    fs.readFileSync(absolute(".claude/skills/d2c/references/provider-official.md"), "utf8"),
+    fs.readFileSync(absolute(".claude/skills/d2c/references/provider-context-mcp.md"), "utf8"),
+  ].join("\n");
+  const visual = fs.readFileSync(absolute(".claude/skills/d2c/references/visual-review.md"), "utf8");
+  const rules = [
+    { label: "both Providers", document: skill, pattern: /(?:both Providers|两者都可用|两种 Provider 都可用)[^\n。]{0,80}(?:official|官方)/iu },
+    { label: "official-only Provider", document: skill, pattern: /(?:official only|只有官方|仅官方)[^\n。]{0,80}(?:use|选择|使用)[^\n。]{0,24}(?:official|官方)/iu },
+    { label: "Context-only Provider", document: skill, pattern: /(?:Context only|只有 Context|仅 Context)[^\n。]{0,80}(?:use|选择|使用)[^\n。]{0,32}(?:Context|Figma-Context-MCP)/iu },
+    { label: "neither Provider", document: skill, pattern: /(?:neither Provider|两者都不可用|均不可用)[^\n。]{0,80}(?:stop|停止)/iu },
+    { label: "explicit Provider unavailable/auth failure", document: providers, pattern: /(?:explicitly selected|显式选择|显式指定|用户指定)[^\n。]{0,80}(?:unavailable|不可用)[^\n。]{0,80}(?:stop|停止)/iu },
+    { label: "Provider authentication failure", document: providers, pattern: /(?:authentication|authorization|OAuth|Token)[^\n。]{0,64}(?:failure|problem|失败|问题|过期|无效)[^\n。]{0,100}(?:stop|等待|停止)/iu },
+    { label: "user adjustment", document: skill, pattern: /(?:user adjustment|用户调整)[\s\S]{0,500}(?:latest user request wins over Figma|最新要求为准|最新用户要求为准)/iu },
+    { label: "missing fonts/assets", document: skill, pattern: /(?:missing fonts? or assets?|字体[^\n。]{0,16}(?:缺失|缺少)|资源[^\n。]{0,16}(?:缺失|下载失败))[^\n。]{0,120}(?:user|用户|选择|替代)/iu },
+    { label: "Chrome unavailable", document: visual, pattern: /Chrome[^\n。]{0,24}(?:unavailable|不可用)[^\n。]{0,120}(?:unverified|未验证|保留已识别偏差|不凭猜测)/iu },
+  ];
+
+  for (const rule of rules) {
+    if (!rule.pattern.test(rule.document)) {
+      errors.push(`Skill behavior rule is missing: ${rule.label}`);
+    }
+  }
+}
+
 checkRequiredFiles();
 checkRetiredDirectories();
 checkSkillLinks();
 checkReferenceLinks();
 checkTemplateNeutrality();
 checkActiveRepositoryDocuments();
+checkBehaviorScenarios();
+checkFrameworkScope();
+checkCodeConnectGuidance();
+checkSkillBehaviorRules();
 
 if (errors.length > 0) {
   console.error("Lightweight D2C skill contract failed:");

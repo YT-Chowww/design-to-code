@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project purpose
 
-D2C is a lightweight Skill for implementing a concrete Figma node in an existing React or Vue Web project. It uses structured design context and current-project evidence, requires confirmation before writes, and validates the result in the target project's real page.
+D2C is a lightweight Skill for implementing a concrete Figma node in an identifiable existing Web frontend project. It uses structured design context and current-project evidence, requires confirmation before writes, and validates the result in the target project's real page. The initial validated scope is React + TypeScript and Vue 3 + TypeScript, not a hard framework limit.
 
 ## Daily entrypoint
 
@@ -14,7 +14,7 @@ Use only:
 /d2c https://www.figma.com/design/file-key/name?node-id=1-2 [target-directory]
 ```
 
-The URL must contain a concrete `node-id`. The target defaults to the current working directory and must be a recognizable existing React or Vue Web frontend project. Daily use does not create a separate preview workspace or a chain of stage reports.
+The URL must contain a concrete `node-id`. The target defaults to the current working directory and must be a recognizable existing Web frontend project. Daily use does not create a separate preview workspace or persistent workflow reports.
 
 ## Workflow
 

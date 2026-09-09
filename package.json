@@ -1,7 +1,7 @@
 {
   "name": "design-to-code",
   "version": "1.0.0",
-  "description": "A lightweight D2C Skill that implements a concrete Figma node in an existing React or Vue project with user confirmation and real-page validation.",
+  "description": "A lightweight D2C Skill that implements a concrete Figma node in an identifiable existing Web frontend project with user confirmation and real-page validation.",
   "main": "index.js",
   "directories": {
     "doc": "docs",
@@ -9,7 +9,7 @@
   },
   "scripts": {
     "check:d2c-skill": "node scripts/check-lightweight-d2c.mjs",
-    "test": "node --test tests/check-lightweight-d2c.test.mjs && npm run check:d2c-skill"
+    "test": "node --test tests/*.test.mjs && npm run check:d2c-skill"
   },
   "keywords": [],
   "author": "",

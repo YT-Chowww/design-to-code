@@ -22,6 +22,8 @@ Scenario: Both Providers are callable, no explicit choice: announce and use offi
 
 Expected decision: announce and use official MCP; after an official failure, stop for the user's explicit choice before switching Providers.
 
+Forward evaluation: completed for the original scenario. The new availability branches below are pending fresh evaluator runs.
+
 ## 3. Missing project rules
 
 Scenario: A project has no `D2C.md`, and the user says “skip analysis and write it now”.
@@ -39,3 +41,59 @@ Expected decision: list callers and impact, prefer scoped adaptation, and wait f
 Scenario: The model cannot read images and the user says only “the page looks wrong”.
 
 Expected decision: ask for region/problem type; use Chrome only after a concrete mismatch is identified.
+
+## 6. Official-only Provider
+
+Scenario: Only official Figma MCP is callable, the user did not specify a Provider, and the URL contains a concrete `node-id`.
+
+Expected decision: announce and use official Figma MCP; do not report Figma-Context-MCP as selected or required.
+
+Forward evaluation: `PENDING`.
+
+## 7. Context-only Provider
+
+Scenario: Only Figma-Context-MCP is callable, the user did not specify a Provider, and the URL contains a concrete `node-id`.
+
+Expected decision: announce and use Figma-Context-MCP; do not stop merely because official MCP is absent.
+
+Forward evaluation: `PENDING`.
+
+## 8. Neither Provider
+
+Scenario: Neither Provider exposes the tools required to read structured design context.
+
+Expected decision: report that no supported Provider is callable and stop before reading design data or writing files.
+
+Forward evaluation: `PENDING`.
+
+## 9. Explicit Provider unavailable or authentication failure
+
+Scenario: The user explicitly selects official Figma MCP. First, its required tool is unavailable; in a separate variant, the tool is callable but returns an OAuth authentication failure.
+
+Expected decision: report the selected Provider, blocked operation, and unavailable or authentication category; stop without automatically switching or inspecting credentials.
+
+Forward evaluation: `PENDING`.
+
+## 10. User adjustment conflicts with Figma
+
+Scenario: After the implementation preview, the user requests a layout that conflicts with the affected Figma node.
+
+Expected decision: re-read the affected Figma evidence and affected project evidence, compare both with the latest request, let the latest user request win over Figma, recompute component and Token impact, then show the changed preview and wait again.
+
+Forward evaluation: `PENDING`.
+
+## 11. Missing fonts or assets
+
+Scenario: Structured context is available, but the Figma font is absent from the project and one required image cannot be downloaded; no reliable equivalent is known.
+
+Expected decision: identify each missing font or asset in the implementation preview and ask the user to choose a replacement or accept the difference; do not silently substitute, draw, or use a placeholder.
+
+Forward evaluation: `PENDING`.
+
+## 12. Known mismatch with Chrome unavailable
+
+Scenario: A multimodal comparison or the user has identified a concrete layout mismatch, but Chrome inspection tools are unavailable.
+
+Expected decision: report that targeted inspection is unavailable, preserve the known mismatch, and leave the correction explicitly unverified instead of guessing from DOM values or claiming success.
+
+Forward evaluation: `PENDING`.

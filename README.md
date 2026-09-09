@@ -1,6 +1,6 @@
 # design-to-code
 
-D2C 是一个面向现有 React 或 Vue Web 项目的轻量 Design-to-Code Skill。它读取指定 Figma 节点和当前项目证据，先让用户确认实现方案，再修改代码并在真实页面中验证结果。
+D2C 是一个面向可识别的现有 Web 前端项目的轻量 Design-to-Code Skill。它读取指定 Figma 节点和当前项目证据，先让用户确认实现方案，再修改代码并在真实页面中验证结果。首版实际验证范围为 React + TypeScript 和 Vue 3 + TypeScript。
 
 ## 日常入口
 
@@ -12,7 +12,7 @@ D2C 是一个面向现有 React 或 Vue Web 项目的轻量 Design-to-Code Skill
 
 - Figma URL 必须包含具体 `node-id`。
 - 未提供 `target-directory` 时，以当前工作目录作为目标项目。
-- 目标必须是可识别的现有 React 或 Vue Web 前端项目。
+- 目标必须是可识别的现有 Web 前端项目；超出首版已验证技术栈时会明确说明验证边界。
 - 日常流程不创建独立预览工作区，也不生成阶段报告链。
 
 ## Figma Provider 与认证

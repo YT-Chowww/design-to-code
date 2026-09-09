@@ -1,6 +1,6 @@
 ---
 name: d2c
-description: Use when implementing a web frontend page or component from a Figma URL with a concrete node-id into an existing React or Vue project.
+description: Use when implementing a web frontend page or component from a Figma URL with a concrete node-id into an identifiable existing Web frontend project.
 ---
 
 # D2C
@@ -8,6 +8,8 @@ description: Use when implementing a web frontend page or component from a Figma
 ## 目标与边界
 
 把 Figma URL 中明确的节点实现到现有 Web 前端项目。以结构化设计信息和当前项目证据为依据，优先复用项目组件、Token、主题、资源与业务模式；修改业务代码前必须让用户确认实现预览。
+
+首版实际验证范围是 React + TypeScript 和 Vue 3 + TypeScript；这不是流程的硬限制。其他可识别的现有 Web 前端项目也按相同证据链执行，但交付时要如实说明尚未经过本项目基准验证。
 
 这个 Skill 只编排当前会话中的读取、判断、写入和验证：
 
@@ -35,7 +37,7 @@ preflight → provider → design context → project rules → project analysis
 遇到以下任一条件，说明缺失项并停止，不写对应项目规则或业务代码：
 
 - Figma URL 缺少具体 `node-id`：要求用户提供目标节点；不得浏览整份文件猜主 Frame。
-- 目标目录不存在，或不能从项目文件识别为现有 React/Vue Web 前端项目。
+- 目标目录不存在，或不能从项目文件识别为现有 Web 前端项目。
 - 用户显式选择的 Provider 在当前会话中缺少完成本任务所需的可调用工具。
 - 没有取得目标节点的结构化设计上下文；截图不能替代它。
 - 项目首次使用且 `D2C.md` 候选内容尚未得到用户确认：不得写入 `D2C.md`，也不得继续业务实现。
@@ -45,7 +47,7 @@ preflight → provider → design context → project rules → project analysis
 
 1. 从 URL 解析具体 `node-id`，保留用户指定的节点范围；不扩大到整个 Figma 文件。
 2. 目标项目使用用户指定目录；未指定时使用当前工作目录。
-3. 只做有界识别：读取项目说明和入口配置，确认它是现有 React 或 Vue Web 前端项目。无法确认就停止。
+3. 只做有界识别：读取项目说明和入口配置，确认它是现有 Web 前端项目。无法确认就停止。
 4. 记录本次任务的目标页面或组件、用户明确的响应式与交互要求，以及禁止修改的范围。
 
 ## 2. Provider
@@ -58,6 +60,7 @@ preflight → provider → design context → project rules → project analysis
 
 - 可用性只由当前会话中完成所需操作的真实可调用工具判断，不由 Server 名称、配置文件或已保存凭据判断。
 - 两者都可用且用户未指定时，选择官方 Figma MCP。
+- 仅官方 Provider 可用时使用官方；仅 Context Provider 可用时使用 Figma-Context-MCP；两者都不可用时说明缺失工具并停止。
 - 用户指定的 Provider 不可用时立即停止，不静默切换。
 - 选择后只使用该 Provider。失败时按对应 Reference 报告；最多仅对临时超时、限流或资源下载失败安全重试一次，然后等待用户决定稍后重试还是明确改选另一个 Provider。
 - 不安装或配置工具，不触碰 OAuth、Token、环境变量或 MCP 配置。

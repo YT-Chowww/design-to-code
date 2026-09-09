@@ -11,6 +11,7 @@ SOURCE_RULES="${PROJECT_ROOT}/.claude/rules"
 TARGET_ROOT="${HOME}/.claude"
 TARGET_SKILLS="${TARGET_ROOT}/skills"
 TARGET_RULES="${TARGET_ROOT}/rules"
+RETIRED_SKILLS=(d2c-init d2c-extract d2c-generate d2c-merge d2c-validate d2c-verify)
 
 echo "============================================="
 echo "        Claude project -> user sync tool      "
@@ -26,6 +27,45 @@ if [ ! -d "${SOURCE_SKILLS}" ]; then
 fi
 
 mkdir -p "${TARGET_SKILLS}" "${TARGET_RULES}"
+
+resolved_link_target() {
+  local target_path="$1"
+  local linked_path="$2"
+  local candidate_path
+  local candidate_directory
+
+  if [[ "${linked_path}" = /* ]]; then
+    candidate_path="${linked_path}"
+  else
+    candidate_path="$(dirname "${target_path}")/${linked_path}"
+  fi
+  candidate_directory=$(dirname "${candidate_path}")
+  if [ -d "${candidate_directory}" ]; then
+    printf '%s/%s\n' "$(cd "${candidate_directory}" && pwd -P)" "$(basename "${candidate_path}")"
+  else
+    printf '%s\n' "${candidate_path}"
+  fi
+}
+
+cleanup_retired_links() {
+  local name source_path target_path linked_path resolved_target
+
+  for name in "${RETIRED_SKILLS[@]}"; do
+    source_path="${SOURCE_SKILLS}/${name}"
+    target_path="${TARGET_SKILLS}/${name}"
+    [ -L "${target_path}" ] || continue
+    linked_path=$(readlink "${target_path}")
+    resolved_target=$(resolved_link_target "${target_path}" "${linked_path}")
+    if [ "${linked_path}" = "${source_path}" ] || [ "${resolved_target}" = "${source_path}" ]; then
+      rm "${target_path}"
+      echo "removed retired skill ${name}"
+    else
+      echo "kept retired skill ${name}: target is a symlink to another source (${linked_path})" >&2
+    fi
+  done
+}
+
+cleanup_retired_links
 
 sync_link() {
   local source_path="$1"

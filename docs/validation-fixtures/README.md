@@ -1,4 +1,6 @@
-# D2C 本地验证数据（Validation Fixtures）
+# D2C 旧方案验证样本（已归档）
+
+> 本目录只保留旧工件式方案的历史样本，不是当前轻量 D2C Skill 的执行入口或验收依据。当前检查见 `npm test` 和 `npm run check:d2c-skill`。
 
 这些测试数据支撑 `docs/capability-roadmap.md` 中模块 8 的自动验证。
 它们刻意放在 `tests/` 之外，这样当前能力路线图工作可以验证协议层，
