@@ -113,16 +113,23 @@ pc_pid=""
 mobile_pid=""
 review_pid=""
 shutdown_signal="TERM"
-pc_available=false
-mobile_available=false
-pc_reason="PC preview did not start."
-mobile_reason="Mobile preview did not start."
+pc_data_available=false
+pc_chart_available=false
+mobile_content_available=false
+mobile_form_available=false
+pc_data_reason="PC preview did not start."
+pc_chart_reason="PC preview did not start."
+mobile_content_reason="Mobile preview did not start."
+mobile_form_reason="Mobile preview did not start."
 
 write_availability() {
   local temporary_file
   temporary_file="$(mktemp "$review_dir/.availability.XXXXXX")"
-  if ! printf '{\n  "pc": { "available": %s, "reason": "%s" },\n  "mobile": { "available": %s, "reason": "%s" }\n}\n' \
-    "$pc_available" "$pc_reason" "$mobile_available" "$mobile_reason" >"$temporary_file"; then
+  if ! printf '{\n  "pc-data": { "available": %s, "reason": "%s" },\n  "pc-chart": { "available": %s, "reason": "%s" },\n  "mobile-content": { "available": %s, "reason": "%s" },\n  "mobile-form": { "available": %s, "reason": "%s" }\n}\n' \
+    "$pc_data_available" "$pc_data_reason" \
+    "$pc_chart_available" "$pc_chart_reason" \
+    "$mobile_content_available" "$mobile_content_reason" \
+    "$mobile_form_available" "$mobile_form_reason" >"$temporary_file"; then
     rm -f -- "$temporary_file"
     return 1
   fi
@@ -305,50 +312,72 @@ fi
 node_available=true
 if ! command -v node >/dev/null 2>&1; then
   node_available=false
-  pc_reason="PC preview did not start because Node is unavailable."
-  mobile_reason="Mobile preview did not start because Node is unavailable."
+  pc_data_reason="PC preview did not start because Node is unavailable."
+  pc_chart_reason="$pc_data_reason"
+  mobile_content_reason="Mobile preview did not start because Node is unavailable."
+  mobile_form_reason="$mobile_content_reason"
 fi
 
 if [[ "$node_available" == true && $pc_vite_result -eq 0 ]]; then
   (cd "$pc_dir" && exec node "$pc_vite" --host 127.0.0.1 --port 4173 --strictPort) >"$log_dir/pc.log" 2>&1 &
   pc_pid="$!"
   if wait_for_service "$pc_pid" "http://127.0.0.1:4173/data-management"; then
-    pc_http_code="$(route_http_code "http://127.0.0.1:4173/data-management")"
-    case "$pc_http_code" in
+    pc_data_http_code="$(route_http_code "http://127.0.0.1:4173/data-management")"
+    case "$pc_data_http_code" in
       2??|3??)
-        pc_available=true
-        pc_reason=""
+        pc_data_available=true
+        pc_data_reason=""
         ;;
-      *) pc_reason="PC preview route returned HTTP $pc_http_code." ;;
+      *) pc_data_reason="PC data route returned HTTP $pc_data_http_code." ;;
+    esac
+    pc_chart_http_code="$(route_http_code "http://127.0.0.1:4173/chart-analytics")"
+    case "$pc_chart_http_code" in
+      2??|3??)
+        pc_chart_available=true
+        pc_chart_reason=""
+        ;;
+      *) pc_chart_reason="PC chart route returned HTTP $pc_chart_http_code." ;;
     esac
   else
-    pc_reason="PC preview did not start on port 4173."
+    pc_data_reason="PC preview did not start on port 4173."
+    pc_chart_reason="$pc_data_reason"
     stop_child "$pc_pid"
     pc_pid=""
   fi
 elif [[ $pc_vite_result -eq 1 ]]; then
-  pc_reason="PC preview did not start because its installed Vite entry is missing."
+  pc_data_reason="PC preview did not start because its installed Vite entry is missing."
+  pc_chart_reason="$pc_data_reason"
 fi
 
 if [[ "$node_available" == true && $mobile_vite_result -eq 0 ]]; then
   (cd "$mobile_dir" && exec node "$mobile_vite" --host 127.0.0.1 --port 4174 --strictPort) >"$log_dir/mobile.log" 2>&1 &
   mobile_pid="$!"
   if wait_for_service "$mobile_pid" "http://127.0.0.1:4174/content-display"; then
-    mobile_http_code="$(route_http_code "http://127.0.0.1:4174/content-display")"
-    case "$mobile_http_code" in
+    mobile_content_http_code="$(route_http_code "http://127.0.0.1:4174/content-display")"
+    case "$mobile_content_http_code" in
       2??|3??)
-        mobile_available=true
-        mobile_reason=""
+        mobile_content_available=true
+        mobile_content_reason=""
         ;;
-      *) mobile_reason="Mobile preview route returned HTTP $mobile_http_code." ;;
+      *) mobile_content_reason="Mobile content route returned HTTP $mobile_content_http_code." ;;
+    esac
+    mobile_form_http_code="$(route_http_code "http://127.0.0.1:4174/form-interaction")"
+    case "$mobile_form_http_code" in
+      2??|3??)
+        mobile_form_available=true
+        mobile_form_reason=""
+        ;;
+      *) mobile_form_reason="Mobile form route returned HTTP $mobile_form_http_code." ;;
     esac
   else
-    mobile_reason="Mobile preview did not start on port 4174."
+    mobile_content_reason="Mobile preview did not start on port 4174."
+    mobile_form_reason="$mobile_content_reason"
     stop_child "$mobile_pid"
     mobile_pid=""
   fi
 elif [[ $mobile_vite_result -eq 1 ]]; then
-  mobile_reason="Mobile preview did not start because its installed Vite entry is missing."
+  mobile_content_reason="Mobile preview did not start because its installed Vite entry is missing."
+  mobile_form_reason="$mobile_content_reason"
 fi
 
 write_availability
@@ -356,11 +385,17 @@ write_availability
 echo "Review: http://127.0.0.1:4172"
 echo "PC: http://127.0.0.1:4173/data-management and http://127.0.0.1:4173/chart-analytics"
 echo "Mobile: http://127.0.0.1:4174/content-display and http://127.0.0.1:4174/form-interaction"
-if [[ "$pc_available" != true ]]; then
-  echo "PC unavailable: $pc_reason" >&2
+if [[ "$pc_data_available" != true ]]; then
+  echo "PC data unavailable: $pc_data_reason" >&2
 fi
-if [[ "$mobile_available" != true ]]; then
-  echo "Mobile unavailable: $mobile_reason" >&2
+if [[ "$pc_chart_available" != true ]]; then
+  echo "PC chart unavailable: $pc_chart_reason" >&2
+fi
+if [[ "$mobile_content_available" != true ]]; then
+  echo "Mobile content unavailable: $mobile_content_reason" >&2
+fi
+if [[ "$mobile_form_available" != true ]]; then
+  echo "Mobile form unavailable: $mobile_form_reason" >&2
 fi
 
 while true; do
@@ -372,21 +407,35 @@ while true; do
   if [[ -n "$pc_pid" ]] && ! kill -0 "$pc_pid" 2>/dev/null; then
     wait "$pc_pid" 2>/dev/null || true
     pc_pid=""
-    if [[ "$pc_available" == true ]]; then
-      pc_available=false
-      pc_reason="PC preview process exited."
+    if [[ "$pc_data_available" == true ]]; then
+      pc_data_available=false
+      pc_data_reason="PC preview process exited."
       availability_changed=true
-      echo "$pc_reason" >&2
+    fi
+    if [[ "$pc_chart_available" == true ]]; then
+      pc_chart_available=false
+      pc_chart_reason="PC preview process exited."
+      availability_changed=true
+    fi
+    if [[ "$availability_changed" == true ]]; then
+      echo "PC preview process exited." >&2
     fi
   fi
   if [[ -n "$mobile_pid" ]] && ! kill -0 "$mobile_pid" 2>/dev/null; then
     wait "$mobile_pid" 2>/dev/null || true
     mobile_pid=""
-    if [[ "$mobile_available" == true ]]; then
-      mobile_available=false
-      mobile_reason="Mobile preview process exited."
+    if [[ "$mobile_content_available" == true ]]; then
+      mobile_content_available=false
+      mobile_content_reason="Mobile preview process exited."
       availability_changed=true
-      echo "$mobile_reason" >&2
+    fi
+    if [[ "$mobile_form_available" == true ]]; then
+      mobile_form_available=false
+      mobile_form_reason="Mobile preview process exited."
+      availability_changed=true
+    fi
+    if [[ "$availability_changed" == true ]]; then
+      echo "Mobile preview process exited." >&2
     fi
   fi
   if [[ "$availability_changed" == true ]]; then

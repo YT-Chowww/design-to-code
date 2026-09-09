@@ -118,8 +118,10 @@ while :; do sleep 0.05; done
 `;
   const fakeCurl = `#!/bin/sh
 case "$*" in
-  *4173*) mode="$FAKE_PC_MODE" ;;
-  *4174*) mode="$FAKE_MOBILE_MODE" ;;
+  *4173/data-management*) mode="$FAKE_PC_DATA_MODE" ;;
+  *4173/chart-analytics*) mode="$FAKE_PC_CHART_MODE" ;;
+  *4174/content-display*) mode="$FAKE_MOBILE_CONTENT_MODE" ;;
+  *4174/form-interaction*) mode="$FAKE_MOBILE_FORM_MODE" ;;
   *4172*) mode=healthy ;;
   *) exit 1 ;;
 esac
@@ -138,6 +140,10 @@ if [ "$mode" = http-error ] || [ "$mode" = http-error-later-fail ]; then printf 
       TMPDIR: "/tmp",
       FAKE_PC_MODE: modes.pc,
       FAKE_MOBILE_MODE: modes.mobile,
+      FAKE_PC_DATA_MODE: modes.pcData ?? modes.pc,
+      FAKE_PC_CHART_MODE: modes.pcChart ?? modes.pc,
+      FAKE_MOBILE_CONTENT_MODE: modes.mobileContent ?? modes.mobile,
+      FAKE_MOBILE_FORM_MODE: modes.mobileForm ?? modes.mobile,
       FAKE_REVIEW_MODE: modes.review ?? "healthy",
       FAKE_PROCESS_DIR: processDir,
     },
@@ -172,6 +178,15 @@ function readAvailability(fixture) {
   return JSON.parse(fs.readFileSync(path.join(fixture.workspace, "review/availability.json"), "utf8"));
 }
 
+function expectedHealthyAvailability() {
+  return {
+    "pc-data": { available: true, reason: "" },
+    "pc-chart": { available: true, reason: "" },
+    "mobile-content": { available: true, reason: "" },
+    "mobile-form": { available: true, reason: "" },
+  };
+}
+
 function processExists(pid) {
   try {
     process.kill(pid, 0);
@@ -190,10 +205,7 @@ test("preview helper keeps all healthy services until signal and cleans children
       () => ["pc", "mobile", "review"].every((service) => fs.existsSync(path.join(fixture.processDir, `${service}.pid`))),
       `child PID evidence was not written: ${fixture.stderr()}`,
     );
-    assert.deepEqual(readAvailability(fixture), {
-      pc: { available: true, reason: "" },
-      mobile: { available: true, reason: "" },
-    });
+    assert.deepEqual(readAvailability(fixture), expectedHealthyAvailability());
     fixture.child.kill("SIGTERM");
     await fixture.exit;
     for (const service of ["pc", "mobile", "review"]) {
@@ -267,11 +279,14 @@ test("initial PC failure leaves mobile and review available", async () => {
   let sentinelExit;
   try {
     await waitFor(() => fs.existsSync(path.join(fixture.workspace, "review/availability.json")), `availability was not written: ${fixture.stderr()}`);
-    await waitFor(() => readAvailability(fixture).mobile.available, `mobile never became available: ${fixture.stderr()}`);
+    await waitFor(() => readAvailability(fixture)["mobile-content"].available, `mobile never became available: ${fixture.stderr()}`);
     const availability = readAvailability(fixture);
-    assert.equal(availability.pc.available, false);
-    assert.match(availability.pc.reason, /start|启动/iu);
-    assert.equal(availability.mobile.available, true);
+    assert.equal(availability["pc-data"].available, false);
+    assert.equal(availability["pc-chart"].available, false);
+    assert.match(availability["pc-data"].reason, /start|启动/iu);
+    assert.match(availability["pc-chart"].reason, /start|启动/iu);
+    assert.equal(availability["mobile-content"].available, true);
+    assert.equal(availability["mobile-form"].available, true);
     assert.equal(fixture.child.exitCode, null, `helper exited early: ${fixture.stderr()}`);
     const failedPcPid = Number(fs.readFileSync(path.join(fixture.processDir, "pc.pid"), "utf8"));
     assert.equal(processExists(failedPcPid), false, "failed PC child was not reaped before review cleanup");
@@ -288,16 +303,43 @@ test("initial PC failure leaves mobile and review available", async () => {
   }
 });
 
-test("PC route HTTP error becomes local evidence while review stays alive", async () => {
-  const fixture = createFakePreviewFixture("pc-http-error", { pc: "http-error", mobile: "healthy" });
+test("PC chart HTTP 500 leaves PC data healthy and review alive", async () => {
+  const fixture = createFakePreviewFixture("pc-chart-http-error", {
+    pc: "healthy",
+    pcChart: "http-error",
+    mobile: "healthy",
+  });
   try {
     await waitFor(() => fs.existsSync(path.join(fixture.workspace, "review/availability.json")), `availability was not written: ${fixture.stderr()}`);
-    await waitFor(() => readAvailability(fixture).mobile.available, `mobile never became available: ${fixture.stderr()}`);
+    await waitFor(() => readAvailability(fixture)["mobile-content"].available, `mobile never became available: ${fixture.stderr()}`);
     const availability = readAvailability(fixture);
-    assert.equal(availability.pc.available, false);
-    assert.match(availability.pc.reason, /HTTP 500/u);
-    assert.equal(availability.mobile.available, true);
+    assert.deepEqual(availability["pc-data"], { available: true, reason: "" });
+    assert.equal(availability["pc-chart"].available, false);
+    assert.match(availability["pc-chart"].reason, /HTTP 500/u);
+    assert.equal(availability["mobile-content"].available, true);
+    assert.equal(availability["mobile-form"].available, true);
     assert.equal(fixture.child.exitCode, null, `helper exited for an app HTTP error: ${fixture.stderr()}`);
+  } finally {
+    await stopFixture(fixture);
+  }
+});
+
+test("mobile form HTTP 500 leaves mobile content healthy and review alive", async () => {
+  const fixture = createFakePreviewFixture("mobile-form-http-error", {
+    pc: "healthy",
+    mobile: "healthy",
+    mobileForm: "http-error",
+  });
+  try {
+    await waitFor(() => fs.existsSync(path.join(fixture.workspace, "review/availability.json")), `availability was not written: ${fixture.stderr()}`);
+    await waitFor(() => readAvailability(fixture)["pc-data"].available, `PC never became available: ${fixture.stderr()}`);
+    const availability = readAvailability(fixture);
+    assert.deepEqual(availability["mobile-content"], { available: true, reason: "" });
+    assert.equal(availability["mobile-form"].available, false);
+    assert.match(availability["mobile-form"].reason, /HTTP 500/u);
+    assert.equal(availability["pc-data"].available, true);
+    assert.equal(availability["pc-chart"].available, true);
+    assert.equal(fixture.child.exitCode, null, `helper exited for a scenario HTTP error: ${fixture.stderr()}`);
   } finally {
     await stopFixture(fixture);
   }
@@ -309,12 +351,14 @@ test("HTTP-error app exit is reaped without signaling an unrelated process", asy
   let sentinelExit;
   try {
     await waitFor(() => fs.existsSync(path.join(fixture.workspace, "review/availability.json")), `availability was not written: ${fixture.stderr()}`);
-    await waitFor(() => readAvailability(fixture).pc.reason.includes("HTTP 500"), `HTTP error was not recorded: ${fixture.stderr()}`);
+    await waitFor(() => readAvailability(fixture)["pc-data"].reason.includes("HTTP 500"), `HTTP error was not recorded: ${fixture.stderr()}`);
     const pcPidFile = path.join(fixture.processDir, "pc.pid");
     await waitFor(() => fs.existsSync(pcPidFile), `PC PID evidence was not written: ${fixture.stderr()}`);
     const failedPcPid = Number(fs.readFileSync(pcPidFile, "utf8"));
     await waitFor(() => !processExists(failedPcPid), "HTTP-error PC child did not exit");
-    assert.match(readAvailability(fixture).pc.reason, /HTTP 500/u, "process exit replaced the more precise HTTP error reason");
+    const availability = readAvailability(fixture);
+    assert.match(availability["pc-data"].reason, /HTTP 500/u, "process exit replaced the more precise HTTP error reason");
+    assert.match(availability["pc-chart"].reason, /HTTP 500/u, "process exit replaced the sibling HTTP error reason");
     assert.equal(fixture.child.exitCode, null, `helper exited after HTTP-error app stopped: ${fixture.stderr()}`);
 
     sentinel = spawn(process.execPath, ["-e", "setInterval(() => {}, 1000)"], { stdio: "ignore" });
@@ -334,12 +378,32 @@ test("later mobile exit updates evidence without stopping PC or review", async (
   const fixture = createFakePreviewFixture("later-mobile", { pc: "healthy", mobile: "later-fail" });
   try {
     await waitFor(() => fs.existsSync(path.join(fixture.workspace, "review/availability.json")), `availability was not written: ${fixture.stderr()}`);
-    await waitFor(() => readAvailability(fixture).mobile.reason.includes("exited"), `later failure was not recorded: ${fixture.stderr()}`);
+    await waitFor(() => readAvailability(fixture)["mobile-content"].reason.includes("exited"), `later failure was not recorded: ${fixture.stderr()}`);
     const availability = readAvailability(fixture);
-    assert.equal(availability.pc.available, true);
-    assert.equal(availability.mobile.available, false);
+    assert.equal(availability["pc-data"].available, true);
+    assert.equal(availability["pc-chart"].available, true);
+    assert.equal(availability["mobile-content"].available, false);
+    assert.equal(availability["mobile-form"].available, false);
+    assert.match(availability["mobile-content"].reason, /exited/iu);
+    assert.match(availability["mobile-form"].reason, /exited/iu);
     assert.equal(fixture.child.exitCode, null, `helper exited after one app failed: ${fixture.stderr()}`);
   } finally {
     await stopFixture(fixture);
   }
+});
+
+test("review status lookup uses the exact scenario ID", async () => {
+  const modulePath = path.join(root, ".claude/skills/d2c-benchmark/templates/review/scenario-availability.mjs");
+  const { scenarioAvailability } = await import(`file://${modulePath}?test=${Date.now()}`);
+  const availability = {
+    "pc-data": { available: true, reason: "" },
+    "pc-chart": { available: false, reason: "PC chart returned HTTP 500." },
+  };
+
+  assert.deepEqual(scenarioAvailability(availability, "pc-data"), { available: true, reason: "" });
+  assert.deepEqual(scenarioAvailability(availability, "pc-chart"), {
+    available: false,
+    reason: "PC chart returned HTTP 500.",
+  });
+  assert.equal(scenarioAvailability(availability, "pc"), null);
 });

@@ -19,6 +19,7 @@ const required = [
   ".claude/skills/d2c-benchmark/templates/pc-react-antd/package.json",
   ".claude/skills/d2c-benchmark/templates/mobile-vue-vant/package.json",
   ".claude/skills/d2c-benchmark/templates/review/index.html",
+  ".claude/skills/d2c-benchmark/templates/review/scenario-availability.mjs",
   ".claude/skills/d2c-benchmark/scripts/reset-latest.sh",
   ".claude/skills/d2c-benchmark/scripts/start-preview.sh",
 ];
@@ -395,9 +396,9 @@ function checkReviewTemplate() {
   if (!/Number\.isInteger\(width\)/u.test(app)) {
     errors.push(`${appPath} must validate numeric width metadata before inline style assignment`);
   }
-  for (const availabilityMarker of ["availability.json", "available", "reason", "application"]) {
+  for (const availabilityMarker of ["availability.json", "available", "reason", "scenarioAvailability"]) {
     if (!app.includes(availabilityMarker)) {
-      errors.push(`${appPath} must render per-application availability evidence: ${availabilityMarker}`);
+      errors.push(`${appPath} must render per-scenario availability evidence: ${availabilityMarker}`);
     }
   }
   if (!/reconcileApplication/u.test(app) || /if\s*\(\s*!viewport\s*\|\|\s*!frame\s*\)\s*return/u.test(app)) {
@@ -508,9 +509,19 @@ function checkStartScript() {
   if (/curl\s+-[^\n]*f/u.test(script)) {
     errors.push(`${startScriptPath} must not stop all review services for one scenario HTTP error`);
   }
-  for (const availabilityMarker of ["availability.json", "pc_available", "mobile_available", "pc_reason", "mobile_reason"]) {
+  for (const availabilityMarker of [
+    "availability.json",
+    "pc_data_available",
+    "pc_chart_available",
+    "mobile_content_available",
+    "mobile_form_available",
+    "pc_data_reason",
+    "pc_chart_reason",
+    "mobile_content_reason",
+    "mobile_form_reason",
+  ]) {
     if (!script.includes(availabilityMarker)) {
-      errors.push(`${startScriptPath} must persist application availability: ${availabilityMarker}`);
+      errors.push(`${startScriptPath} must persist scenario availability: ${availabilityMarker}`);
     }
   }
   if (/availability_file\.tmp\.\$\$/u.test(script) || !/mktemp\s+[^\n]*review_dir[^\n]*availability/u.test(script)) {

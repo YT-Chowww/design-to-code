@@ -1,3 +1,5 @@
+import { scenarioAvailability } from './scenario-availability.mjs';
+
 const scenarios = [
   ['pc-data', 'PC 数据管理', 'references/pc-data.png', 'http://127.0.0.1:4173/data-management', 'pc', 1400],
   ['pc-chart', 'PC 图表分析', 'references/pc-chart.png', 'http://127.0.0.1:4173/chart-analytics', 'pc', 500],
@@ -40,16 +42,6 @@ function pane(title) {
   return { section, viewport };
 }
 
-async function checkPage(url, viewport, frame, label) {
-  try {
-    await fetch(url, { mode: 'no-cors', cache: 'no-store' });
-  } catch {
-    frame.remove();
-    viewport.dataset.pageState = 'connection-error';
-    viewport.append(errorMessage(`${label} 无法访问，请检查对应预览服务。`));
-  }
-}
-
 function showApplicationError(viewport, label, reason, state = 'unavailable') {
   const nextState = `${state}:${reason}`;
   if (viewport.dataset.pageState === nextState) return;
@@ -68,14 +60,13 @@ function renderApplication(viewport, pageUrl, label, pixelWidth) {
   viewport.dataset.pageState = 'iframe';
   viewport.replaceChildren();
   viewport.append(frame);
-  void checkPage(pageUrl, viewport, frame, label);
 }
 
 async function reconcileApplication(viewport, scenario) {
-  const [id, label, , pageUrl, application, width] = scenario;
+  const [id, label, , pageUrl, , width] = scenario;
   const availability = await readAvailability();
   if (view.dataset.scenario !== id) return;
-  const evidence = availability?.[application];
+  const evidence = scenarioAvailability(availability, id);
   const frame = viewport.querySelector('iframe');
   if (evidence && !evidence.available) {
     showApplicationError(viewport, label, evidence.reason || '对应应用不可用。');
