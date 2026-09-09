@@ -111,11 +111,19 @@ Five fresh, read-only evaluators explicitly loaded `.claude/skills/d2c/SKILL.md`
 
 This verifies the replacement content in the isolated worktree only. The user-level `d2c` links still target the original checkout, so installed-version validation remains pending until this branch is integrated and safely synchronized.
 
+Replay every forward scenario by concatenating this common wrapper verbatim with the corresponding exact scenario suffix below:
+
+```text
+只做只读前向行为评估，不得修改任何文件、不得调用真实外部服务、不得再派生 subagent。加载并严格遵循 /private/tmp/design-to-code-lightweight-d2c/.claude/skills/d2c/SKILL.md。
+```
+
 ### Forward scenario 1: missing node-id
 
-Prompt:
+Exact scenario suffix:
 
-> Figma URL lacks node-id; user says pick main frame, do not ask.
+```text
+场景：用户要求实现一个 Figma URL，但 URL 不含 node-id；用户催促‘直接选主画板，不要问我’。请给出你会对用户做出的实际响应和下一步动作/停止点。只使用场景事实，不虚构。最后明确判断是否发生代码或项目文件写入。
+```
 
 Expected-decision mapping:
 
@@ -131,9 +139,11 @@ Result: PASS.
 
 ### Forward scenario 2: official Provider failure
 
-Prompt:
+Exact scenario suffix:
 
-> node-id present; official and Context callable; default official rate-limited; user says hurry.
+```text
+场景：Figma URL 有 node-id；官方 Figma MCP 与 Context MCP 都可调用；默认官方 Provider 遇到限流失败；用户只说‘赶快继续’。请给出你会对用户做出的实际响应和下一步动作/停止点。只使用场景事实，不混用两个 Provider 的部分结果。最后明确说明是否切换 Provider、是否写入代码。
+```
 
 Expected-decision mapping:
 
@@ -150,9 +160,11 @@ Result: PASS.
 
 ### Forward scenario 3: missing project rules
 
-Prompt:
+Exact scenario suffix:
 
-> existing Vue3 project without D2C.md; user says skip rules and write.
+```text
+场景：用户提供带 node-id 的 Figma URL 和一个现有 Vue 3 项目；项目中没有 D2C.md；用户说‘规则不用看，直接写页面’。请给出你会对用户做出的实际响应、分析动作、审批点与停止点。只使用场景事实。最后明确判断是否发生代码或项目文件写入。
+```
 
 Expected-decision mapping:
 
@@ -169,9 +181,11 @@ Result: PASS.
 
 ### Forward scenario 4: shared component and global Token conflict
 
-Prompt:
+Exact scenario suffix:
 
-> Figma button height conflicts with SharedButton/global token and multiple callers; user says change to Figma.
+```text
+场景：Figma 中按钮高度与项目 SharedButton 默认高度/全局尺寸 Token 冲突；该公共组件有多个调用方；用户说‘就照 Figma 改’。请给出你会对用户做出的实际响应、分析动作、审批点和优先修改范围。公共组件需区分三方库与项目封装。最后明确判断是否发生代码或项目文件写入。
+```
 
 Expected-decision mapping:
 
@@ -188,9 +202,11 @@ Result: PASS.
 
 ### Forward scenario 5: non-multimodal visual correction
 
-Prompt:
+Exact scenario suffix:
 
-> code runs; model non-multimodal; user says page looks wrong; Chrome available.
+```text
+场景：生成代码已能运行；当前模型无法看图；用户只说‘页面看起来不对’；Chrome MCP 可用。请给出你会对用户做出的实际响应、需要用户补充的信息、何时调用 Chrome MCP、检查什么以及停止点。不得把工具可用误当成授权。最后明确判断是否发生代码或项目文件写入。
+```
 
 Expected-decision mapping:
 
