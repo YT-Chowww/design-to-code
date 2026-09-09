@@ -2,5 +2,6 @@
 ./.mcp.json
 templates/vite-preview
 .d2c/*
+.d2c-benchmark/latest/
 tests/results/*
 .DS_Store

@@ -1,13 +1,18 @@
 #!/usr/bin/env node
 
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 
 const root = process.cwd();
 const skillPath = ".claude/skills/d2c-benchmark/SKILL.md";
 const scenariosPath = ".claude/skills/d2c-benchmark/references/scenarios.md";
 const pcTemplatePath = ".claude/skills/d2c-benchmark/templates/pc-react-antd";
 const mobileTemplatePath = ".claude/skills/d2c-benchmark/templates/mobile-vue-vant";
+const reviewTemplatePath = ".claude/skills/d2c-benchmark/templates/review";
+const resetScriptPath = ".claude/skills/d2c-benchmark/scripts/reset-latest.sh";
+const startScriptPath = ".claude/skills/d2c-benchmark/scripts/start-preview.sh";
 const required = [
   skillPath,
   scenariosPath,
@@ -207,12 +212,142 @@ function checkMobileTemplate() {
   }
 }
 
+function checkReviewTemplate() {
+  const indexPath = path.join(reviewTemplatePath, "index.html");
+  const stylePath = path.join(reviewTemplatePath, "style.css");
+  const appPath = path.join(reviewTemplatePath, "app.js");
+
+  if (![indexPath, stylePath, appPath].every((file) => fs.existsSync(absolute(file)))) {
+    return;
+  }
+
+  const index = fs.readFileSync(absolute(indexPath), "utf8");
+  const style = fs.readFileSync(absolute(stylePath), "utf8");
+  const app = fs.readFileSync(absolute(appPath), "utf8");
+  const expectedScenarios = [
+    ["pc-data", "references/pc-data.png", "http://127.0.0.1:4173/data-management"],
+    ["pc-chart", "references/pc-chart.png", "http://127.0.0.1:4173/chart-analytics"],
+    ["mobile-content", "references/mobile-content.png", "http://127.0.0.1:4174/content-display"],
+    ["mobile-form", "references/mobile-form.png", "http://127.0.0.1:4174/form-interaction"],
+  ];
+  const declaredScenarioIds = [...app.matchAll(/^\s*\[['"]([^'"]+)['"],/gmu)]
+    .map((match) => match[1]);
+  const expectedScenarioIds = expectedScenarios.map(([id]) => id);
+  if (JSON.stringify(declaredScenarioIds) !== JSON.stringify(expectedScenarioIds)) {
+    errors.push(`${appPath} must declare exactly the four stable scenario IDs in order`);
+  }
+
+  for (const scenario of expectedScenarios) {
+    for (const value of scenario) {
+      if (!app.includes(value)) {
+        errors.push(`${appPath} must contain stable scenario value: ${value}`);
+      }
+    }
+  }
+
+  if (!index.includes("app.js") || !index.includes("style.css")) {
+    errors.push(`${indexPath} must load the review application and stylesheet`);
+  }
+  const rendersImage = /<img\b/iu.test(app) || /createElement\(["']img["']\)/u.test(app);
+  const rendersFrame = /<iframe\b/iu.test(app) || /createElement\(["']iframe["']\)/u.test(app);
+  if (!rendersImage || !rendersFrame) {
+    errors.push(`${appPath} must render a Figma image and a real-page iframe`);
+  }
+  if (!/overflow\s*:\s*auto/iu.test(style)) {
+    errors.push(`${stylePath} must provide independently scrollable panes`);
+  }
+  if (!/(onerror|addEventListener\(["']error)/u.test(app) || !/error/iu.test(app)) {
+    errors.push(`${appPath} must display per-scenario load errors`);
+  }
+  if (/\b(score|threshold|ranking|classification)\b/iu.test(`${index}\n${app}`)) {
+    errors.push(`${reviewTemplatePath} must not calculate or display model evaluation`);
+  }
+}
+
+function checkResetScriptBehavior() {
+  const script = absolute(resetScriptPath);
+  if (!fs.existsSync(script)) {
+    return;
+  }
+
+  const temporaryParent = fs.mkdtempSync(path.join(os.tmpdir(), "d2c-benchmark-check-"));
+  const target = path.join(temporaryParent, "latest");
+
+  try {
+    fs.mkdirSync(target, { recursive: true });
+    fs.writeFileSync(path.join(target, "stale.txt"), "remove me\n");
+    const reset = spawnSync("bash", [script, target], { cwd: root, encoding: "utf8" });
+    if (reset.status !== 0) {
+      errors.push(`${resetScriptPath} failed for an explicit temporary target: ${reset.stderr.trim()}`);
+      return;
+    }
+
+    const entries = fs.readdirSync(target, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .sort();
+    const expected = ["mobile", "pc", "references", "review"];
+    if (JSON.stringify(entries) !== JSON.stringify(expected)) {
+      errors.push(`${resetScriptPath} must create exactly pc/mobile/review/references directories`);
+    }
+    if (fs.existsSync(path.join(target, "stale.txt"))) {
+      errors.push(`${resetScriptPath} must replace the validated target`);
+    }
+
+    const noTarget = spawnSync("bash", [script], { cwd: root, encoding: "utf8" });
+    if (noTarget.status === 0) {
+      errors.push(`${resetScriptPath} must reject a missing target`);
+    }
+    const repoRoot = spawnSync("bash", [script, root], { cwd: root, encoding: "utf8" });
+    if (repoRoot.status === 0) {
+      errors.push(`${resetScriptPath} must reject the repository root`);
+    }
+    for (const unsafeTarget of ["/", os.homedir(), "/Applications/d2c-benchmark-outside-check"]) {
+      const unsafe = spawnSync("bash", [script, unsafeTarget], { cwd: root, encoding: "utf8" });
+      if (unsafe.status === 0) {
+        errors.push(`${resetScriptPath} must reject unsafe target: ${unsafeTarget}`);
+      }
+    }
+  } finally {
+    fs.rmSync(temporaryParent, { recursive: true, force: true });
+  }
+}
+
+function checkStartScript() {
+  const scriptPath = absolute(startScriptPath);
+  if (!fs.existsSync(scriptPath)) {
+    return;
+  }
+  const script = fs.readFileSync(scriptPath, "utf8");
+  for (const port of ["4172", "4173", "4174"]) {
+    if (!script.includes(port)) {
+      errors.push(`${startScriptPath} must use port ${port}`);
+    }
+  }
+  if (!/trap\s+[^\n]*(INT|TERM)/u.test(script) || !/kill/u.test(script) || !/wait/u.test(script)) {
+    errors.push(`${startScriptPath} must forward termination and clean up child processes`);
+  }
+  if (!/review_reference_link/u.test(script) || !/ln\s+-s/u.test(script)) {
+    errors.push(`${startScriptPath} must expose sibling references at the review server root`);
+  }
+  if (/curl\s+-[^\n]*f/u.test(script)) {
+    errors.push(`${startScriptPath} must not stop all review services for one scenario HTTP error`);
+  }
+  const invalid = spawnSync("bash", [scriptPath, root], { cwd: root, encoding: "utf8" });
+  if (invalid.status === 0) {
+    errors.push(`${startScriptPath} must reject an invalid workspace`);
+  }
+}
+
 checkRequiredFiles();
 checkLatestIsIgnored();
 checkDirectScenarioLink();
 checkScenarioReferenceDoesNotLinkToReference();
 checkPcTemplate();
 checkMobileTemplate();
+checkReviewTemplate();
+checkResetScriptBehavior();
+checkStartScript();
 
 if (errors.length > 0) {
   console.error("D2C Benchmark contract failed:");
