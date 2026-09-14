@@ -88,3 +88,39 @@ for (const [scriptName, targetKind] of [
     }
   });
 }
+
+test("Claude sync removes owned retired rules without publishing global rules", () => {
+  const temporaryRoot = fs.mkdtempSync(path.join(os.tmpdir(), "d2c-retired-rules-"));
+  const cases = ["owned", "relative", "foreign", "file", "directory", "absent"];
+  try {
+    for (const kind of cases) {
+      const temporaryHome = path.join(temporaryRoot, kind);
+      const targetRules = path.join(temporaryHome, ".claude", "rules");
+      fs.mkdirSync(targetRules, { recursive: true });
+      for (const name of ["coding-conventions.md", "d2c-workflow.md"]) {
+        const entry = path.join(targetRules, name);
+        const source = path.join(repositoryRoot, ".claude", "rules", name);
+        if (kind === "owned") fs.symlinkSync(source, entry);
+        if (kind === "relative") fs.symlinkSync(path.relative(fs.realpathSync(targetRules), source), entry);
+        if (kind === "foreign") fs.symlinkSync(path.join(temporaryRoot, "foreign", name), entry);
+        if (kind === "file") fs.writeFileSync(entry, "user rule\n");
+        if (kind === "directory") fs.mkdirSync(entry);
+      }
+      const result = spawnSync("bash", [path.join(repositoryRoot, "scripts/sync-claude-skills.sh")], {
+        cwd: repositoryRoot,
+        encoding: "utf8",
+        env: { ...process.env, HOME: temporaryHome },
+      });
+      assert.equal(result.status, 0, result.stderr || result.stdout);
+      for (const name of ["coding-conventions.md", "d2c-workflow.md"]) {
+        const entry = path.join(targetRules, name);
+        if (["owned", "relative", "absent"].includes(kind)) assert.equal(pathEntryExists(entry), false, kind);
+        if (kind === "foreign") assert.equal(fs.readlinkSync(entry), path.join(temporaryRoot, "foreign", name));
+        if (kind === "file") assert.equal(fs.readFileSync(entry, "utf8"), "user rule\n");
+        if (kind === "directory") assert.equal(fs.lstatSync(entry).isDirectory(), true);
+      }
+    }
+  } finally {
+    fs.rmSync(temporaryRoot, { recursive: true, force: true });
+  }
+});

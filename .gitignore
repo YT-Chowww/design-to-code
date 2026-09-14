@@ -1,7 +1,6 @@
-./context
 ./.mcp.json
-templates/vite-preview
-.d2c/*
 .d2c-benchmark/latest/
-tests/results/*
+node_modules/
+dist/
+.superpowers/
 .DS_Store

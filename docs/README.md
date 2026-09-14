@@ -14,7 +14,7 @@ D2C 当前以轻量的 `d2c` Skill 作为日常工作流：从带具体 `node-id
 | [外部使用](提供外部使用.md) | 把本仓库 Skill 同步到本机工具 |
 | [Benchmark 行为场景](skill-evals/d2c-benchmark-scenarios.md) | 回归可选 Benchmark 的隔离与展示边界 |
 
-`architecture.md`、`baseline-protocol.md`、`requirements.md`、`capability-roadmap.md`、`design-specs/`、`figma-examples.*` 和 `validation-fixtures/` 仅保存旧方案背景或历史验证样本，不作为当前执行入口。它们不会覆盖上述需求结论、主 Skill 或操作指南。
+仓库仅维护当前方案的需求、设计、使用指南与行为验证证据。旧工件流水线的协议、脚本和样本已移除；历史版本可通过 Git 查询。
 
 ## 当前入口
 

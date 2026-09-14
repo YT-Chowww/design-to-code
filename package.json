@@ -2,7 +2,6 @@
   "name": "design-to-code",
   "version": "1.0.0",
   "description": "A lightweight D2C Skill that implements a concrete Figma node in an identifiable existing Web frontend project with user confirmation and real-page validation.",
-  "main": "index.js",
   "directories": {
     "doc": "docs",
     "test": "tests"

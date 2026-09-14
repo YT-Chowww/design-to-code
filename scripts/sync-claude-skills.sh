@@ -12,12 +12,12 @@ TARGET_ROOT="${HOME}/.claude"
 TARGET_SKILLS="${TARGET_ROOT}/skills"
 TARGET_RULES="${TARGET_ROOT}/rules"
 RETIRED_SKILLS=(d2c-init d2c-extract d2c-generate d2c-merge d2c-validate d2c-verify)
+RETIRED_RULES=(coding-conventions.md d2c-workflow.md)
 
 echo "============================================="
 echo "        Claude project -> user sync tool      "
 echo "============================================="
 echo "source skills: ${SOURCE_SKILLS}"
-echo "source rules : ${SOURCE_RULES}"
 echo "target root  : ${TARGET_ROOT}"
 echo "============================================="
 
@@ -26,7 +26,7 @@ if [ ! -d "${SOURCE_SKILLS}" ]; then
   exit 1
 fi
 
-mkdir -p "${TARGET_SKILLS}" "${TARGET_RULES}"
+mkdir -p "${TARGET_SKILLS}"
 
 resolved_link_target() {
   local target_path="$1"
@@ -42,6 +42,8 @@ resolved_link_target() {
   candidate_directory=$(dirname "${candidate_path}")
   if [ -d "${candidate_directory}" ]; then
     printf '%s/%s\n' "$(cd "${candidate_directory}" && pwd -P)" "$(basename "${candidate_path}")"
+  elif [ -d "$(dirname "${candidate_directory}")" ] && [ "$(basename "${candidate_directory}")" = "rules" ]; then
+    printf '%s/rules/%s\n' "$(cd "$(dirname "${candidate_directory}")" && pwd -P)" "$(basename "${candidate_path}")"
   else
     printf '%s\n' "${candidate_path}"
   fi
@@ -66,6 +68,21 @@ cleanup_retired_links() {
 }
 
 cleanup_retired_links
+
+# Retire only this checkout's old global rules; project rules now live in D2C.md.
+for name in "${RETIRED_RULES[@]}"; do
+  target_path="${TARGET_RULES}/${name}"
+  source_path="${SOURCE_RULES}/${name}"
+  [ -L "${target_path}" ] || continue
+  linked_path=$(readlink "${target_path}")
+  resolved_target=$(resolved_link_target "${target_path}" "${linked_path}")
+  if [ "${linked_path}" = "${source_path}" ] || [ "${resolved_target}" = "${source_path}" ]; then
+    rm "${target_path}"
+    echo "removed retired rule ${name}"
+  else
+    echo "kept retired rule ${name}: link belongs to another source" >&2
+  fi
+done
 
 sync_link() {
   local source_path="$1"
@@ -102,14 +119,4 @@ for skill in "${SOURCE_SKILLS}"/*/; do
 done
 
 echo ""
-echo "Linking rules..."
-if [ -d "${SOURCE_RULES}" ]; then
-  for rule in "${SOURCE_RULES}"/*; do
-    [ -e "${rule}" ] || continue
-    name=$(basename "${rule}")
-    sync_link "${rule}" "${TARGET_RULES}/${name}" "rule ${name}"
-  done
-fi
-
-echo ""
-echo "Done. Restart Claude to refresh the available skills and rules."
+echo "Done. Restart Claude to refresh the available skills."

@@ -11,7 +11,7 @@ npm run check:d2c-skill
 
 检查内容包括：主 Skill 与四个 Reference、项目规则模板、链接有效性、模板中立性、旧入口清理、当前文档表述、框架范围、Provider 行为场景和 Code Connect 边界。
 
-`scripts/check-validation-suite.mjs` 是旧入口兼容器，只提示旧验证样本已归档并转到当前轻量检查。`docs/validation-fixtures/` 保留为历史样本，不作为当前能力通过证据。
+日常 Skill 使用 `check:d2c-skill`，可选 Benchmark 使用 `check:d2c-benchmark`。旧工件校验入口和样本不再保留，也不作为当前能力证据。
 
 ## 2. 行为验证
 
