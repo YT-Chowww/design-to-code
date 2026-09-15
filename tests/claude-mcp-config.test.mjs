@@ -8,13 +8,17 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("..", import.meta.url));
 const configPath = path.join(root, ".mcp.example.json");
 
-test("Claude MCP template runs the community Figma provider with an inline token argument", () => {
+test("Claude MCP template configures official and community Figma providers separately", () => {
   assert.equal(fs.existsSync(configPath), true, "missing .mcp.example.json");
   const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
 
   assert.deepEqual(config, {
     mcpServers: {
-      figma: {
+      "figma-official": {
+        type: "http",
+        url: "https://mcp.figma.com/mcp",
+      },
+      "figma-context": {
         command: "npx",
         args: [
           "-y",

@@ -7,7 +7,7 @@
 - 目标是可识别的现有 Web 前端项目。首版实际验证范围为 React + TypeScript 和 Vue 3 + TypeScript。
 - 用户已安装并认证官方 Figma MCP 或 Figma-Context-MCP；Skill 只检查当前会话中所需工具是否可调用。
 
-缺少节点、项目或结构化设计上下文时停止。显式选择的 Provider 不可用或认证失败时，报告原因并停止，不自动换用另一个 Provider。
+缺少节点、项目或结构化设计上下文时停止。显式选择的 Provider 不可用或认证失败时，报告原因并停止，不自动换用另一个 Provider。只有用户未显式指定 Provider、默认官方返回 OAuth 未授权、授权被拒绝或授权已过期，且社区 Provider 可用时，才提示后丢弃官方结果，从目标节点用社区 Provider 重新读取且不混用结果。
 
 ## 日常入口
 
@@ -26,7 +26,7 @@
 
 ## Provider
 
-未显式指定时，按“官方 Figma MCP、Figma-Context-MCP、停止”的顺序选择，并在读取前说明本轮 Provider。当前 Provider 失败时最多对安全的临时错误重试一次，然后由用户决定稍后重试或明确改选；不拼接不同 Provider 的部分结果。
+未显式指定时，按“官方 Figma MCP、Figma-Context-MCP、停止”的顺序选择，并在读取前说明本轮 Provider。用户未显式指定 Provider、默认官方返回 OAuth 未授权、授权被拒绝或授权已过期，且社区 Provider 可用时，提示原因、丢弃官方结果，并从目标节点重新读取且不混用结果。其他失败最多安全重试一次后停止。
 
 认证由用户在工具侧管理。Skill 不读取、保存、复制或输出 OAuth、Token、环境变量或 MCP 配置中的凭据。
 

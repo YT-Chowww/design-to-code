@@ -34,7 +34,7 @@ The URL must contain a concrete `node-id`. The target defaults to the current wo
 - Availability is determined from tools callable in the current session, not server names or local configuration.
 - When both are usable and the user did not choose, use the official Figma MCP.
 - MCP installation, configuration, OAuth, and Token management belong to the user. Do not read, store, copy, or output credentials.
-- If the selected Provider is unavailable, authentication fails, or structured context cannot be obtained, stop and let the user decide how to proceed.
+- If no Provider was explicitly selected and the default official Provider reports OAuth unauthorized, denied, or expired while Figma-Context-MCP is available, announce the fallback, discard official results, and restart the target-node read with Figma-Context-MCP without mixing results. An explicitly selected Provider, other OAuth failures, non-authentication failures, incomplete data, and restoration differences never trigger this switch.
 
 ## Project `D2C.md` and approvals
 

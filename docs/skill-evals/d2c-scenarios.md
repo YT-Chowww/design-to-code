@@ -68,6 +68,12 @@ Scenario: The user explicitly selects official Figma MCP. First, its required to
 
 Expected decision: report the selected Provider, blocked operation, and unavailable or authentication category; stop without automatically switching or inspecting credentials.
 
+## 9c. Default official OAuth fallback
+
+Scenario: Both Providers are callable, the user did not explicitly select one, and the default official Provider returns an OAuth unauthorized, denied, or expired error while reading the target node.
+
+Expected decision: for official OAuth unauthorized, denied, or expired, announce the status, discard any official result, and restart the target-node read with Figma-Context-MCP. Do not switch for other OAuth failures, service errors, rate limits, timeouts, permission or node errors, incomplete design data, or restoration differences.
+
 ## 10. User adjustment conflicts with Figma
 
 Scenario: After the implementation preview, the user requests a layout that conflicts with the affected Figma node.

@@ -26,7 +26,7 @@ description: Use when implementing a web frontend page or component from a Figma
 
 Initial validated scope: React + TypeScript and Vue 3 + TypeScript. Other identifiable existing Web frontend projects follow the same evidence-based flow.
 
-When both Providers are callable, use official. When official only is callable, use official. When Context only is callable, use Figma-Context-MCP. When neither Provider is callable, stop. An explicitly selected unavailable Provider or authentication failure must stop without switching.
+When both Providers are callable, use official. When official only is callable, use official. When Context only is callable, use Figma-Context-MCP. When neither Provider is callable, stop. If the user did not explicitly choose a Provider and official OAuth authorization is denied while Context Provider is available, announce the denial, discard official results, and restart the target-node extraction with Figma-Context-MCP without mixing results. If the user explicitly selected official and OAuth authorization is denied, stop without switching. An explicitly selected unavailable Provider must stop without switching.
 
 When a user adjustment conflicts with Figma, re-read affected Figma and project evidence; the latest user request wins over Figma. Missing fonts or assets must be reported for the user to choose a replacement or accept the difference, without silent substitution.
 `;
@@ -62,6 +62,9 @@ Stop when neither provider is callable.
 
 ## Explicit provider unavailable or authentication failure
 Stop and report the selected provider and authentication category without switching.
+
+## Default official OAuth fallback
+When no Provider was explicitly selected and default official OAuth authorization is denied, announce it and restart extraction with Figma-Context-MCP without mixing results.
 
 ## Missing project rules
 Preview D2C.md and wait before implementation preview.
@@ -206,6 +209,16 @@ test("requires the Provider availability decision matrix in the Skill", () => {
   assert.match(result.stderr, /Skill behavior rule is missing: Context-only Provider/u);
 });
 
+test("requires default official OAuth failure to restart with Context without mixing results", () => {
+  const result = runChecker(
+    "skills/d2c/SKILL.md",
+    validSkill.replace(/If the user did not explicitly choose a Provider[^.]+\. /u, ""),
+  );
+
+  assert.equal(result.status, 1, result.stdout || result.stderr);
+  assert.match(result.stderr, /default official OAuth fallback/u);
+});
+
 test("requires user adjustments to override conflicting Figma evidence", () => {
   const result = runChecker(
     "skills/d2c/SKILL.md",
@@ -239,6 +252,17 @@ const forbiddenCases = [
   ["CLAUDE.md", "On Provider failure, use Figma-Context-MCP instead."],
   ["CLAUDE.md", "官方 Provider 失败时自动改用 Figma-Context-MCP。"],
   ["CLAUDE.md", "官方 Provider 不可用时切换到 Figma-Context-MCP。"],
+  ["CLAUDE.md", "The user explicitly selected official; on OAuth failure, automatically switch to Figma-Context-MCP."],
+  ["CLAUDE.md", "When no Provider was explicitly selected and official OAuth authorization fails while Context Provider is available, announce it and restart with Context Provider while keeping official results."],
+  ["CLAUDE.md", "When no Provider was explicitly selected and official OAuth authorization fails while Context Provider is unavailable, announce it, discard official results, and restart the target-node extraction with Figma-Context-MCP without mixing results."],
+  ["CLAUDE.md", "When no Provider was explicitly selected and official OAuth authorization fails while Context Provider is available, also switch on rate limits; announce it, discard official results, and restart the target-node extraction with Figma-Context-MCP without mixing results."],
+  ["CLAUDE.md", "When no Provider was explicitly selected and official OAuth authorization fails while Context Provider is available, also switch on permission or node errors; announce it, discard official results, and restart the target-node extraction with Figma-Context-MCP without mixing results."],
+  ["CLAUDE.md", "When no Provider was explicitly selected and official OAuth authorization fails while Context Provider is available, also switch for incomplete data or restoration mismatch; announce it, discard official results, and restart the target-node extraction with Figma-Context-MCP without mixing results."],
+  ["CLAUDE.md", "When no Provider was explicitly selected and official OAuth authorization fails while Context Provider is available, announce it, discard official results, and restart the target-node extraction with Figma-Context-MCP without mixing results."],
+  ["CLAUDE.md", "When no Provider was explicitly selected and official OAuth authorization is denied while Context Provider is available, announce it, discard official results, and restart the target-node extraction with Figma-Context-MCP without mixing results; also switch on HTTP 500, network outage, or connection errors."],
+  ["CLAUDE.md", "Do not switch Providers for rate limits, but automatically switch to Figma-Context-MCP on HTTP 500."],
+  ["CLAUDE.md", "Do not switch Providers for rate limits; automatically switch to Figma-Context-MCP on HTTP 500."],
+  ["CLAUDE.md", "限流时不切换 Provider；HTTP 500 时自动改用社区 Provider。"],
 ];
 
 for (const [relativePath, phrase] of forbiddenCases) {
@@ -259,6 +283,8 @@ const allowedCases = [
   ["package.json", "Provider fallback is not automatic."],
   ["CLAUDE.md", "Provider 失败后不自动改用 Figma-Context-MCP。"],
   ["CLAUDE.md", "If the Provider fails, stop and let the user choose another Provider."],
+  ["CLAUDE.md", "When no Provider was explicitly selected and official OAuth authorization is denied while Context Provider is available, announce it, discard official results, and restart the target-node extraction with Figma-Context-MCP without mixing results."],
+  ["docs/operation-guide.md", "未显式指定时，默认官方 OAuth 未授权且社区 Provider 可用，提示后丢弃官方结果，从目标节点重新读取且不混用结果。"],
 ];
 
 for (const [relativePath, phrase] of allowedCases) {

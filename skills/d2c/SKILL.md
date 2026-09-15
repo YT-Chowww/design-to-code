@@ -15,7 +15,7 @@ description: Use when implementing a web frontend page or component from a Figma
 
 - 不安装、启动、认证或配置 MCP，也不读取、保存、复制或输出 OAuth、Token 等凭据。
 - 不创建运行脚本、状态机、`.d2c` 工作区、manifest、normalized JSON、阶段报告或独立日常预览工程。
-- 不自动切换 Provider，不混用两个 Provider 的部分结果，不自动评分或循环收敛。
+- 除“未显式指定 Provider 且默认官方 Provider 返回 OAuth 未授权、授权被拒绝或授权已过期”外，不自动切换 Provider；任何切换都不混用两个 Provider 的结果。不自动评分或循环收敛。
 - 不支持从 Figma Desktop 当前选择推断目标，也不允许只看截图猜代码。
 
 Provider 指取得 Figma 证据的工具来源。本 Skill 仅支持当前会话中实际可调用的官方 Figma MCP 或 Figma-Context-MCP。
@@ -62,7 +62,9 @@ preflight → provider → design context → project rules → project analysis
 - 两者都可用且用户未指定时，选择官方 Figma MCP。
 - 仅官方 Provider 可用时使用官方；仅 Context Provider 可用时使用 Figma-Context-MCP；两者都不可用时说明缺失工具并停止。
 - 用户指定的 Provider 不可用时立即停止，不静默切换。
-- 选择后只使用该 Provider。失败时按对应 Reference 报告；最多仅对临时超时、限流或资源下载失败安全重试一次，然后等待用户决定稍后重试还是明确改选另一个 Provider。
+- 选择后只使用该 Provider。失败时按对应 Reference 分类；最多仅对临时超时、限流或资源下载失败安全重试一次。
+- 用户未显式指定 Provider、默认官方 Provider 返回 OAuth 未授权、授权被拒绝或授权过期，且 Context Provider 的必需操作可调用时：先说明授权失败和即将切换，再丢弃官方调用的任何结果，从目标 `node-id` 开始用 Figma-Context-MCP 重新读取。Context Provider 不可用时停止。
+- 用户显式指定官方 Provider 时，即使返回上述三类 OAuth 授权状态也停止，不自动切换。其他 OAuth 故障、官方服务异常、限流、超时、权限不足、节点错误、数据为空或不完整、以及后续还原偏差均不得触发切换。
 - 不安装或配置工具，不触碰 OAuth、Token、环境变量或 MCP 配置。
 
 按选中的 Provider 读取一个 Reference：

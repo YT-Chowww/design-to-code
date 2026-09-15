@@ -55,6 +55,7 @@ const behaviorScenarios = [
   { label: "Context-only Provider", pattern: /context[- ]only|只有 Context|仅 Context/iu },
   { label: "neither Provider", pattern: /neither provider|两者都不可用|均不可用/iu },
   { label: "explicit Provider unavailable/auth failure", pattern: /explicit provider unavailable|显式指定.{0,20}不可用|authentication failure|认证失败/iu },
+  { label: "default official OAuth fallback", pattern: /default official OAuth fallback|默认官方.{0,24}OAuth.{0,24}(?:降级|切换|社区)/iu },
   { label: "user adjustment conflicts with Figma", pattern: /adjustment conflicts with Figma|用户调整.{0,20}Figma|最新用户要求.{0,20}Figma/iu },
   { label: "missing fonts/assets", pattern: /missing fonts? or assets?|字体或资源缺失|缺少字体|资源缺失/iu },
   { label: "known mismatch with Chrome unavailable", pattern: /known mismatch with Chrome unavailable|已知偏差.{0,24}Chrome.{0,16}不可用/iu },
@@ -125,12 +126,23 @@ function explicitlyNegatesProviderSwitch(segment) {
 
 function hasAutomaticProviderSwitch(document) {
   const provider = /\bProvider\b|\bFigma(?:-Context)?-MCP\b|\b(?:official|context)\s+(?:Figma\s+)?MCP\b|官方\s*(?:Figma\s*)?(?:MCP|Provider)|上下文\s*MCP/iu;
-  const switchAction = /\b(?:fallback|fall(?:s|ing)?\s+back|switch(?:es|ed|ing)?|degrad\w*|use\b.{0,40}\binstead)\b|回退|降级|切换|改用|转用|兜底/iu;
-  const automaticTrigger = /\bautomatic(?:ally)?\b|\b(?:if|when|on)\b.{0,80}\b(?:fail(?:s|ed|ure)?|unavailable|missing)\b|(?:失败|不可用|缺失|异常)(?:时|后)?|自动|静默/iu;
+  const switchAction = /\b(?:fallback|fall(?:s|ing)?\s+back|switch(?:es|ed|ing)?|degrad\w*|restart(?:s|ed|ing)?\b.{0,64}\bwith|use\b.{0,40}\binstead)\b|回退|降级|切换|改用|转用|兜底/iu;
+  const automaticTrigger = /\bautomatic(?:ally)?\b|\b(?:if|when|on)\b.{0,80}\b(?:fail(?:s|ed|ure)?|unavailable|missing|unauthorized|denied|expired)\b|\bHTTP\s+[45]\d\d\b|\bnetwork\s+(?:outage|failure|error)\b|\bconnection\s+(?:failure|error)\b|(?:失败|不可用|缺失|异常|未授权|被拒绝|过期)(?:时|后)?|自动|静默/iu;
   const implicitFallback = /\b(?:fallback|fall(?:s|ing)?\s+back|degradation paths?)\b|回退|降级|兜底/iu;
+  const contradictorySwitch = /\b(?:but|however|yet)\b.{0,120}\b(?:automatic(?:ally)?\s+)?(?:fallback|fall\s+back|switch|use\b.{0,32}\binstead)\b|(?:但|但是|然而|仍然?|却)[^。！？\n]{0,120}(?:自动|静默)?(?:回退|降级|切换|改用|转用|兜底)/iu;
 
-  return proseSegments(document).some((segment) => {
-    if (explicitlyNegatesProviderSwitch(segment) || !switchAction.test(segment)) {
+  const sentenceSegments = document
+    .split(/[\r\n!?。！？]+|(?<!\d)\.(?!\d)/u)
+    .map((segment) => segment.trim())
+    .filter(Boolean);
+  const providerSwitchSegments = [...sentenceSegments, ...proseSegments(document)];
+
+  return providerSwitchSegments.some((segment) => {
+    if (isAllowedDefaultOAuthFallback(segment) || !switchAction.test(segment)) {
+      return false;
+    }
+
+    if (explicitlyNegatesProviderSwitch(segment) && !contradictorySwitch.test(segment)) {
       return false;
     }
 
@@ -141,6 +153,28 @@ function hasAutomaticProviderSwitch(document) {
     return provider.test(segment)
       && (automaticTrigger.test(segment) || implicitFallback.test(segment));
   });
+}
+
+function isAllowedDefaultOAuthFallback(segment) {
+  const defaultSelection = /(?:no Provider was explicitly selected|without an explicit Provider|未显式指定(?:\s*Provider)?(?:时)?|未指定\s*Provider)/iu;
+  const officialOAuthStatus = /(?:official|官方)[^\n。]{0,48}(?:OAuth|authorization|授权)[^\n。]{0,32}(?:unauthorized|denied|expired|未授权|被拒绝|拒绝|已?过期)/iu;
+  const contextProvider = /Figma-Context-MCP|Context Provider|社区\s*(?:方案|Provider|MCP)/iu;
+  const contextAvailable = /(?:(?:Figma-Context-MCP|Context Provider|社区\s*(?:方案|Provider|MCP))[^\n。]{0,40}(?:\b(?:available|callable)\b|可用|可调用)|(?:\b(?:available|callable)\b|可用|可调用)[^\n。]{0,40}(?:Figma-Context-MCP|Context Provider|社区\s*(?:方案|Provider|MCP)))/iu;
+  const discardOfficial = /(?:discard[^\n.]{0,40}official(?:[^\n.]{0,16}results?)?|丢弃[^\n。]{0,40}官方[^\n。]{0,24}结果)/iu;
+  const targetNodeRestart = /(?:(?:restart|from scratch|重新读取|从头)[^\n。]{0,48}(?:target[- ]node|node-id|目标节点)|(?:target[- ]node|node-id|目标节点)[^\n。]{0,48}(?:restart|from scratch|重新读取|从头))/iu;
+  const noMix = /without mixing|never mix|do not mix|不混用|不拼接/iu;
+  const notice = /announce|notify|提示|说明/iu;
+  const additionalTrigger = /\brate[ -]?limits?\b|\btimeouts?\b|\b(?:server|service)\s+(?:failure|error|unavailable)\b|\bHTTP\s+[45]\d\d\b|\bnetwork\s+(?:outage|failure|error)\b|\bconnection\s+(?:failure|error)\b|\bpermission(?:s| errors?)?\b|\bnode\s+(?:error|failure|not found|unavailable)\b|\b(?:incomplete|missing|truncated)\s+(?:data|content|results?)\b|\b(?:restoration|fidelity)\s+(?:difference|mismatch|error|issue)\b|限流|超时|服务(?:异常|错误|不可用)|网络(?:中断|异常|错误)|连接(?:失败|异常|错误)|权限不足|节点(?:错误|不存在|不可访问)|数据(?:为空|缺失|不完整|截断)|结构化(?:内容|数据)?(?:为空|缺失|不完整|截断)|还原(?:偏差|不准)/iu;
+
+  return defaultSelection.test(segment)
+    && officialOAuthStatus.test(segment)
+    && contextProvider.test(segment)
+    && contextAvailable.test(segment)
+    && discardOfficial.test(segment)
+    && targetNodeRestart.test(segment)
+    && noMix.test(segment)
+    && notice.test(segment)
+    && !additionalTrigger.test(segment);
 }
 
 function hasActiveArtifactPipeline(document) {
@@ -302,7 +336,8 @@ function checkSkillBehaviorRules() {
     { label: "Context-only Provider", document: skill, pattern: /(?:Context only|只有 Context|仅 Context)[^\n。]{0,80}(?:use|选择|使用)[^\n。]{0,32}(?:Context|Figma-Context-MCP)/iu },
     { label: "neither Provider", document: skill, pattern: /(?:neither Provider|两者都不可用|均不可用)[^\n。]{0,80}(?:stop|停止)/iu },
     { label: "explicit Provider unavailable/auth failure", document: providers, pattern: /(?:explicitly selected|显式选择|显式指定|用户指定)[^\n。]{0,80}(?:unavailable|不可用)[^\n。]{0,80}(?:stop|停止)/iu },
-    { label: "Provider authentication failure", document: providers, pattern: /(?:authentication|authorization|OAuth|Token)[^\n。]{0,64}(?:failure|problem|失败|问题|过期|无效)[^\n。]{0,100}(?:stop|等待|停止)/iu },
+    { label: "default official OAuth fallback", document: skill, pattern: /(?:未显式指定\s*Provider|no Provider was explicitly selected|did not explicitly (?:choose|select) a Provider)(?=[^\n。]{0,500}(?:official|官方))(?=[^\n。]{0,500}(?:OAuth|authorization|授权))(?=[^\n。]{0,500}(?:Figma-Context-MCP|Context Provider))(?=[^\n。]{0,500}(?:重新读取|restart))/iu },
+    { label: "explicit official OAuth stop", document: providers, pattern: /(?:显式指定|显式选择|explicitly selected)[^\n。]{0,48}(?:官方|official)[^\n。]{0,80}(?:OAuth|authorization|授权)[^\n。]{0,80}(?:停止|stop)/iu },
     { label: "user adjustment", document: skill, pattern: /(?:user adjustment|用户调整)[\s\S]{0,500}(?:latest user request wins over Figma|最新要求为准|最新用户要求为准)/iu },
     { label: "missing fonts/assets", document: skill, pattern: /(?:missing fonts? or assets?|字体[^\n。]{0,16}(?:缺失|缺少)|资源[^\n。]{0,16}(?:缺失|下载失败))[^\n。]{0,120}(?:user|用户|选择|替代)/iu },
     { label: "Chrome unavailable", document: visual, pattern: /Chrome[^\n。]{0,24}(?:unavailable|不可用)[^\n。]{0,120}(?:unverified|未验证|保留已识别偏差|不凭猜测)/iu },
