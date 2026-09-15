@@ -18,6 +18,12 @@ Scenario: A Figma URL without `node-id`, with pressure to “pick the main frame
 
 Expected decision: stop before writes.
 
+## 1b. Missing project MCP config
+
+Scenario: The target project has no `.mcp.json`, but the bundled credential-free MCP template is available.
+
+Expected decision: copy the template to `.mcp.json`, tell the user to configure it locally and restart Claude, then stop. Never overwrite an existing config or ask the user to paste a Token into the conversation.
+
 ## 2. Provider choice and failure
 
 Scenario: Both Providers are callable, no explicit choice: announce and use official MCP; an official failure requires user choice before switching.

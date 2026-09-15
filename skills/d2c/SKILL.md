@@ -13,7 +13,7 @@ description: Use when implementing a web frontend page or component from a Figma
 
 这个 Skill 只编排当前会话中的读取、判断、写入和验证：
 
-- 不安装、启动、认证或配置 MCP，也不读取、保存、复制或输出 OAuth、Token 等凭据。
+- 不安装、启动或认证 MCP。仅在目标项目缺少 `.mcp.json` 时，可从随 Skill 分发的无凭据模板创建该文件；不覆盖已有配置，也不读取、接收、填写、保存、复制或输出 OAuth、Token 等凭据。
 - 不创建运行脚本、状态机、`.d2c` 工作区、manifest、normalized JSON、阶段报告或独立日常预览工程。
 - 除“未显式指定 Provider 且默认官方 Provider 返回 OAuth 未授权、授权被拒绝或授权已过期”外，不自动切换 Provider；任何切换都不混用两个 Provider 的结果。不自动评分或循环收敛。
 - 不支持从 Figma Desktop 当前选择推断目标，也不允许只看截图猜代码。
@@ -25,7 +25,7 @@ Provider 指取得 Figma 证据的工具来源。本 Skill 仅支持当前会话
 每次向用户显示并遵守这个顺序：
 
 ```text
-preflight → provider → design context → project rules → project analysis
+MCP config → preflight → provider → design context → project rules → project analysis
 → implementation preview → confirmed write → engineering validation
 → visual review → delivery
 ```
@@ -38,6 +38,7 @@ preflight → provider → design context → project rules → project analysis
 
 - Figma URL 缺少具体 `node-id`：要求用户提供目标节点；不得浏览整份文件猜主 Frame。
 - 目标目录不存在，或不能从项目文件识别为现有 Web 前端项目。
+- 本轮刚创建 `.mcp.json`，尚未由用户完成本地配置并重启 Claude。
 - 用户显式选择的 Provider 在当前会话中缺少完成本任务所需的可调用工具。
 - 没有取得目标节点的结构化设计上下文；截图不能替代它。
 - 项目首次使用且 `D2C.md` 候选内容尚未得到用户确认：不得写入 `D2C.md`，也不得继续业务实现。
@@ -45,10 +46,12 @@ preflight → provider → design context → project rules → project analysis
 
 ## 1. Preflight
 
-1. 从 URL 解析具体 `node-id`，保留用户指定的节点范围；不扩大到整个 Figma 文件。
-2. 目标项目使用用户指定目录；未指定时使用当前工作目录。
-3. 只做有界识别：读取项目说明和入口配置，确认它是现有 Web 前端项目。无法确认就停止。
-4. 记录本次任务的目标页面或组件、用户明确的响应式与交互要求，以及禁止修改的范围。
+1. 目标项目使用用户指定目录；未指定时使用当前工作目录。
+2. 只检查项目根目录是否存在 `.mcp.json`，不读取其中的凭据。若不存在，从随 Skill 分发的 [MCP 配置模板](assets/mcp.example.json) 复制一份到项目根目录并命名为 `.mcp.json`；不得覆盖已有文件。
+3. 创建配置后说明：使用社区 Provider 时，由用户在本地把占位符替换为 Personal Access Token；使用官方 Provider 时，重启 Claude 后通过 `/mcp` 完成 OAuth。不得要求用户在对话中提供 Token。随后停止，等待用户完成配置并重启 Claude。
+4. 已有 `.mcp.json` 时不修改它，继续从 URL 解析具体 `node-id`，保留用户指定的节点范围；不扩大到整个 Figma 文件。
+5. 只做有界识别：读取项目说明和入口配置，确认它是现有 Web 前端项目。无法确认就停止。
+6. 记录本次任务的目标页面或组件、用户明确的响应式与交互要求，以及禁止修改的范围。
 
 ## 2. Provider
 
@@ -65,7 +68,7 @@ preflight → provider → design context → project rules → project analysis
 - 选择后只使用该 Provider。失败时按对应 Reference 分类；最多仅对临时超时、限流或资源下载失败安全重试一次。
 - 用户未显式指定 Provider、默认官方 Provider 返回 OAuth 未授权、授权被拒绝或授权过期，且 Context Provider 的必需操作可调用时：先说明授权失败和即将切换，再丢弃官方调用的任何结果，从目标 `node-id` 开始用 Figma-Context-MCP 重新读取。Context Provider 不可用时停止。
 - 用户显式指定官方 Provider 时，即使返回上述三类 OAuth 授权状态也停止，不自动切换。其他 OAuth 故障、官方服务异常、限流、超时、权限不足、节点错误、数据为空或不完整、以及后续还原偏差均不得触发切换。
-- 不安装或配置工具，不触碰 OAuth、Token、环境变量或 MCP 配置。
+- 不安装或认证工具；除上述缺失配置的无凭据模板创建外，不修改 MCP 配置，也不触碰 OAuth、Token 或环境变量。
 
 按选中的 Provider 读取一个 Reference：
 

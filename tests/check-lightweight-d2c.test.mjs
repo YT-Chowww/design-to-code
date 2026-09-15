@@ -14,6 +14,7 @@ const requiredFiles = [
   "skills/d2c/references/project-analysis-guide.md",
   "skills/d2c/references/visual-review.md",
   "skills/d2c/templates/D2C.md",
+  "skills/d2c/assets/mcp.example.json",
   "docs/skill-evals/d2c-forward-extended.md",
 ];
 
@@ -25,6 +26,8 @@ description: Use when implementing a web frontend page or component from a Figma
 # D2C
 
 Initial validated scope: React + TypeScript and Vue 3 + TypeScript. Other identifiable existing Web frontend projects follow the same evidence-based flow.
+
+If .mcp.json is missing, copy the bundled credential-free template, do not read or fill Token values, tell the user to complete local configuration and restart Claude, then stop. Never overwrite an existing .mcp.json.
 
 When both Providers are callable, use official. When official only is callable, use official. When Context only is callable, use Figma-Context-MCP. When neither Provider is callable, stop. If the user did not explicitly choose a Provider and official OAuth authorization is denied while Context Provider is available, announce the denial, discard official results, and restart the target-node extraction with Figma-Context-MCP without mixing results. If the user explicitly selected official and OAuth authorization is denied, stop without switching. An explicitly selected unavailable Provider must stop without switching.
 
@@ -207,6 +210,16 @@ test("requires the Provider availability decision matrix in the Skill", () => {
 
   assert.equal(result.status, 1, result.stdout || result.stderr);
   assert.match(result.stderr, /Skill behavior rule is missing: Context-only Provider/u);
+});
+
+test("requires missing .mcp.json to be bootstrapped without handling credentials", () => {
+  const result = runChecker(
+    "skills/d2c/SKILL.md",
+    validSkill.replace(/If \.mcp\.json is missing[^\n]+\n/u, ""),
+  );
+
+  assert.equal(result.status, 1, result.stdout || result.stderr);
+  assert.match(result.stderr, /missing MCP config bootstrap/u);
 });
 
 test("requires default official OAuth failure to restart with Context without mixing results", () => {

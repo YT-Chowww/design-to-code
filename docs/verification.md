@@ -9,7 +9,7 @@ npm test
 npm run check:d2c-skill
 ```
 
-检查内容包括：主 Skill 与四个 Reference、项目规则模板、链接有效性、模板中立性、旧入口清理、当前文档表述、框架范围、Provider 行为场景和 Code Connect 边界。
+检查内容包括：主 Skill 与四个 Reference、项目规则模板、无凭据 MCP 模板、链接有效性、模板中立性、旧入口清理、当前文档表述、框架范围、Provider 行为场景和 Code Connect 边界。
 
 日常 Skill 使用 `check:d2c-skill`，可选 Benchmark 使用 `check:d2c-benchmark`。旧工件校验入口和样本不再保留，也不作为当前能力证据。
 
@@ -18,6 +18,7 @@ npm run check:d2c-skill
 使用 [行为场景](skill-evals/d2c-scenarios.md) 在新上下文中验证模型是否遵守关键决策：
 
 - 缺少 `node-id` 时不猜节点、不写代码。
+- 缺少 `.mcp.json` 时只创建无凭据模板，提示用户在本地配置并重启 Claude；不覆盖已有配置或处理真实 Token。
 - Provider 自动选择覆盖“两者都有、仅官方、仅 Context、两者都没有”。
 - 用户未显式指定 Provider、默认官方返回 OAuth 未授权、授权被拒绝或授权已过期，且社区 Provider 可用时，提示后丢弃官方结果，从目标节点重新读取且不混用结果；显式指定官方时仍停止。
 - 服务异常、限流、超时、权限或节点错误、数据不完整和还原偏差不会触发 Provider 切换。

@@ -19,11 +19,20 @@ D2C 是一个面向可识别的现有 Web 前端项目的轻量 Design-to-Code S
 
 D2C 支持官方 Figma MCP 和 Figma-Context-MCP，选择顺序为：用户明确指定、官方 Figma MCP、Figma-Context-MCP。两者都可用且用户未指定时使用官方 Figma MCP。
 
-Claude Code 使用时，将 `.mcp.example.json` 复制为本地 `.mcp.json`：`figma-official` 连接 Figma 官方远程 MCP 并由用户在 `/mcp` 完成 OAuth；`figma-context` 运行社区方案，需要把 `--figma-api-key=<YOUR_FIGMA_API_KEY>` 替换为新生成的 Personal Access Token。`.mcp.json` 已被 Git 忽略，不得提交或分享；仓库只维护不含真实凭据的模板。
+首次使用 Claude Code 时，按以下顺序准备：
+
+1. 在项目根目录将 `.mcp.example.json` 复制为本地 `.mcp.json`。
+2. 使用社区方案时，在本地把 `--figma-api-key=<YOUR_FIGMA_API_KEY>` 替换为新生成的 Personal Access Token；只使用官方方案时无需填写 Token。
+3. 从项目根目录启动或重启 Claude Code，使项目级 MCP 配置生效。
+4. 使用官方方案时，在 Claude Code 中通过 `/mcp` 完成 OAuth。
+
+如果已经启动 Claude 后才调用 D2C Skill，Skill 会检查 `.mcp.json` 是否存在；缺失时从随 Skill 分发的无凭据模板创建该文件，提示用户完成本地配置并重启，但不会覆盖已有配置或读取、接收、代填 Token。
+
+`figma-official` 连接 Figma 官方远程 MCP；`figma-context` 运行社区方案。`.mcp.json` 已被 Git 忽略，不得提交或分享；仓库只维护不含真实凭据的模板。
 
 已有克隆从旧版本升级时，先在仓库外保存原 `.mcp.json` 的本地配置，确认备份后把仓库内该文件恢复为当前提交的版本，再拉取更新。更新完成后基于 `.mcp.example.json` 重建本地 `.mcp.json`，使用新生成的 Token，不要把备份加入 Git。
 
-MCP 的安装、配置和认证由用户管理。Skill 不读取、保存、复制或输出 OAuth、Token 等凭据。用户未指定 Provider、默认官方返回 OAuth 未授权、授权被拒绝或授权已过期，且社区 Provider 可用时，D2C 会先提示，再丢弃官方结果并用社区 Provider 从目标 `node-id` 重新读取且不混用结果。其他 OAuth 故障、Provider 错误和还原偏差都不会触发切换。用户显式指定官方时，上述三类授权状态也会停止。
+MCP 的安装和认证由用户管理；Skill 仅能在配置缺失时创建无凭据模板。Skill 不读取、保存、复制或输出 OAuth、Token 等凭据。用户未指定 Provider、默认官方返回 OAuth 未授权、授权被拒绝或授权已过期，且社区 Provider 可用时，D2C 会先提示，再丢弃官方结果并用社区 Provider 从目标 `node-id` 重新读取且不混用结果。其他 OAuth 故障、Provider 错误和还原偏差都不会触发切换。用户显式指定官方时，上述三类授权状态也会停止。
 
 ## 首次使用的两次确认
 

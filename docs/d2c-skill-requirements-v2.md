@@ -84,7 +84,8 @@ Provider 选择顺序：
 
 - 官方 MCP 使用用户自己的 OAuth。
 - Figma-Context-MCP 使用用户配置的 Token。
-- Skill 不负责安装、启动、认证或修改 MCP 配置。
+- Skill 不负责安装、启动或认证 MCP；仅在目标项目缺少 `.mcp.json` 时，从随 Skill 分发的无凭据模板创建该文件，提示用户在本地完成配置并重启 Claude 后停止。
+- Skill 不覆盖已有 `.mcp.json`，不读取、接收或代填 OAuth、Token 等凭据。
 - Skill 不读取、保存、复制或输出凭据。
 
 可用性检查规则：

@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const configPath = path.join(root, ".mcp.example.json");
+const skillConfigPath = path.join(root, "skills", "d2c", "assets", "mcp.example.json");
 
 test("Claude MCP template configures official and community Figma providers separately", () => {
   assert.equal(fs.existsSync(configPath), true, "missing .mcp.example.json");
@@ -33,6 +34,8 @@ test("Claude MCP template configures official and community Figma providers sepa
       },
     },
   });
+  assert.equal(fs.existsSync(skillConfigPath), true, "missing bundled MCP template");
+  assert.deepEqual(JSON.parse(fs.readFileSync(skillConfigPath, "utf8")), config);
 });
 
 test("local Claude MCP config is ignored even before it contains a token", () => {
