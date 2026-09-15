@@ -150,9 +150,11 @@ function hasActiveArtifactPipeline(document) {
 }
 
 function hasUnsafeCredentialGuidance(document) {
+  const placeholderArgument = /--figma-api-key=<YOUR_FIGMA_API_KEY>(?=$|[\s`'",.;:，。；：）)\]])/gu;
+  const content = document.replace(placeholderArgument, "");
   const credentialAction = /(?:figma[- ]token[- ]probe|--figma-api-key|X-Figma-Token)|(?:read|store|save|copy|output|读取|保存|复制|输出)[^\n。]{0,32}(?:credentials?|OAuth|凭据)/iu;
   const negation = /(?:do(?:es)? not|never|不|不会|不得|禁止)[^\n。]{0,32}(?:read|store|save|copy|output|读取|保存|复制|输出)[^\n。]{0,32}(?:credentials?|OAuth|凭据)/iu;
-  return proseSegments(document).some((segment) => credentialAction.test(segment) && !negation.test(segment));
+  return proseSegments(content).some((segment) => credentialAction.test(segment) && !negation.test(segment));
 }
 
 function checkRequiredFiles() {

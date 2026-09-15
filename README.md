@@ -17,9 +17,11 @@ D2C 是一个面向可识别的现有 Web 前端项目的轻量 Design-to-Code S
 
 ## Figma Provider 与认证
 
-D2C 支持官方 Figma MCP 和 Figma-Context-MCP，Claude 项目配置分别命名为 `figma-official` 和 `figma-context`。选择顺序为：用户明确指定、官方 Figma MCP、Figma-Context-MCP。两者都可用且用户未指定时使用官方 Figma MCP；必需工具不可用时停止并说明缺失能力。
+D2C 支持官方 Figma MCP 和 Figma-Context-MCP，选择顺序为：用户明确指定、官方 Figma MCP、Figma-Context-MCP。两者都可用且用户未指定时使用官方 Figma MCP；必需工具不可用时停止并说明缺失能力。
 
-仓库 `.mcp.json` 不保存凭据。Claude 使用官方 Provider 时，在 `/mcp` 中完成 OAuth；使用社区 Provider 时，启动 Claude Code 前在本机设置 `FIGMA_API_KEY`。该环境变量会传给社区 MCP 进程，不会作为命令参数保存。未配置 Token 时社区 Provider 不可用，但不影响官方 Provider 的 OAuth 配置。
+Claude Code 使用社区方案时，将 `.mcp.example.json` 复制为本地 `.mcp.json`，再把 `--figma-api-key=<YOUR_FIGMA_API_KEY>` 替换为新生成的 Personal Access Token。`.mcp.json` 已被 Git 忽略，不得提交或分享；仓库只维护不含真实凭据的模板。官方 Provider 如有需要，由用户在 Claude 中另行安装和完成 OAuth。
+
+已有克隆从旧版本升级时，先在仓库外保存原 `.mcp.json` 的本地配置，确认备份后把仓库内该文件恢复为当前提交的版本，再拉取更新。更新完成后基于 `.mcp.example.json` 重建本地 `.mcp.json`，使用新生成的 Token，不要把备份加入 Git。
 
 MCP 的安装、配置和认证由用户管理。Skill 不读取、保存、复制或输出 OAuth、Token 等凭据。Provider 不可用或认证失败时，D2C 会停止，由用户决定修复当前 Provider 或明确改选另一 Provider。
 

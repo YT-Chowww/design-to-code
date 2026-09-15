@@ -227,6 +227,8 @@ test("requires an explicit unverified boundary when Chrome is unavailable", () =
 });
 
 const forbiddenCases = [
+  ["README.md", "Start MCP with --figma-api-key=real-token-value."],
+  ["README.md", "Start MCP with --figma-api-key=<YOUR_FIGMA_API_KEY>-real-secret."],
   ["README.md", "Visual comparison passes when similarity reaches 84%."],
   ["README.md", "Set the visual score threshold to 75."],
   ["README.md", "Fidelity below 0.8 fails the review."],
@@ -251,6 +253,7 @@ for (const [relativePath, phrase] of forbiddenCases) {
 const allowedCases = [
   ["README.md", "Use Node.js 22 and validate the page at a 1440 x 900 viewport."],
   ["README.md", "Visual review compares 2 screenshots at the target viewport."],
+  ["README.md", "Copy .mcp.example.json to .mcp.json and replace --figma-api-key=<YOUR_FIGMA_API_KEY> locally."],
   ["README.md", "There are no degradation paths."],
   ["package.json", "No automatic Provider fallback is allowed."],
   ["package.json", "Provider fallback is not automatic."],
