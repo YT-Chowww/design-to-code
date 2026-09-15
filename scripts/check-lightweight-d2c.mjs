@@ -4,27 +4,27 @@ import fs from "node:fs";
 import path from "node:path";
 
 const required = [
-  ".claude/skills/d2c/SKILL.md",
-  ".claude/skills/d2c/references/provider-official.md",
-  ".claude/skills/d2c/references/provider-context-mcp.md",
-  ".claude/skills/d2c/references/project-analysis-guide.md",
-  ".claude/skills/d2c/references/visual-review.md",
-  ".claude/skills/d2c/templates/D2C.md",
+  "skills/d2c/SKILL.md",
+  "skills/d2c/references/provider-official.md",
+  "skills/d2c/references/provider-context-mcp.md",
+  "skills/d2c/references/project-analysis-guide.md",
+  "skills/d2c/references/visual-review.md",
+  "skills/d2c/templates/D2C.md",
   "docs/skill-evals/d2c-forward-extended.md",
 ];
 
 const retired = [
-  ".claude/skills/d2c-init",
-  ".claude/skills/d2c-extract",
-  ".claude/skills/d2c-generate",
-  ".claude/skills/d2c-merge",
-  ".claude/skills/d2c-validate",
-  ".claude/skills/d2c-verify",
+  "skills/d2c-init",
+  "skills/d2c-extract",
+  "skills/d2c-generate",
+  "skills/d2c-merge",
+  "skills/d2c-validate",
+  "skills/d2c-verify",
 ];
 
 const root = process.cwd();
-const skillPath = ".claude/skills/d2c/SKILL.md";
-const referencesDirectory = ".claude/skills/d2c/references";
+const skillPath = "skills/d2c/SKILL.md";
+const referencesDirectory = "skills/d2c/references";
 const forbiddenTemplateTerms = ["Ant Design", "Vant", "E-Space", "React", "Vue"];
 const activeRepositoryDocuments = [
   "README.md",
@@ -210,7 +210,7 @@ function checkReferenceLinks() {
 }
 
 function checkTemplateNeutrality() {
-  const templatePath = absolute(".claude/skills/d2c/templates/D2C.md");
+  const templatePath = absolute("skills/d2c/templates/D2C.md");
   if (!fs.existsSync(templatePath)) {
     return;
   }
@@ -276,7 +276,7 @@ function checkFrameworkScope() {
 }
 
 function checkCodeConnectGuidance() {
-  const relativePath = ".claude/skills/d2c/references/provider-official.md";
+  const relativePath = "skills/d2c/references/provider-official.md";
   const document = fs.readFileSync(absolute(relativePath), "utf8");
   const verifiesCurrentCode = /Code Connect[^\n。]*(?:verify|match|核对|验证)[^\n。]*(?:current project code|当前项目代码)/iu;
   const creationDeferred = /(?:creat(?:e|ing)|创建)[^\n。]*(?:out of scope|TODO|待办|不在本次范围)/iu;
@@ -290,10 +290,10 @@ function checkSkillBehaviorRules() {
   const skill = fs.readFileSync(absolute(skillPath), "utf8");
   const providers = [
     skill,
-    fs.readFileSync(absolute(".claude/skills/d2c/references/provider-official.md"), "utf8"),
-    fs.readFileSync(absolute(".claude/skills/d2c/references/provider-context-mcp.md"), "utf8"),
+    fs.readFileSync(absolute("skills/d2c/references/provider-official.md"), "utf8"),
+    fs.readFileSync(absolute("skills/d2c/references/provider-context-mcp.md"), "utf8"),
   ].join("\n");
-  const visual = fs.readFileSync(absolute(".claude/skills/d2c/references/visual-review.md"), "utf8");
+  const visual = fs.readFileSync(absolute("skills/d2c/references/visual-review.md"), "utf8");
   const rules = [
     { label: "both Providers", document: skill, pattern: /(?:both Providers|两者都可用|两种 Provider 都可用)[^\n。]{0,80}(?:official|官方)/iu },
     { label: "official-only Provider", document: skill, pattern: /(?:official only|只有官方|仅官方)[^\n。]{0,80}(?:use|选择|使用)[^\n。]{0,24}(?:official|官方)/iu },

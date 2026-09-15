@@ -44,14 +44,18 @@ Chrome MCP 只在已经识别出具体视觉偏差后用于检查相关元素的
 
 统一预览在 `http://127.0.0.1:4172`，左右并排显示 Figma 原稿与真实页面；PC 页面运行在 `4173`，移动页面运行在 `4174`。预览不评分、不排名、不判定通过，结果由用户自行判断。若单场景失败，其余场景继续并保留失败页签；全局 Figma MCP 或脚手架前置条件缺失时整轮停止。
 
-## 安装与仓库检查
+## Agent 使用方式
 
-把仓库内的 Skills 同步到 Claude Code 或 Codex：
+仓库根目录的 `skills/` 是唯一 Skill 源。OpenClaw 等支持工作区 Agent Skills 的工具可以直接发现它；Claude Code 和 Codex 使用同步脚本安装到各自的用户目录：
 
 ```bash
 bash scripts/sync-claude-skills.sh
 bash scripts/sync-codex-skills.sh
 ```
+
+同步脚本只创建指向 `skills/` 的符号链接，不复制项目配置或认证信息。
+
+## 仓库检查
 
 修改日常或 Benchmark Skill 后运行静态检查：
 

@@ -8,12 +8,12 @@ import { fileURLToPath } from "node:url";
 
 const checkerPath = fileURLToPath(new URL("../scripts/check-lightweight-d2c.mjs", import.meta.url));
 const requiredFiles = [
-  ".claude/skills/d2c/SKILL.md",
-  ".claude/skills/d2c/references/provider-official.md",
-  ".claude/skills/d2c/references/provider-context-mcp.md",
-  ".claude/skills/d2c/references/project-analysis-guide.md",
-  ".claude/skills/d2c/references/visual-review.md",
-  ".claude/skills/d2c/templates/D2C.md",
+  "skills/d2c/SKILL.md",
+  "skills/d2c/references/provider-official.md",
+  "skills/d2c/references/provider-context-mcp.md",
+  "skills/d2c/references/project-analysis-guide.md",
+  "skills/d2c/references/visual-review.md",
+  "skills/d2c/templates/D2C.md",
   "docs/skill-evals/d2c-forward-extended.md",
 ];
 
@@ -178,7 +178,7 @@ test("requires provider availability and missing-evidence behavior scenarios", (
 
 test("rejects a React-or-Vue-only Skill precondition", () => {
   const result = runChecker(
-    ".claude/skills/d2c/SKILL.md",
+    "skills/d2c/SKILL.md",
     "---\nname: d2c\ndescription: Use in an existing React or Vue project.\n---\n",
   );
 
@@ -188,7 +188,7 @@ test("rejects a React-or-Vue-only Skill precondition", () => {
 
 test("requires Code Connect mappings to be verified against current project code", () => {
   const result = runChecker(
-    ".claude/skills/d2c/references/provider-official.md",
+    "skills/d2c/references/provider-official.md",
     "# Official provider\n\nPrefer existing Code Connect mappings.\n",
   );
 
@@ -198,7 +198,7 @@ test("requires Code Connect mappings to be verified against current project code
 
 test("requires the Provider availability decision matrix in the Skill", () => {
   const result = runChecker(
-    ".claude/skills/d2c/SKILL.md",
+    "skills/d2c/SKILL.md",
     validSkill.replace("When Context only is callable, use Figma-Context-MCP. ", ""),
   );
 
@@ -208,7 +208,7 @@ test("requires the Provider availability decision matrix in the Skill", () => {
 
 test("requires user adjustments to override conflicting Figma evidence", () => {
   const result = runChecker(
-    ".claude/skills/d2c/SKILL.md",
+    "skills/d2c/SKILL.md",
     validSkill.replace(/When a user adjustment[^\n]+\n/u, ""),
   );
 
@@ -218,7 +218,7 @@ test("requires user adjustments to override conflicting Figma evidence", () => {
 
 test("requires an explicit unverified boundary when Chrome is unavailable", () => {
   const result = runChecker(
-    ".claude/skills/d2c/references/visual-review.md",
+    "skills/d2c/references/visual-review.md",
     "# Visual review\n\nUse Chrome after a mismatch.\n",
   );
 

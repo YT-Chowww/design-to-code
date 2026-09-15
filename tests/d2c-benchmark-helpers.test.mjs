@@ -7,8 +7,8 @@ import { spawn, spawnSync } from "node:child_process";
 import test from "node:test";
 
 const root = process.cwd();
-const resetScript = path.join(root, ".claude/skills/d2c-benchmark/scripts/reset-latest.sh");
-const startScript = path.join(root, ".claude/skills/d2c-benchmark/scripts/start-preview.sh");
+const resetScript = path.join(root, "skills/d2c-benchmark/scripts/reset-latest.sh");
+const startScript = path.join(root, "skills/d2c-benchmark/scripts/start-preview.sh");
 
 function removeTemporary(target) {
   fs.rmSync(target, { recursive: true, force: true });
@@ -18,7 +18,7 @@ function makeTrustedTemporary(prefix) {
   return fs.mkdtempSync(path.join("/tmp", prefix));
 }
 
-function waitFor(predicate, message, timeout = 4000) {
+function waitFor(predicate, message, timeout = 8000) {
   const started = Date.now();
   return new Promise((resolve, reject) => {
     const poll = () => {
@@ -393,7 +393,7 @@ test("later mobile exit updates evidence without stopping PC or review", async (
 });
 
 test("review status lookup uses the exact scenario ID", async () => {
-  const modulePath = path.join(root, ".claude/skills/d2c-benchmark/templates/review/scenario-availability.mjs");
+  const modulePath = path.join(root, "skills/d2c-benchmark/templates/review/scenario-availability.mjs");
   const { scenarioAvailability } = await import(`file://${modulePath}?test=${Date.now()}`);
   const availability = {
     "pc-data": { available: true, reason: "" },

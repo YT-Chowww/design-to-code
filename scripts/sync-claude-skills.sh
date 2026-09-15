@@ -5,7 +5,8 @@ set -euo pipefail
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 PROJECT_ROOT=$(cd "${SCRIPT_DIR}/.." &>/dev/null && pwd)
 
-SOURCE_SKILLS="${PROJECT_ROOT}/.claude/skills"
+SOURCE_SKILLS="${PROJECT_ROOT}/skills"
+LEGACY_SOURCE_SKILLS="${PROJECT_ROOT}/.claude/skills"
 SOURCE_RULES="${PROJECT_ROOT}/.claude/rules"
 
 TARGET_ROOT="${HOME}/.claude"
@@ -42,23 +43,26 @@ resolved_link_target() {
   candidate_directory=$(dirname "${candidate_path}")
   if [ -d "${candidate_directory}" ]; then
     printf '%s/%s\n' "$(cd "${candidate_directory}" && pwd -P)" "$(basename "${candidate_path}")"
-  elif [ -d "$(dirname "${candidate_directory}")" ] && [ "$(basename "${candidate_directory}")" = "rules" ]; then
-    printf '%s/rules/%s\n' "$(cd "$(dirname "${candidate_directory}")" && pwd -P)" "$(basename "${candidate_path}")"
+  elif [ -d "$(dirname "${candidate_directory}")" ] &&
+       { [ "$(basename "${candidate_directory}")" = "rules" ] || [ "$(basename "${candidate_directory}")" = "skills" ]; }; then
+    printf '%s/%s/%s\n' "$(cd "$(dirname "${candidate_directory}")" && pwd -P)" "$(basename "${candidate_directory}")" "$(basename "${candidate_path}")"
   else
     printf '%s\n' "${candidate_path}"
   fi
 }
 
 cleanup_retired_links() {
-  local name source_path target_path linked_path resolved_target
+  local name source_path legacy_source_path target_path linked_path resolved_target
 
   for name in "${RETIRED_SKILLS[@]}"; do
     source_path="${SOURCE_SKILLS}/${name}"
+    legacy_source_path="${LEGACY_SOURCE_SKILLS}/${name}"
     target_path="${TARGET_SKILLS}/${name}"
     [ -L "${target_path}" ] || continue
     linked_path=$(readlink "${target_path}")
     resolved_target=$(resolved_link_target "${target_path}" "${linked_path}")
-    if [ "${linked_path}" = "${source_path}" ] || [ "${resolved_target}" = "${source_path}" ]; then
+    if [ "${linked_path}" = "${source_path}" ] || [ "${resolved_target}" = "${source_path}" ] ||
+       [ "${linked_path}" = "${legacy_source_path}" ] || [ "${resolved_target}" = "${legacy_source_path}" ]; then
       rm "${target_path}"
       echo "removed retired skill ${name}"
     else
@@ -88,11 +92,14 @@ sync_link() {
   local source_path="$1"
   local target_path="$2"
   local label="$3"
+  local legacy_source_path="${LEGACY_SOURCE_SKILLS}/$(basename "${source_path}")"
 
   if [ -L "${target_path}" ]; then
-    local linked_path
+    local linked_path resolved_target
     linked_path=$(readlink "${target_path}")
-    if [ "${linked_path}" = "${source_path}" ]; then
+    resolved_target=$(resolved_link_target "${target_path}" "${linked_path}")
+    if [ "${linked_path}" = "${source_path}" ] || [ "${resolved_target}" = "${source_path}" ] ||
+       [ "${linked_path}" = "${legacy_source_path}" ] || [ "${resolved_target}" = "${legacy_source_path}" ]; then
       ln -sfn "${source_path}" "${target_path}"
       echo "synced ${label}"
     else

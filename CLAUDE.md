@@ -64,7 +64,7 @@ bash scripts/sync-claude-skills.sh
 bash scripts/sync-codex-skills.sh
 ```
 
-`npm test` runs the daily and Benchmark contracts. The sync scripts publish the repository Skills to the corresponding local runtime.
+`npm test` runs the daily and Benchmark contracts. `skills/` is the runtime-neutral source used directly by workspace-aware agents such as OpenClaw. The sync scripts publish the same source to Claude Code and Codex.
 
 ## Optional Benchmark
 
@@ -74,15 +74,15 @@ The review shell is `http://127.0.0.1:4172`; React + Ant Design routes use port 
 
 ## Important locations
 
-- `.claude/skills/d2c/SKILL.md` — daily workflow, stops, approvals, write boundaries, and delivery requirements.
-- `.claude/skills/d2c/references/provider-official.md` — official Figma MCP evidence and failure handling.
-- `.claude/skills/d2c/references/provider-context-mcp.md` — Figma-Context-MCP evidence and failure handling.
-- `.claude/skills/d2c/references/project-analysis-guide.md` — bounded project analysis and impact assessment.
-- `.claude/skills/d2c/references/visual-review.md` — real-page review and conditional Chrome diagnostics.
-- `.claude/skills/d2c/templates/D2C.md` — neutral project-rule skeleton.
-- `.claude/skills/d2c-benchmark/SKILL.md` — optional four-scenario Benchmark workflow and failure isolation rules.
-- `.claude/skills/d2c-benchmark/references/scenarios.md` — fixed Figma nodes, routes, targets, and visible interactions.
-- `.claude/skills/d2c-benchmark/templates/` — committed PC, mobile, and review scaffolds.
-- `.claude/skills/d2c-benchmark/scripts/` — safe latest-workspace reset and preview startup helpers.
+- `skills/d2c/SKILL.md` — daily workflow, stops, approvals, write boundaries, and delivery requirements.
+- `skills/d2c/references/provider-official.md` — official Figma MCP evidence and failure handling.
+- `skills/d2c/references/provider-context-mcp.md` — Figma-Context-MCP evidence and failure handling.
+- `skills/d2c/references/project-analysis-guide.md` — bounded project analysis and impact assessment.
+- `skills/d2c/references/visual-review.md` — real-page review and conditional Chrome diagnostics.
+- `skills/d2c/templates/D2C.md` — neutral project-rule skeleton.
+- `skills/d2c-benchmark/SKILL.md` — optional four-scenario Benchmark workflow and failure isolation rules.
+- `skills/d2c-benchmark/references/scenarios.md` — fixed Figma nodes, routes, targets, and visible interactions.
+- `skills/d2c-benchmark/templates/` — committed PC, mobile, and review scaffolds.
+- `skills/d2c-benchmark/scripts/` — safe latest-workspace reset and preview startup helpers.
 - `scripts/check-lightweight-d2c.mjs` — active Skill and repository guidance checks.
 - `scripts/check-d2c-benchmark.mjs` — Benchmark structure, scaffold, helper, and instruction checks.
