@@ -1,0 +1,61 @@
+:root {
+  color: #1f2329;
+  background: #eef0f3;
+  font-family:
+    Inter, "PingFang SC", "Microsoft YaHei", system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+}
+
+.benchmark-device {
+  width: min(100%, 375px);
+  min-height: 100vh;
+  margin: 0 auto;
+  background: #ffffff;
+}
+
+.benchmark-failure {
+  display: grid;
+  min-height: 100vh;
+  align-content: center;
+  gap: 12px;
+  padding: 32px 24px;
+  color: #cf1322;
+  background: #fff2f0;
+}
+
+.benchmark-failure h1,
+.benchmark-failure p {
+  margin: 0;
+}
+
+.benchmark-failure h1 {
+  font-size: 22px;
+}
+
+.benchmark-failure p {
+  color: #5c0011;
+  line-height: 1.6;
+}
+
+.benchmark-failure__path {
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+}
