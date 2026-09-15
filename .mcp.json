@@ -1,13 +1,20 @@
 {
   "mcpServers": {
-    "figma": {
+    "figma-official": {
+      "type": "http",
+      "url": "https://mcp.figma.com/mcp"
+    },
+    "figma-context": {
+      "type": "stdio",
       "command": "npx",
       "args": [
         "-y",
         "figma-developer-mcp",
-        "--figma-api-key=<YOUR_FIGMA_API_KEY>",
         "--stdio"
-      ]
+      ],
+      "env": {
+        "FIGMA_API_KEY": "${FIGMA_API_KEY:-}"
+      }
     },
     "chrome-devtools": {
       "command": "npx",

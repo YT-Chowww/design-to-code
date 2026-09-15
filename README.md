@@ -17,7 +17,9 @@ D2C 是一个面向可识别的现有 Web 前端项目的轻量 Design-to-Code S
 
 ## Figma Provider 与认证
 
-D2C 支持官方 Figma MCP 和 Figma-Context-MCP，选择顺序为：用户明确指定、官方 Figma MCP、Figma-Context-MCP。两者都可用且用户未指定时使用官方 Figma MCP；必需工具不可用时停止并说明缺失能力。
+D2C 支持官方 Figma MCP 和 Figma-Context-MCP，Claude 项目配置分别命名为 `figma-official` 和 `figma-context`。选择顺序为：用户明确指定、官方 Figma MCP、Figma-Context-MCP。两者都可用且用户未指定时使用官方 Figma MCP；必需工具不可用时停止并说明缺失能力。
+
+仓库 `.mcp.json` 不保存凭据。Claude 使用官方 Provider 时，在 `/mcp` 中完成 OAuth；使用社区 Provider 时，启动 Claude Code 前在本机设置 `FIGMA_API_KEY`。该环境变量会传给社区 MCP 进程，不会作为命令参数保存。未配置 Token 时社区 Provider 不可用，但不影响官方 Provider 的 OAuth 配置。
 
 MCP 的安装、配置和认证由用户管理。Skill 不读取、保存、复制或输出 OAuth、Token 等凭据。Provider 不可用或认证失败时，D2C 会停止，由用户决定修复当前 Provider 或明确改选另一 Provider。
 
