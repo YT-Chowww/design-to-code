@@ -22,6 +22,8 @@
 - 权限不足或节点不可访问：报告 permission/not-found，并确认请求的文件和 `node-id`，不改猜其他节点。
 - 临时超时、限流或资源下载失败：可以对同一操作安全重试一次，并在报告中说明已重试；第二次失败后停止。
 - 结构化布局或样式为空、截断或不对应目标节点：报告 structured-context missing/incomplete；可在同一 Provider 内按已知子节点拆分读取，不能用截图补猜。
+- 遇到 `PATTERN`、未知 Paint 或父节点样式无法解析时，同样报告 structured-context incomplete；可在当前 Provider 内按已知子节点继续读取，并列出仍缺失的背景、渐变、模糊、阴影、遮罩或图片填充等关键视觉属性。
+- 拆分读取后仍缺少会明显影响结果的视觉属性时，写代码前等待用户补充准确值，或明确确认替代方案及其差异；不得根据截图、兄弟节点或常见默认值自动推测。
 - Provider 失败后不自动改用官方 Figma MCP，也不把 Context Provider 的部分结果与另一 Provider 拼接。
 
 ```text
