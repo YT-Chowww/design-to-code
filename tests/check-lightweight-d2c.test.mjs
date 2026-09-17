@@ -109,11 +109,15 @@ function writeFile(root, relativePath, content) {
   fs.writeFileSync(filePath, content);
 }
 
-function runChecker(relativePath, phrase) {
+function runChecker(relativePath, phrase, omittedRequiredFile = null) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "d2c-checker-"));
 
   try {
     for (const requiredFile of requiredFiles) {
+      if (requiredFile === omittedRequiredFile) {
+        continue;
+      }
+
       const content = requiredFile.endsWith("SKILL.md")
         ? validSkill
         : requiredFile.endsWith("provider-official.md")
@@ -131,11 +135,13 @@ function runChecker(relativePath, phrase) {
     }
     writeFile(root, "docs/skill-evals/d2c-scenarios.md", validScenarios);
     writeFile(root, "package.json", JSON.stringify({ description: "Current workflow" }));
-    writeFile(
-      root,
-      relativePath,
-      relativePath === "package.json" ? JSON.stringify({ description: phrase }) : `${phrase}\n`,
-    );
+    if (relativePath !== null) {
+      writeFile(
+        root,
+        relativePath,
+        relativePath === "package.json" ? JSON.stringify({ description: phrase }) : `${phrase}\n`,
+      );
+    }
 
     return spawnSync(process.execPath, [checkerPath], {
       cwd: root,
@@ -230,14 +236,35 @@ test("requires missing .mcp.json to be bootstrapped without handling credentials
   assert.match(result.stderr, /missing MCP config bootstrap/u);
 });
 
-test("requires provider-specific MCP setup choices and post-restart verification", () => {
+test("requires all three provider setup modes", () => {
   const result = runChecker(
     "skills/d2c/references/mcp-setup.md",
-    "# MCP setup\n\nTell the user to configure MCP.\n",
+    "# MCP setup\n\nOfficial only uses figma-official. After restart, verify using really callable tools rather than the config file.\n",
   );
 
   assert.equal(result.status, 1, result.stdout || result.stderr);
-  assert.match(result.stderr, /Provider setup choices|official MCP setup|Context MCP setup|post-restart Provider verification/u);
+  assert.match(result.stderr, /Provider setup modes/u);
+  assert.doesNotMatch(result.stderr, /post-restart Provider verification/u);
+});
+
+test("requires post-restart verification through callable tools", () => {
+  const result = runChecker(
+    "skills/d2c/references/mcp-setup.md",
+    validMcpSetup.replace(/After restart[^.]+\./u, ""),
+  );
+
+  assert.equal(result.status, 1, result.stdout || result.stderr);
+  assert.match(result.stderr, /post-restart Provider verification/u);
+  assert.doesNotMatch(result.stderr, /Provider setup modes/u);
+});
+
+test("reports a missing MCP setup reference without crashing", () => {
+  const missingFile = "skills/d2c/references/mcp-setup.md";
+  const result = runChecker(null, null, missingFile);
+
+  assert.equal(result.status, 1, result.stdout || result.stderr);
+  assert.match(result.stderr, /missing required file: skills\/d2c\/references\/mcp-setup\.md/u);
+  assert.doesNotMatch(result.stderr, /ENOENT/u);
 });
 
 test("requires default official OAuth failure to restart with Context without mixing results", () => {

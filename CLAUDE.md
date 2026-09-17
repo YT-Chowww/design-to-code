@@ -33,8 +33,8 @@ The URL must contain a concrete `node-id`. The target defaults to the current wo
 - Selection order is: explicit user choice, official Figma MCP, Figma-Context-MCP, then stop.
 - Availability is determined from tools callable in the current session, not server names or local configuration.
 - When both are usable and the user did not choose, use the official Figma MCP.
-- MCP installation, OAuth, and Token management belong to the user. If the target project lacks `.mcp.json`, the Skill may create it from the bundled credential-free template, then must tell the user to configure locally and restart Claude. Never overwrite an existing config. Never read credentials. Never store credentials. Never copy credentials. Never output credentials. Never request or fill Token values.
-- MCP setup guidance must offer official-only (recommended), Context-only, and both modes. After restart, verify the selected Provider from actually callable tools rather than configuration text.
+- MCP installation and authentication belong to the user. The Skill may create a missing `.mcp.json` from the credential-free template, but never overwrites an existing config. It may inspect configuration presence and Provider/authentication status, but never reads, stores, copies, outputs, requests, or fills credential values.
+- Setup guidance offers official-only (recommended), Context-only, and both modes. After restart, verify the selected Provider from actually callable tools rather than configuration text; detailed steps live in `skills/d2c/references/mcp-setup.md`.
 - If no Provider was explicitly selected and the default official Provider reports OAuth unauthorized, denied, or expired while Figma-Context-MCP is available, announce the fallback, discard official results, and restart the target-node read with Figma-Context-MCP without mixing results. An explicitly selected Provider, other OAuth failures, non-authentication failures, incomplete data, and restoration differences never trigger this switch.
 
 ## Project `D2C.md` and approvals

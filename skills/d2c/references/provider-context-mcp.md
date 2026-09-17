@@ -2,7 +2,7 @@
 
 ## 可用性判断
 
-只根据当前会话真实可调用的工具和本次所需操作判断 Context Provider 是否可用，不读取 MCP 配置、Token、环境变量或任何凭据文件。
+只根据当前会话真实可调用的工具和本次所需操作判断 Context Provider 是否可用。可以检查 Provider 配置和认证状态，但不得读取、输出或保存 OAuth、Token、环境变量等凭据值。
 
 - 必须存在能按 Figma 文件与具体 `node-id` 返回结构化布局和样式的操作，例如该 Provider 暴露的 `get_figma_data` 或等价能力。
 - 需要下载截图或资源时，确认当前会话实际存在对应操作，例如 `download_figma_images` 或等价能力；不要根据 Server 名称推断。

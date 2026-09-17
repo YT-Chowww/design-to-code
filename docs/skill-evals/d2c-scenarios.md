@@ -32,9 +32,9 @@ Expected decision: do not infer success from `.mcp.json`. For official, direct t
 
 ## 2. Provider choice and failure
 
-Scenario: Both Providers are callable, no explicit choice: announce and use official MCP; an official failure requires user choice before switching.
+Scenario: Both Providers are callable and the user did not explicitly choose one.
 
-Expected decision: announce and use official MCP; after an official failure, stop for the user's explicit choice before switching Providers.
+Expected decision: announce and use official MCP. Stop after a failure unless it matches the narrow OAuth fallback in scenario 9c.
 
 Forward evaluation: completed for the original scenario.
 

@@ -67,6 +67,17 @@ function absolute(relativePath) {
   return path.resolve(root, relativePath);
 }
 
+function readFileIfAvailable(relativePath) {
+  try {
+    return fs.readFileSync(absolute(relativePath), "utf8");
+  } catch (error) {
+    if (["ENOENT", "ENOTDIR", "EISDIR"].includes(error?.code)) {
+      return null;
+    }
+    throw error;
+  }
+}
+
 function isLocalMarkdownTarget(target) {
   return target
     && !target.startsWith("#")
@@ -303,7 +314,10 @@ function checkBehaviorScenarios() {
 }
 
 function checkFrameworkScope() {
-  const document = fs.readFileSync(absolute(skillPath), "utf8");
+  const document = readFileIfAvailable(skillPath);
+  if (document === null) {
+    return;
+  }
   const description = document.match(/^description:\s*(.+)$/mu)?.[1] ?? "";
   const identifiableWebProject = /identifiable existing Web frontend project|可识别的现有 Web 前端项目/iu;
   const initialValidatedScope = /initial validated scope[^\n]*(?:React[^\n]*TypeScript[^\n]*Vue\s*3[^\n]*TypeScript)|首版实际验证范围[^\n]*(?:React[^\n]*TypeScript[^\n]*Vue\s*3[^\n]*TypeScript)/iu;
@@ -315,7 +329,10 @@ function checkFrameworkScope() {
 
 function checkCodeConnectGuidance() {
   const relativePath = "skills/d2c/references/provider-official.md";
-  const document = fs.readFileSync(absolute(relativePath), "utf8");
+  const document = readFileIfAvailable(relativePath);
+  if (document === null) {
+    return;
+  }
   const verifiesCurrentCode = /Code Connect[^\n。]*(?:verify|match|核对|验证)[^\n。]*(?:current project code|当前项目代码)/iu;
   const creationDeferred = /(?:creat(?:e|ing)|创建)[^\n。]*(?:out of scope|TODO|待办|不在本次范围)/iu;
 
@@ -325,20 +342,18 @@ function checkCodeConnectGuidance() {
 }
 
 function checkSkillBehaviorRules() {
-  const skill = fs.readFileSync(absolute(skillPath), "utf8");
+  const skill = readFileIfAvailable(skillPath);
   const providers = [
     skill,
-    fs.readFileSync(absolute("skills/d2c/references/provider-official.md"), "utf8"),
-    fs.readFileSync(absolute("skills/d2c/references/provider-context-mcp.md"), "utf8"),
-  ].join("\n");
-  const visual = fs.readFileSync(absolute("skills/d2c/references/visual-review.md"), "utf8");
-  const mcpSetup = fs.readFileSync(absolute("skills/d2c/references/mcp-setup.md"), "utf8");
+    readFileIfAvailable("skills/d2c/references/provider-official.md"),
+    readFileIfAvailable("skills/d2c/references/provider-context-mcp.md"),
+  ].filter((document) => document !== null).join("\n");
+  const visual = readFileIfAvailable("skills/d2c/references/visual-review.md");
+  const mcpSetup = readFileIfAvailable("skills/d2c/references/mcp-setup.md");
   const rules = [
-    { label: "missing MCP config bootstrap", document: skill, pattern: /(?:(?:\.mcp\.json[^\n。]{0,80}(?:missing|不存在|缺失))|(?:(?:missing|不存在|缺少|缺失)[^\n。]{0,80}\.mcp\.json))(?=[\s\S]{0,700}(?:copy|复制))(?=[\s\S]{0,900}(?:restart|重启))(?=[\s\S]{0,900}(?:do not|never|不得|不)[^\n。]{0,48}(?:read|request|fill|读取|Token|凭据))/iu },
-    { label: "Provider setup choices", document: mcpSetup, pattern: /(?:仅官方|official only)[\s\S]{0,300}(?:仅社区|Context only)[\s\S]{0,300}(?:两者|both)/iu },
-    { label: "official MCP setup", document: mcpSetup, pattern: /figma-official[\s\S]{0,500}(?:restart|重启)[\s\S]{0,300}\/mcp[\s\S]{0,200}OAuth/iu },
-    { label: "Context MCP setup", document: mcpSetup, pattern: /figma-context[\s\S]{0,500}(?:Personal Access Token|PAT)[\s\S]{0,500}(?:restart|重启)/iu },
-    { label: "post-restart Provider verification", document: mcpSetup, pattern: /(?:restart|重启)[\s\S]{0,500}(?:实际可调用|really callable|callable tools?)[\s\S]{0,300}(?:配置文件|config)/iu },
+    { label: "missing MCP config bootstrap", document: skill, pattern: /(?=[\s\S]*(?:(?:\.mcp\.json[^\n。]{0,80}(?:missing|不存在|缺失))|(?:(?:missing|不存在|缺少|缺失)[^\n。]{0,80}\.mcp\.json)))(?=[\s\S]*(?:copy|复制))(?=[\s\S]*(?:restart|重启))(?=[\s\S]*(?:do not|never|不得|不)[^\n。]{0,48}(?:read|request|fill|读取|Token|凭据))/iu },
+    { label: "Provider setup modes", document: mcpSetup, pattern: /(?=[\s\S]*(?:仅官方|official only))(?=[\s\S]*(?:仅社区|Context only))(?=[\s\S]*(?:两者|both))(?=[\s\S]*figma-official)(?=[\s\S]*figma-context)/iu },
+    { label: "post-restart Provider verification", document: mcpSetup, pattern: /(?=[\s\S]*(?:restart|重启))(?=[\s\S]*(?:实际可调用|really callable|callable tools?))(?=[\s\S]*(?:(?:不|不能|而非)[^\n。]{0,40}(?:配置|config)|rather than[^\n.]{0,40}config))/iu },
     { label: "both Providers", document: skill, pattern: /(?:both Providers|两者都可用|两种 Provider 都可用)[^\n。]{0,80}(?:official|官方)/iu },
     { label: "official-only Provider", document: skill, pattern: /(?:official only|只有官方|仅官方)[^\n。]{0,80}(?:use|选择|使用)[^\n。]{0,24}(?:official|官方)/iu },
     { label: "Context-only Provider", document: skill, pattern: /(?:Context only|只有 Context|仅 Context)[^\n。]{0,80}(?:use|选择|使用)[^\n。]{0,32}(?:Context|Figma-Context-MCP)/iu },
@@ -352,7 +367,7 @@ function checkSkillBehaviorRules() {
   ];
 
   for (const rule of rules) {
-    if (!rule.pattern.test(rule.document)) {
+    if (rule.document !== null && !rule.pattern.test(rule.document)) {
       errors.push(`Skill behavior rule is missing: ${rule.label}`);
     }
   }

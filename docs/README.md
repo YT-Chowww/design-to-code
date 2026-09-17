@@ -13,8 +13,9 @@ D2C 当前以轻量的 `d2c` Skill 作为日常工作流：从带具体 `node-id
 | [真实项目验收](skill-evals/d2c-live-acceptance.md) | 记录外部项目与 Provider 验证状态 |
 | [外部使用](提供外部使用.md) | 把本仓库 Skill 同步到本机工具 |
 | [Benchmark 行为场景](skill-evals/d2c-benchmark-scenarios.md) | 回归可选 Benchmark 的隔离与展示边界 |
+| [历史归档](archive/2026-09-09/README.md) | 已实施的方案设计和实施计划摘要 |
 
-仓库仅维护当前方案的需求、设计、使用指南与行为验证证据。旧工件流水线的协议、脚本和样本已移除；历史版本可通过 Git 查询。
+活跃文档只维护当前方案的需求、使用指南与验证证据。已完成的方案和计划仅保留精简归档，完整历史通过 Git 查询。
 
 ## 当前入口
 

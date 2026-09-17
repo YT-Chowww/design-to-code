@@ -13,7 +13,7 @@ description: Use when implementing a web frontend page or component from a Figma
 
 这个 Skill 只编排当前会话中的读取、判断、写入和验证：
 
-- 不安装、启动或认证 MCP。仅在目标项目缺少 `.mcp.json` 时，可从随 Skill 分发的无凭据模板创建该文件；不覆盖已有配置，也不读取、接收、填写、保存、复制或输出 OAuth、Token 等凭据。
+- 不安装、启动或认证 MCP。仅在目标项目缺少 `.mcp.json` 时，可从随 Skill 分发的无凭据模板创建该文件；不覆盖已有配置。允许检查配置是否存在、Provider 是否配置及认证状态；不得读取、输出或保存 OAuth、Token、环境变量等凭据值。
 - 不创建运行脚本、状态机、`.d2c` 工作区、manifest、normalized JSON、阶段报告或独立日常预览工程。
 - 除“未显式指定 Provider 且默认官方 Provider 返回 OAuth 未授权、授权被拒绝或授权已过期”外，不自动切换 Provider；任何切换都不混用两个 Provider 的结果。不自动评分或循环收敛。
 - 不支持从 Figma Desktop 当前选择推断目标，也不允许只看截图猜代码。
@@ -68,7 +68,7 @@ MCP config → preflight → provider → design context → project rules → p
 - 选择后只使用该 Provider。失败时按对应 Reference 分类；最多仅对临时超时、限流或资源下载失败安全重试一次。
 - 用户未显式指定 Provider、默认官方 Provider 返回 OAuth 未授权、授权被拒绝或授权过期，且 Context Provider 的必需操作可调用时：先说明授权失败和即将切换，再丢弃官方调用的任何结果，从目标 `node-id` 开始用 Figma-Context-MCP 重新读取。Context Provider 不可用时停止。
 - 用户显式指定官方 Provider 时，即使返回上述三类 OAuth 授权状态也停止，不自动切换。其他 OAuth 故障、官方服务异常、限流、超时、权限不足、节点错误、数据为空或不完整、以及后续还原偏差均不得触发切换。
-- 不安装或认证工具；除上述缺失配置的无凭据模板创建外，不修改 MCP 配置，也不触碰 OAuth、Token 或环境变量。
+- 不安装或认证工具；除创建缺失的无凭据模板外，不修改 MCP 配置，也不处理 OAuth、Token 或环境变量值。
 - 用户完成配置并重启后，必须按 [MCP 配置引导](references/mcp-setup.md) 用当前会话中的实际可调用工具验证所选 Provider；不能仅根据 `.mcp.json` 判断成功。
 
 按选中的 Provider 读取一个 Reference：
