@@ -2,7 +2,7 @@
 
 ## 可用性判断
 
-只根据当前会话真实可调用的工具和本次所需操作判断官方 Provider 是否可用，不读取 MCP 配置、OAuth 信息、环境变量或本地凭据。
+只根据当前会话真实可调用的工具和本次所需操作判断官方 Provider 是否可用。可以检查 Provider 和认证状态，但不得读取、输出或保存 OAuth、Token、环境变量等凭据值。
 
 - 必须存在能按 Figma URL 与具体 `node-id` 取得结构化设计上下文的操作，例如官方 MCP 暴露的 `get_design_context`。
 - 需要截图、变量或资源时，相应操作也必须在当前会话可调用；不要因为看见 Server 名称就假定能力存在。
@@ -18,14 +18,14 @@
 
 ## 失败分类与重试
 
-- OAuth 未登录、授权过期或授权被拒绝：说明这是 OAuth/authorization 问题和受阻操作；不查看、复制、输出或尝试修复凭据，等待用户在工具侧处理。
+- OAuth 未登录、授权过期或授权被拒绝：说明这是 OAuth/authorization 问题和受阻操作；不查看、复制、输出或尝试修复凭据。若用户未显式指定 Provider 且 Context Provider 的必需操作可调用，提示后丢弃官方调用的所有结果，并从目标 `node-id` 开始用 Figma-Context-MCP 重新读取；否则停止并等待用户在工具侧处理。
 - 权限不足或节点不可访问：报告 permission/not-found，并确认请求的文件和 `node-id`，不改猜其他节点。
 - 临时超时、限流或资源下载失败：可以对同一操作安全重试一次，并在报告中说明已重试；第二次失败后停止。
 - 结构化内容为空、截断或不对应目标节点：报告 structured-context missing/incomplete；可在同一 Provider 内按已知子节点拆分读取，但不能用截图补猜缺失结构。
-- Provider 失败后不自动改用 Figma-Context-MCP，也不把官方 Provider 的部分结果与另一 Provider 拼接。
+- 除上述默认官方 OAuth 未授权、授权被拒绝或授权已过期外，不改用 Figma-Context-MCP。其他 OAuth 故障、服务异常、限流、超时、权限不足、节点错误、结构化内容缺失或不完整，以及代码还原偏差都在当前 Provider 内处理或停止。
 
 ```text
 Report provider, failed operation, error category, and whether one safe retry was used.
-Stop and ask the user whether to retry later or explicitly select the other Provider.
-Do not combine partial results.
+Only default-official OAuth unauthorized, denied, or expired may restart with an available Context Provider after notice.
+Otherwise stop after the allowed retry. Never combine results from different Providers.
 ```

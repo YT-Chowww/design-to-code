@@ -5,23 +5,23 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 
 const root = process.cwd();
-const skillPath = "skills/d2c-benchmark/SKILL.md";
-const scenariosPath = "skills/d2c-benchmark/references/scenarios.md";
-const pcTemplatePath = "skills/d2c-benchmark/templates/pc-react-antd";
-const mobileTemplatePath = "skills/d2c-benchmark/templates/mobile-vue-vant";
-const reviewTemplatePath = "skills/d2c-benchmark/templates/review";
-const resetScriptPath = "skills/d2c-benchmark/scripts/reset-latest.sh";
-const startScriptPath = "skills/d2c-benchmark/scripts/start-preview.sh";
+const skillPath = ".claude/skills/d2c-benchmark/SKILL.md";
+const scenariosPath = ".claude/skills/d2c-benchmark/references/scenarios.md";
+const pcTemplatePath = ".claude/skills/d2c-benchmark/templates/pc-react-antd";
+const mobileTemplatePath = ".claude/skills/d2c-benchmark/templates/mobile-vue-vant";
+const reviewTemplatePath = ".claude/skills/d2c-benchmark/templates/review";
+const resetScriptPath = ".claude/skills/d2c-benchmark/scripts/reset-latest.sh";
+const startScriptPath = ".claude/skills/d2c-benchmark/scripts/start-preview.sh";
 const benchmarkEvidencePath = "docs/skill-evals/d2c-benchmark-baseline.md";
 const required = [
   skillPath,
   scenariosPath,
-  "skills/d2c-benchmark/templates/pc-react-antd/package.json",
-  "skills/d2c-benchmark/templates/mobile-vue-vant/package.json",
-  "skills/d2c-benchmark/templates/review/index.html",
-  "skills/d2c-benchmark/templates/review/scenario-availability.mjs",
-  "skills/d2c-benchmark/scripts/reset-latest.sh",
-  "skills/d2c-benchmark/scripts/start-preview.sh",
+  ".claude/skills/d2c-benchmark/templates/pc-react-antd/package.json",
+  ".claude/skills/d2c-benchmark/templates/mobile-vue-vant/package.json",
+  ".claude/skills/d2c-benchmark/templates/review/index.html",
+  ".claude/skills/d2c-benchmark/templates/review/scenario-availability.mjs",
+  ".claude/skills/d2c-benchmark/scripts/reset-latest.sh",
+  ".claude/skills/d2c-benchmark/scripts/start-preview.sh",
 ];
 const errors = [];
 

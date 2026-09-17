@@ -16,6 +16,14 @@ const retiredNames = [
   "d2c-verify",
 ];
 
+test("repository keeps .claude/skills as the only Skill source", () => {
+  assert.equal(fs.existsSync(path.join(repositoryRoot, ".claude", "skills", "d2c", "SKILL.md")), true);
+  assert.equal(fs.existsSync(path.join(repositoryRoot, ".claude", "skills", "d2c", "references", "mcp-setup.md")), true);
+  assert.equal(fs.existsSync(path.join(repositoryRoot, ".claude", "skills", "d2c", "assets", "mcp.example.json")), true);
+  assert.equal(fs.existsSync(path.join(repositoryRoot, ".claude", "skills", "d2c-benchmark", "SKILL.md")), true);
+  assert.equal(fs.existsSync(path.join(repositoryRoot, "skills")), false);
+});
+
 function runSync(scriptName, targetKind) {
   const temporaryRoot = fs.mkdtempSync(path.join(os.tmpdir(), `d2c-${targetKind}-sync-`));
   const temporaryHome = path.join(temporaryRoot, "home");
@@ -95,7 +103,7 @@ for (const [scriptName, targetKind] of [
       for (const skillName of ["d2c", "d2c-benchmark"]) {
         const installedSkill = path.join(fixture.targetSkills, skillName);
         assert.equal(fs.lstatSync(installedSkill).isSymbolicLink(), true);
-        assert.equal(fs.realpathSync(installedSkill), path.join(repositoryRoot, "skills", skillName));
+        assert.equal(fs.realpathSync(installedSkill), path.join(repositoryRoot, ".claude", "skills", skillName));
       }
     } finally {
       fs.rmSync(fixture.temporaryRoot, { recursive: true, force: true });
@@ -107,7 +115,7 @@ for (const [scriptName, targetKind] of [
   ["sync-codex-skills.sh", "codex"],
   ["sync-claude-skills.sh", "claude"],
 ]) {
-  test(`${scriptName} also removes retired links from the runtime-neutral source`, () => {
+  test(`${scriptName} also removes retired links from the former root source`, () => {
     const temporaryRoot = fs.mkdtempSync(path.join(os.tmpdir(), `d2c-${targetKind}-current-root-`));
     const temporaryHome = path.join(temporaryRoot, "home");
     const codexHome = path.join(temporaryRoot, "codex");

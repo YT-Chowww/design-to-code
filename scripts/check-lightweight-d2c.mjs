@@ -4,29 +4,29 @@ import fs from "node:fs";
 import path from "node:path";
 
 const required = [
-  "skills/d2c/SKILL.md",
-  "skills/d2c/references/provider-official.md",
-  "skills/d2c/references/provider-context-mcp.md",
-  "skills/d2c/references/mcp-setup.md",
-  "skills/d2c/references/project-analysis-guide.md",
-  "skills/d2c/references/visual-review.md",
-  "skills/d2c/templates/D2C.md",
-  "skills/d2c/assets/mcp.example.json",
+  ".claude/skills/d2c/SKILL.md",
+  ".claude/skills/d2c/references/provider-official.md",
+  ".claude/skills/d2c/references/provider-context-mcp.md",
+  ".claude/skills/d2c/references/mcp-setup.md",
+  ".claude/skills/d2c/references/project-analysis-guide.md",
+  ".claude/skills/d2c/references/visual-review.md",
+  ".claude/skills/d2c/templates/D2C.md",
+  ".claude/skills/d2c/assets/mcp.example.json",
   "docs/skill-evals/d2c-forward-extended.md",
 ];
 
 const retired = [
-  "skills/d2c-init",
-  "skills/d2c-extract",
-  "skills/d2c-generate",
-  "skills/d2c-merge",
-  "skills/d2c-validate",
-  "skills/d2c-verify",
+  ".claude/skills/d2c-init",
+  ".claude/skills/d2c-extract",
+  ".claude/skills/d2c-generate",
+  ".claude/skills/d2c-merge",
+  ".claude/skills/d2c-validate",
+  ".claude/skills/d2c-verify",
 ];
 
 const root = process.cwd();
-const skillPath = "skills/d2c/SKILL.md";
-const referencesDirectory = "skills/d2c/references";
+const skillPath = ".claude/skills/d2c/SKILL.md";
+const referencesDirectory = ".claude/skills/d2c/references";
 const forbiddenTemplateTerms = ["Ant Design", "Vant", "E-Space", "React", "Vue"];
 const activeRepositoryDocuments = [
   "README.md",
@@ -259,7 +259,7 @@ function checkReferenceLinks() {
 }
 
 function checkTemplateNeutrality() {
-  const templatePath = absolute("skills/d2c/templates/D2C.md");
+  const templatePath = absolute(".claude/skills/d2c/templates/D2C.md");
   if (!fs.existsSync(templatePath)) {
     return;
   }
@@ -328,7 +328,7 @@ function checkFrameworkScope() {
 }
 
 function checkCodeConnectGuidance() {
-  const relativePath = "skills/d2c/references/provider-official.md";
+  const relativePath = ".claude/skills/d2c/references/provider-official.md";
   const document = readFileIfAvailable(relativePath);
   if (document === null) {
     return;
@@ -345,11 +345,11 @@ function checkSkillBehaviorRules() {
   const skill = readFileIfAvailable(skillPath);
   const providers = [
     skill,
-    readFileIfAvailable("skills/d2c/references/provider-official.md"),
-    readFileIfAvailable("skills/d2c/references/provider-context-mcp.md"),
+    readFileIfAvailable(".claude/skills/d2c/references/provider-official.md"),
+    readFileIfAvailable(".claude/skills/d2c/references/provider-context-mcp.md"),
   ].filter((document) => document !== null).join("\n");
-  const visual = readFileIfAvailable("skills/d2c/references/visual-review.md");
-  const mcpSetup = readFileIfAvailable("skills/d2c/references/mcp-setup.md");
+  const visual = readFileIfAvailable(".claude/skills/d2c/references/visual-review.md");
+  const mcpSetup = readFileIfAvailable(".claude/skills/d2c/references/mcp-setup.md");
   const rules = [
     { label: "missing MCP config bootstrap", document: skill, pattern: /(?=[\s\S]*(?:(?:\.mcp\.json[^\n。]{0,80}(?:missing|不存在|缺失))|(?:(?:missing|不存在|缺少|缺失)[^\n。]{0,80}\.mcp\.json)))(?=[\s\S]*(?:copy|复制))(?=[\s\S]*(?:restart|重启))(?=[\s\S]*(?:do not|never|不得|不)[^\n。]{0,48}(?:read|request|fill|读取|Token|凭据))/iu },
     { label: "Provider setup modes", document: mcpSetup, pattern: /(?=[\s\S]*(?:仅官方|official only))(?=[\s\S]*(?:仅社区|Context only))(?=[\s\S]*(?:两者|both))(?=[\s\S]*figma-official)(?=[\s\S]*figma-context)/iu },

@@ -5,8 +5,8 @@ set -euo pipefail
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 PROJECT_ROOT=$(cd "${SCRIPT_DIR}/.." &>/dev/null && pwd)
 
-SOURCE_SKILLS="${PROJECT_ROOT}/skills"
-LEGACY_SOURCE_SKILLS="${PROJECT_ROOT}/.claude/skills"
+SOURCE_SKILLS="${PROJECT_ROOT}/.claude/skills"
+LEGACY_SOURCE_SKILLS="${PROJECT_ROOT}/skills"
 SOURCE_RULES="${PROJECT_ROOT}/.claude/rules"
 
 TARGET_ROOT="${HOME}/.claude"

@@ -23,4 +23,4 @@
 - 全局前置条件失败时整轮停止；单节点失败时保留失败页签并继续其他场景。
 - 每轮重建 `latest`，不维护历史运行目录。
 
-当前行为以 `skills/d2c-benchmark/SKILL.md` 为准。完整任务步骤可通过 Git 历史查看。
+当前行为以 `.claude/skills/d2c-benchmark/SKILL.md` 为准。完整任务步骤可通过 Git 历史查看。

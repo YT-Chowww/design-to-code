@@ -6,4 +6,4 @@
 - [日常 Skill 实施计划](lightweight-d2c-skill-plan.md)
 - [Benchmark 实施计划](d2c-benchmark-plan.md)
 
-这些文件不再作为当前执行依据。当前规则以 `skills/`、根目录 README 和 `docs/` 下的现行文档为准；完整过程可通过 Git 历史查看。
+这些文件不再作为当前执行依据。当前规则以 `.claude/skills/`、根目录 README 和 `docs/` 下的现行文档为准；完整过程可通过 Git 历史查看。

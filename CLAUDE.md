@@ -34,7 +34,7 @@ The URL must contain a concrete `node-id`. The target defaults to the current wo
 - Availability is determined from tools callable in the current session, not server names or local configuration.
 - When both are usable and the user did not choose, use the official Figma MCP.
 - MCP installation and authentication belong to the user. The Skill may create a missing `.mcp.json` from the credential-free template, but never overwrites an existing config. It may inspect configuration presence and Provider/authentication status, but never reads, stores, copies, outputs, requests, or fills credential values.
-- Setup guidance offers official-only (recommended), Context-only, and both modes. After restart, verify the selected Provider from actually callable tools rather than configuration text; detailed steps live in `skills/d2c/references/mcp-setup.md`.
+- Setup guidance offers official-only (recommended), Context-only, and both modes. After restart, verify the selected Provider from actually callable tools rather than configuration text; detailed steps live in `.claude/skills/d2c/references/mcp-setup.md`.
 - If no Provider was explicitly selected and the default official Provider reports OAuth unauthorized, denied, or expired while Figma-Context-MCP is available, announce the fallback, discard official results, and restart the target-node read with Figma-Context-MCP without mixing results. An explicitly selected Provider, other OAuth failures, non-authentication failures, incomplete data, and restoration differences never trigger this switch.
 
 ## Project `D2C.md` and approvals
@@ -65,7 +65,7 @@ bash scripts/sync-claude-skills.sh
 bash scripts/sync-codex-skills.sh
 ```
 
-`npm test` runs the daily and Benchmark contracts. `skills/` is the runtime-neutral source used directly by workspace-aware agents such as OpenClaw. The sync scripts publish the same source to Claude Code and Codex.
+`npm test` runs the daily and Benchmark contracts. `.claude/skills/` is the only repository Skill source. The sync scripts link that source into Claude Code and Codex user directories when installation is needed.
 
 ## Optional Benchmark
 
@@ -75,15 +75,15 @@ The review shell is `http://127.0.0.1:4172`; React + Ant Design routes use port 
 
 ## Important locations
 
-- `skills/d2c/SKILL.md` — daily workflow, stops, approvals, write boundaries, and delivery requirements.
-- `skills/d2c/references/provider-official.md` — official Figma MCP evidence and failure handling.
-- `skills/d2c/references/provider-context-mcp.md` — Figma-Context-MCP evidence and failure handling.
-- `skills/d2c/references/project-analysis-guide.md` — bounded project analysis and impact assessment.
-- `skills/d2c/references/visual-review.md` — real-page review and conditional Chrome diagnostics.
-- `skills/d2c/templates/D2C.md` — neutral project-rule skeleton.
-- `skills/d2c-benchmark/SKILL.md` — optional four-scenario Benchmark workflow and failure isolation rules.
-- `skills/d2c-benchmark/references/scenarios.md` — fixed Figma nodes, routes, targets, and visible interactions.
-- `skills/d2c-benchmark/templates/` — committed PC, mobile, and review scaffolds.
-- `skills/d2c-benchmark/scripts/` — safe latest-workspace reset and preview startup helpers.
+- `.claude/skills/d2c/SKILL.md` — daily workflow, stops, approvals, write boundaries, and delivery requirements.
+- `.claude/skills/d2c/references/provider-official.md` — official Figma MCP evidence and failure handling.
+- `.claude/skills/d2c/references/provider-context-mcp.md` — Figma-Context-MCP evidence and failure handling.
+- `.claude/skills/d2c/references/project-analysis-guide.md` — bounded project analysis and impact assessment.
+- `.claude/skills/d2c/references/visual-review.md` — real-page review and conditional Chrome diagnostics.
+- `.claude/skills/d2c/templates/D2C.md` — neutral project-rule skeleton.
+- `.claude/skills/d2c-benchmark/SKILL.md` — optional four-scenario Benchmark workflow and failure isolation rules.
+- `.claude/skills/d2c-benchmark/references/scenarios.md` — fixed Figma nodes, routes, targets, and visible interactions.
+- `.claude/skills/d2c-benchmark/templates/` — committed PC, mobile, and review scaffolds.
+- `.claude/skills/d2c-benchmark/scripts/` — safe latest-workspace reset and preview startup helpers.
 - `scripts/check-lightweight-d2c.mjs` — active Skill and repository guidance checks.
 - `scripts/check-d2c-benchmark.mjs` — Benchmark structure, scaffold, helper, and instruction checks.

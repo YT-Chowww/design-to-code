@@ -23,4 +23,4 @@
 - 用户调整后重新读取受影响的 Figma 与项目证据。
 - 只修改确认范围，按 changed surface 执行工程检查。
 
-当前行为以 `skills/d2c/SKILL.md` 为准，验证入口见 `docs/verification.md`。完整任务步骤可通过 Git 历史查看。
+当前行为以 `.claude/skills/d2c/SKILL.md` 为准，验证入口见 `docs/verification.md`。完整任务步骤可通过 Git 历史查看。

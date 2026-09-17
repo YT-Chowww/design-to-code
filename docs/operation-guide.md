@@ -28,7 +28,7 @@
 
 未显式指定时，按“官方 Figma MCP、Figma-Context-MCP、停止”的顺序选择，并在读取前说明本轮 Provider。用户未显式指定 Provider、默认官方返回 OAuth 未授权、授权被拒绝或授权已过期，且社区 Provider 可用时，提示原因、丢弃官方结果，并从目标节点重新读取且不混用结果。其他失败最多安全重试一次后停止。
 
-首次使用时从 `.mcp.example.json` 创建项目级 `.mcp.json`，选择“仅官方（推荐）”“仅社区”或“两者都配置”，完成本地设置后重启 Claude。Skill 只创建缺失的无凭据模板，不覆盖已有配置；重启后以实际可调用工具判断 Provider 是否生效。完整步骤见 [MCP 配置引导](../skills/d2c/references/mcp-setup.md)。
+首次使用时从 `.mcp.example.json` 创建项目级 `.mcp.json`，选择“仅官方（推荐）”“仅社区”或“两者都配置”，完成本地设置后重启 Claude。Skill 只创建缺失的无凭据模板，不覆盖已有配置；重启后以实际可调用工具判断 Provider 是否生效。完整步骤见 [MCP 配置引导](../.claude/skills/d2c/references/mcp-setup.md)。
 
 ## 实现与复核
 

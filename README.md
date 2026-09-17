@@ -31,7 +31,7 @@ D2C 支持官方 Figma MCP 和 Figma-Context-MCP。用户未指定且两者都�
 2. 按上表保留 Provider；社区 Token 只在本地填写。
 3. 从项目根目录重启 Claude；官方方案再通过 `/mcp` 完成 OAuth。
 
-Skill 发现配置缺失时可创建无凭据模板，但不会覆盖已有配置。重启后以当前会话中实际可调用的工具判断 Provider 是否生效，不以配置文本或已保存凭据推断。允许检查配置是否存在、Provider 是否配置及认证状态；不得读取、输出或保存凭据值。详细步骤见 [MCP 配置引导](skills/d2c/references/mcp-setup.md)。
+Skill 发现配置缺失时可创建无凭据模板，但不会覆盖已有配置。重启后以当前会话中实际可调用的工具判断 Provider 是否生效，不以配置文本或已保存凭据推断。允许检查配置是否存在、Provider 是否配置及认证状态；不得读取、输出或保存凭据值。详细步骤见 [MCP 配置引导](.claude/skills/d2c/references/mcp-setup.md)。
 
 用户未指定 Provider 且默认官方返回 OAuth 未授权、被拒绝或已过期时，若社区 Provider 可用，D2C 会提示后从目标节点重新读取且不混用结果；其他错误以及用户显式指定官方时不自动切换。
 
@@ -60,14 +60,14 @@ Chrome MCP 只在已经识别出具体视觉偏差后用于检查相关元素的
 
 ## Agent 使用方式
 
-仓库根目录的 `skills/` 是唯一 Skill 源。OpenClaw 等支持工作区 Agent Skills 的工具可以直接发现它；Claude Code 和 Codex 使用同步脚本安装到各自的用户目录：
+`.claude/skills/` 是仓库内唯一 Skill 源。Claude Code 可直接使用；Codex 或其他支持用户级 Skill 目录的 Agent 可通过同步脚本安装：
 
 ```bash
 bash scripts/sync-claude-skills.sh
 bash scripts/sync-codex-skills.sh
 ```
 
-同步脚本只创建指向 `skills/` 的符号链接，不复制项目配置或认证信息。
+同步脚本只创建指向 `.claude/skills/` 的符号链接，不复制项目配置或认证信息。只识别根目录 `skills/`、且不支持用户级安装的 Agent 无法直接发现本仓库 Skill。
 
 ## 仓库检查
 
