@@ -11,6 +11,7 @@ const requiredFiles = [
   "skills/d2c/SKILL.md",
   "skills/d2c/references/provider-official.md",
   "skills/d2c/references/provider-context-mcp.md",
+  "skills/d2c/references/mcp-setup.md",
   "skills/d2c/references/project-analysis-guide.md",
   "skills/d2c/references/visual-review.md",
   "skills/d2c/templates/D2C.md",
@@ -42,6 +43,11 @@ Prefer an existing Code Connect mapping only after verifying that it matches the
 const validVisualReview = `# Visual review
 
 When a known mismatch exists but Chrome is unavailable, preserve the mismatch, report unavailable targeted inspection, and mark the correction unverified without guessing.
+`;
+
+const validMcpSetup = `# MCP setup
+
+Offer three choices in this order: official only, Context only, or both. Official only keeps figma-official, restarts Claude, then uses /mcp for OAuth. Context only keeps figma-context, asks the user to add a Personal Access Token locally, and restarts Claude. After restart, verify the selected Provider using really callable tools rather than the config file.
 `;
 
 const validScenarios = `# Scenarios
@@ -112,6 +118,8 @@ function runChecker(relativePath, phrase) {
         ? validSkill
         : requiredFile.endsWith("provider-official.md")
           ? validOfficialProvider
+          : requiredFile.endsWith("mcp-setup.md")
+            ? validMcpSetup
           : requiredFile.endsWith("visual-review.md")
             ? validVisualReview
           : "# Fixture\n";
@@ -220,6 +228,16 @@ test("requires missing .mcp.json to be bootstrapped without handling credentials
 
   assert.equal(result.status, 1, result.stdout || result.stderr);
   assert.match(result.stderr, /missing MCP config bootstrap/u);
+});
+
+test("requires provider-specific MCP setup choices and post-restart verification", () => {
+  const result = runChecker(
+    "skills/d2c/references/mcp-setup.md",
+    "# MCP setup\n\nTell the user to configure MCP.\n",
+  );
+
+  assert.equal(result.status, 1, result.stdout || result.stderr);
+  assert.match(result.stderr, /Provider setup choices|official MCP setup|Context MCP setup|post-restart Provider verification/u);
 });
 
 test("requires default official OAuth failure to restart with Context without mixing results", () => {

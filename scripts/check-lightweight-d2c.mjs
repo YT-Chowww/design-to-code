@@ -7,6 +7,7 @@ const required = [
   "skills/d2c/SKILL.md",
   "skills/d2c/references/provider-official.md",
   "skills/d2c/references/provider-context-mcp.md",
+  "skills/d2c/references/mcp-setup.md",
   "skills/d2c/references/project-analysis-guide.md",
   "skills/d2c/references/visual-review.md",
   "skills/d2c/templates/D2C.md",
@@ -331,8 +332,13 @@ function checkSkillBehaviorRules() {
     fs.readFileSync(absolute("skills/d2c/references/provider-context-mcp.md"), "utf8"),
   ].join("\n");
   const visual = fs.readFileSync(absolute("skills/d2c/references/visual-review.md"), "utf8");
+  const mcpSetup = fs.readFileSync(absolute("skills/d2c/references/mcp-setup.md"), "utf8");
   const rules = [
     { label: "missing MCP config bootstrap", document: skill, pattern: /(?:(?:\.mcp\.json[^\n。]{0,80}(?:missing|不存在|缺失))|(?:(?:missing|不存在|缺少|缺失)[^\n。]{0,80}\.mcp\.json))(?=[\s\S]{0,700}(?:copy|复制))(?=[\s\S]{0,900}(?:restart|重启))(?=[\s\S]{0,900}(?:do not|never|不得|不)[^\n。]{0,48}(?:read|request|fill|读取|Token|凭据))/iu },
+    { label: "Provider setup choices", document: mcpSetup, pattern: /(?:仅官方|official only)[\s\S]{0,300}(?:仅社区|Context only)[\s\S]{0,300}(?:两者|both)/iu },
+    { label: "official MCP setup", document: mcpSetup, pattern: /figma-official[\s\S]{0,500}(?:restart|重启)[\s\S]{0,300}\/mcp[\s\S]{0,200}OAuth/iu },
+    { label: "Context MCP setup", document: mcpSetup, pattern: /figma-context[\s\S]{0,500}(?:Personal Access Token|PAT)[\s\S]{0,500}(?:restart|重启)/iu },
+    { label: "post-restart Provider verification", document: mcpSetup, pattern: /(?:restart|重启)[\s\S]{0,500}(?:实际可调用|really callable|callable tools?)[\s\S]{0,300}(?:配置文件|config)/iu },
     { label: "both Providers", document: skill, pattern: /(?:both Providers|两者都可用|两种 Provider 都可用)[^\n。]{0,80}(?:official|官方)/iu },
     { label: "official-only Provider", document: skill, pattern: /(?:official only|只有官方|仅官方)[^\n。]{0,80}(?:use|选择|使用)[^\n。]{0,24}(?:official|官方)/iu },
     { label: "Context-only Provider", document: skill, pattern: /(?:Context only|只有 Context|仅 Context)[^\n。]{0,80}(?:use|选择|使用)[^\n。]{0,32}(?:Context|Figma-Context-MCP)/iu },

@@ -19,14 +19,24 @@ D2C 是一个面向可识别的现有 Web 前端项目的轻量 Design-to-Code S
 
 D2C 支持官方 Figma MCP 和 Figma-Context-MCP，选择顺序为：用户明确指定、官方 Figma MCP、Figma-Context-MCP。两者都可用且用户未指定时使用官方 Figma MCP。
 
-首次使用 Claude Code 时，按以下顺序准备：
+首次使用 Claude Code 时，可以选择以下模式：
+
+| 模式 | 本地配置 | 启动后的操作 |
+| --- | --- | --- |
+| 仅官方（推荐） | 保留 `figma-official`，无需 Token | 重启 Claude 后执行 `/mcp`，完成 OAuth |
+| 仅社区 | 保留 `figma-context`，在本地填写 Personal Access Token | 重启 Claude |
+| 两者都配置 | 保留两个 Provider，并在本地填写社区 Token | 重启 Claude 后执行 `/mcp`，完成官方 OAuth |
+
+具体顺序：
 
 1. 在项目根目录将 `.mcp.example.json` 复制为本地 `.mcp.json`。
-2. 使用社区方案时，在本地把 `--figma-api-key=<YOUR_FIGMA_API_KEY>` 替换为新生成的 Personal Access Token；只使用官方方案时无需填写 Token。
+2. 按上表保留需要的 Provider；使用社区方案时，在本地把 `--figma-api-key=<YOUR_FIGMA_API_KEY>` 替换为新生成的 Personal Access Token。
 3. 从项目根目录启动或重启 Claude Code，使项目级 MCP 配置生效。
 4. 使用官方方案时，在 Claude Code 中通过 `/mcp` 完成 OAuth。
 
-如果已经启动 Claude 后才调用 D2C Skill，Skill 会检查 `.mcp.json` 是否存在；缺失时从随 Skill 分发的无凭据模板创建该文件，提示用户完成本地配置并重启，但不会覆盖已有配置或读取、接收、代填 Token。
+如果已经启动 Claude 后才调用 D2C Skill，Skill 会检查 `.mcp.json` 是否存在；缺失时从随 Skill 分发的无凭据模板创建该文件，并引导用户选择“仅官方 / 仅社区 / 两者都配置”。已有 `.mcp.json` 时只展示需要核对的配置片段，不覆盖文件，也不读取、接收或代填 Token。
+
+重启后，Skill 只根据当前会话中实际可调用的工具判断配置是否生效：官方不可用时引导用户检查 `/mcp` 和 OAuth；社区不可用时引导用户在本地核对 Token 占位符、`npx` 和重启状态，但不读取 Token 内容。
 
 `figma-official` 连接 Figma 官方远程 MCP；`figma-context` 运行社区方案。`.mcp.json` 已被 Git 忽略，不得提交或分享；仓库只维护不含真实凭据的模板。
 

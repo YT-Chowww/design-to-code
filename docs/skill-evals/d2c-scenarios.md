@@ -22,7 +22,13 @@ Expected decision: stop before writes.
 
 Scenario: The target project has no `.mcp.json`, but the bundled credential-free MCP template is available.
 
-Expected decision: copy the template to `.mcp.json`, tell the user to configure it locally and restart Claude, then stop. Never overwrite an existing config or ask the user to paste a Token into the conversation.
+Expected decision: copy the template to `.mcp.json`; offer official-only (recommended), Context-only, and both modes; give the selected mode's local steps; tell the user to restart Claude; then stop. Never overwrite an existing config or ask the user to paste a Token into the conversation.
+
+## 1c. Provider still unavailable after restart
+
+Scenario: The user says configuration is complete and Claude was restarted, but the selected Provider does not expose the required tools.
+
+Expected decision: do not infer success from `.mcp.json`. For official, direct the user to `/mcp` and OAuth status. For Context, direct the user to check the local placeholder, `npx`, and restart state without reading the Token. Stop until the selected Provider is actually callable.
 
 ## 2. Provider choice and failure
 
