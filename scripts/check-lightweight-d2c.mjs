@@ -61,6 +61,8 @@ const behaviorScenarios = [
   { label: "user adjustment conflicts with Figma", pattern: /adjustment conflicts with Figma|用户调整.{0,20}Figma|最新用户要求.{0,20}Figma/iu },
   { label: "missing fonts/assets", pattern: /missing fonts? or assets?|字体或资源缺失|缺少字体|资源缺失/iu },
   { label: "known mismatch with Chrome unavailable", pattern: /known mismatch with Chrome unavailable|已知偏差.{0,24}Chrome.{0,16}不可用/iu },
+  { label: "structured visual comparison", pattern: /cannot inspect both screenshots|无法直接查看.{0,16}两张截图|结构化视觉对比/iu },
+  { label: "quota exhaustion", pattern: /quota exhaustion|额度耗尽/iu },
 ];
 
 function absolute(relativePath) {
@@ -349,6 +351,8 @@ function checkSkillBehaviorRules() {
     readFileIfAvailable(".claude/skills/d2c/references/provider-context-mcp.md"),
   ].filter((document) => document !== null).join("\n");
   const visual = readFileIfAvailable(".claude/skills/d2c/references/visual-review.md");
+  const official = readFileIfAvailable(".claude/skills/d2c/references/provider-official.md");
+  const context = readFileIfAvailable(".claude/skills/d2c/references/provider-context-mcp.md");
   const mcpSetup = readFileIfAvailable(".claude/skills/d2c/references/mcp-setup.md");
   const rules = [
     { label: "missing MCP config bootstrap", document: skill, pattern: /(?=[\s\S]*(?:(?:\.mcp\.json[^\n。]{0,80}(?:missing|不存在|缺失))|(?:(?:missing|不存在|缺少|缺失)[^\n。]{0,80}\.mcp\.json)))(?=[\s\S]*(?:copy|复制))(?=[\s\S]*(?:restart|重启))(?=[\s\S]*(?:do not|never|不得|不)[^\n。]{0,48}(?:read|request|fill|读取|Token|凭据))/iu },
@@ -363,7 +367,11 @@ function checkSkillBehaviorRules() {
     { label: "explicit official OAuth stop", document: providers, pattern: /(?:显式指定|显式选择|explicitly selected)[^\n。]{0,48}(?:官方|official)[^\n。]{0,80}(?:OAuth|authorization|授权)[^\n。]{0,80}(?:停止|stop)/iu },
     { label: "user adjustment", document: skill, pattern: /(?:user adjustment|用户调整)[\s\S]{0,500}(?:latest user request wins over Figma|最新要求为准|最新用户要求为准)/iu },
     { label: "missing fonts/assets", document: skill, pattern: /(?:missing fonts? or assets?|字体[^\n。]{0,16}(?:缺失|缺少)|资源[^\n。]{0,16}(?:缺失|下载失败))[^\n。]{0,120}(?:user|用户|选择|替代)/iu },
+    { label: "visual capability routing", document: skill, pattern: /(?=[^\n。]*(?:both screenshots|两张截图))(?=[^\n。]*(?:inspect|查看))(?=[^\n。]*(?:structured|结构化))(?=[^\n。]*(?:DOM|计算样式))[^\n。]+/iu },
     { label: "Chrome unavailable", document: visual, pattern: /Chrome[^\n。]{0,24}(?:unavailable|不可用)[^\n。]{0,120}(?:unverified|未验证|保留已识别偏差|不凭猜测)/iu },
+    { label: "structured Chrome comparison", document: visual, pattern: /(?:both screenshots cannot be inspected|无法直接查看[^\n。]{0,24}两张截图)[\s\S]{0,500}(?:DOM|计算样式)[\s\S]{0,300}(?:structured comparison|结构化对比)[\s\S]{0,240}(?:do not claim visual completion|不得[^\n。]{0,40}(?:视觉一致|视觉复核完成))/iu },
+    { label: "quota exhaustion no retry", document: official, pattern: /(?:quota|额度)[^\n。]{0,48}(?:exhausted|耗尽)[^\n。]{0,48}(?:do not retry|不重试|stop|停止)/iu },
+    { label: "Context quota exhaustion no retry", document: context, pattern: /(?:quota|额度)[^\n。]{0,48}(?:exhausted|耗尽)[^\n。]{0,48}(?:do not retry|不重试|stop|停止)/iu },
   ];
 
   for (const rule of rules) {

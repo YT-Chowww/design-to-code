@@ -65,7 +65,7 @@ MCP config → preflight → provider → design context → project rules → p
 - 两者都可用且用户未指定时，选择官方 Figma MCP。
 - 仅官方 Provider 可用时使用官方；仅 Context Provider 可用时使用 Figma-Context-MCP；两者都不可用时说明缺失工具并停止。
 - 用户指定的 Provider 不可用时，读取 [MCP 配置引导](references/mcp-setup.md)，给出该 Provider 的本地配置或认证步骤，然后停止；不静默切换。
-- 选择后只使用该 Provider。失败时按对应 Reference 分类；最多仅对临时超时、限流或资源下载失败安全重试一次。
+- 选择后只使用该 Provider。失败时按对应 Reference 分类；临时超时、可恢复限流或资源下载失败最多安全重试一次，明确返回席位或周期额度耗尽时不重试。
 - 用户未显式指定 Provider、默认官方 Provider 返回 OAuth 未授权、授权被拒绝或授权过期，且 Context Provider 的必需操作可调用时：先说明授权失败和即将切换，再丢弃官方调用的任何结果，从目标 `node-id` 开始用 Figma-Context-MCP 重新读取。Context Provider 不可用时停止。
 - 用户显式指定官方 Provider 时，即使返回上述三类 OAuth 授权状态也停止，不自动切换。其他 OAuth 故障、官方服务异常、限流、超时、权限不足、节点错误、数据为空或不完整、以及后续还原偏差均不得触发切换。
 - 不安装或认证工具；除创建缺失的无凭据模板外，不修改 MCP 配置，也不处理 OAuth、Token 或环境变量值。
@@ -175,7 +175,7 @@ D2C.md → package scripts、路由和项目说明 → 询问用户
 
 ## 9. Visual review
 
-按[视觉复核指南](references/visual-review.md)在目标项目真实路由进行复核。它不是独立预览工程，也不能用 DOM 数值代替视觉判断。只有发现具体偏差后才使用 Chrome 定位；最多进行一次源码修正和一次复查。
+按[视觉复核指南](references/visual-review.md)在目标项目真实路由进行复核。根据当前会话能否直接查看两张截图分流：不能时用 Chrome 做 Figma 与 DOM/计算样式的结构化对比；能查看时仅在发现具体偏差后用 Chrome 定位。DOM 数值不能代替视觉判断，最多进行一次源码修正和一次复查。
 
 ## Subagent 边界
 

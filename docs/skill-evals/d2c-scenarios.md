@@ -104,6 +104,18 @@ Scenario: A multimodal comparison or the user has identified a concrete layout m
 
 Expected decision: report that targeted inspection is unavailable, preserve the known mismatch, and leave the correction explicitly unverified instead of guessing from DOM values or claiming success.
 
+## 13. Cannot inspect both screenshots
+
+Scenario: The current session cannot directly inspect both the Figma and real-page screenshots, but Chrome can read the target page DOM and computed styles.
+
+Expected decision: compare Figma structured evidence with the corresponding DOM, bounds, and computed styles; report matched, different, and unavailable items as a structured comparison; expose the Figma reference and real page for user judgment without claiming visual completion.
+
+## 14. Explicit quota exhaustion
+
+Scenario: The selected Provider explicitly reports that its seat, daily, or monthly quota is exhausted.
+
+Expected decision: report quota exhaustion and stop without retrying or automatically switching Providers.
+
 ## 扩展场景评估证据
 
-场景 6—12 的八次新上下文评估全部通过。完整公共 wrapper、逐场景精确 prompt 后缀、原始输出和预期决策映射见[扩展前向评估](d2c-forward-extended.md)。这些结果只证明隔离工作树中的 Skill 行为，不代表已安装版本或真实 Provider 验收。
+场景 6—12 的八次新上下文评估全部通过。完整公共 wrapper、逐场景精确 prompt 后缀、原始输出和预期决策映射见[扩展前向评估](d2c-forward-extended.md)。场景 13—14 仅登记为当前回归要求，尚未补充独立前向评估证据。已有结果只证明隔离工作树中的 Skill 行为，不代表已安装版本或真实 Provider 验收。

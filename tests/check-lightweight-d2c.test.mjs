@@ -33,16 +33,27 @@ If .mcp.json is missing, copy the bundled credential-free template, do not read 
 When both Providers are callable, use official. When official only is callable, use official. When Context only is callable, use Figma-Context-MCP. When neither Provider is callable, stop. If the user did not explicitly choose a Provider and official OAuth authorization is denied while Context Provider is available, announce the denial, discard official results, and restart the target-node extraction with Figma-Context-MCP without mixing results. If the user explicitly selected official and OAuth authorization is denied, stop without switching. An explicitly selected unavailable Provider must stop without switching.
 
 When a user adjustment conflicts with Figma, re-read affected Figma and project evidence; the latest user request wins over Figma. Missing fonts or assets must be reported for the user to choose a replacement or accept the difference, without silent substitution.
+
+Visual review branches by whether both screenshots can be inspected; when they cannot, use Chrome for a structured Figma-to-DOM/computed-style comparison without claiming visual completion.
 `;
 
 const validOfficialProvider = `# Official provider
 
 Prefer an existing Code Connect mapping only after verifying that it matches the current project code. Creating mappings is out of scope and remains a TODO.
+
+Retry a recoverable rate limit once. If the error explicitly says a seat, daily, or monthly quota is exhausted, do not retry and stop.
+`;
+
+const validContextProvider = `# Context provider
+
+Retry a recoverable rate limit once. If the error explicitly says a daily or monthly quota is exhausted, do not retry and stop.
 `;
 
 const validVisualReview = `# Visual review
 
 When a known mismatch exists but Chrome is unavailable, preserve the mismatch, report unavailable targeted inspection, and mark the correction unverified without guessing.
+
+When both screenshots cannot be inspected, use Chrome to compare Figma structure with DOM and computed styles, label the result as a structured comparison, and do not claim visual completion.
 `;
 
 const validMcpSetup = `# MCP setup
@@ -92,6 +103,12 @@ Ask the user to identify a concrete mismatch before using Chrome.
 
 ## Known mismatch with Chrome unavailable
 Report that targeted inspection is unavailable and leave the visual correction unverified.
+
+## Cannot inspect both screenshots
+Use Chrome for a structured Figma-to-DOM/computed-style comparison without claiming visual completion.
+
+## Explicit quota exhaustion
+Do not retry an error that explicitly reports exhausted daily or monthly quota.
 `;
 
 const activeDocs = [
@@ -122,6 +139,8 @@ function runChecker(relativePath, phrase, omittedRequiredFile = null) {
         ? validSkill
         : requiredFile.endsWith("provider-official.md")
           ? validOfficialProvider
+          : requiredFile.endsWith("provider-context-mcp.md")
+            ? validContextProvider
           : requiredFile.endsWith("mcp-setup.md")
             ? validMcpSetup
           : requiredFile.endsWith("visual-review.md")
@@ -295,6 +314,69 @@ test("requires an explicit unverified boundary when Chrome is unavailable", () =
 
   assert.equal(result.status, 1, result.stdout || result.stderr);
   assert.match(result.stderr, /Skill behavior rule is missing: Chrome unavailable/u);
+});
+
+test("requires structured Chrome comparison when both screenshots cannot be inspected", () => {
+  const result = runChecker(
+    ".claude/skills/d2c/references/visual-review.md",
+    "# Visual review\n\nWhen a known mismatch exists but Chrome is unavailable, preserve it and mark the correction unverified.\n",
+  );
+
+  assert.equal(result.status, 1, result.stdout || result.stderr);
+  assert.match(result.stderr, /Skill behavior rule is missing: structured Chrome comparison/u);
+});
+
+test("requires the main Skill to route visual review by screenshot capability", () => {
+  const result = runChecker(
+    ".claude/skills/d2c/SKILL.md",
+    validSkill.replace(
+      "Visual review branches by whether both screenshots can be inspected; when they cannot, use Chrome for a structured Figma-to-DOM/computed-style comparison without claiming visual completion.\n",
+      "",
+    ),
+  );
+
+  assert.equal(result.status, 1, result.stdout || result.stderr);
+  assert.match(result.stderr, /Skill behavior rule is missing: visual capability routing/u);
+});
+
+test("requires explicit quota exhaustion to stop without retry", () => {
+  const result = runChecker(
+    ".claude/skills/d2c/references/provider-official.md",
+    "# Official provider\n\nPrefer an existing Code Connect mapping only after verifying that it matches the current project code. Creating mappings is out of scope and remains a TODO. Retry rate limits once.\n",
+  );
+
+  assert.equal(result.status, 1, result.stdout || result.stderr);
+  assert.match(result.stderr, /Skill behavior rule is missing: quota exhaustion no retry/u);
+});
+
+test("requires Context Provider quota exhaustion to stop without retry", () => {
+  const result = runChecker(
+    ".claude/skills/d2c/references/provider-context-mcp.md",
+    "# Context provider\n\nRetry rate limits once.\n",
+  );
+
+  assert.equal(result.status, 1, result.stdout || result.stderr);
+  assert.match(result.stderr, /Skill behavior rule is missing: Context quota exhaustion no retry/u);
+});
+
+test("requires the non-multimodal structured-comparison scenario", () => {
+  const result = runChecker(
+    "docs/skill-evals/d2c-scenarios.md",
+    validScenarios.replace(/## Cannot inspect both screenshots[\s\S]*?(?=\n## Explicit quota exhaustion)/u, ""),
+  );
+
+  assert.equal(result.status, 1, result.stdout || result.stderr);
+  assert.match(result.stderr, /behavior scenario is missing: structured visual comparison/u);
+});
+
+test("requires the explicit quota-exhaustion scenario", () => {
+  const result = runChecker(
+    "docs/skill-evals/d2c-scenarios.md",
+    validScenarios.replace(/## Explicit quota exhaustion[\s\S]*$/u, ""),
+  );
+
+  assert.equal(result.status, 1, result.stdout || result.stderr);
+  assert.match(result.stderr, /behavior scenario is missing: quota exhaustion/u);
 });
 
 const forbiddenCases = [
