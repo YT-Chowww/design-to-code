@@ -4,32 +4,37 @@
 
 工程验证后，在目标项目的真实路由复核已确认的改动。先从 `D2C.md`、package scripts、路由和项目说明确定启动方式与访问地址；不明确时询问用户。
 
+- 操作浏览器前先询问用户是复用已有可访问服务，还是由 Agent 执行已识别的启动命令。复用时由用户确认地址且不重复启动；代为启动时先展示命令和端口，得到明确确认后再执行，并在复核结束后停止本次启动的进程。
 - 真实页面视口必须匹配 Figma Frame 的宽高或设备宽度，并记录两者。
 - 不用独立日常预览工程替代目标页面。
 - 不为截图新增或修改路由，不绕过登录，不插入临时业务 Stub。若合法会话、数据或访问条件缺失，保留真实边界。
-- Chrome 只用于已识别偏差的定点证据，不是固定前置步骤，也不能用 DOM 数值替代视觉判断。
+- 受控浏览器缺少登录态或跳转到登录页时，暂停操作，引导用户在同一浏览器会话中手动登录并等待确认；不得读取凭据、代填密码、绕过认证或假设其他浏览器的登录态会自动同步。
+- 当前会话无法直接查看 Figma 与真实页面两张截图时，可用 Chrome 取得结构化页面证据；除此之外，Chrome 只用于已识别偏差的定点证据。DOM 和计算样式不能替代视觉判断。
 
 ## 能力分流
 
 严格执行：
 
 ```text
-multimodal → compare Figma and real-page screenshot → mismatch? targeted Chrome
-non-multimodal → expose Figma reference and real page → user identifies mismatch → targeted Chrome
+can inspect both screenshots → compare Figma and real-page screenshot → mismatch? targeted Chrome
+cannot inspect both screenshots → Figma structure vs real-page DOM/computed styles
+→ report structured differences → expose Figma reference and real page
+→ user visual judgment → mismatch? targeted Chrome
 ```
 
-### Multimodal
+### 可以直接查看两张截图
 
 1. 在匹配 Figma Frame 的视口取得真实页面截图。
 2. 直接比较 Figma 与真实页面截图，检查结构、尺寸、间距、对齐、字体、颜色、圆角、边框、阴影、资源和可见状态。
 3. 没有识别出具体偏差时，不打开 Chrome 做泛化检查。
 4. 识别偏差后，只用 Chrome 检查相关元素的尺寸、盒模型、计算样式、父级布局、资源加载和对应源码。
 
-### Non-multimodal
+### 无法直接查看两张截图
 
-1. 向用户提供可查看的 Figma 参考和真实页面入口，并说明当前模型不能读取图片，不能自行作视觉结论。
-2. 等待用户指出具体区域或问题类型。用户只说“有问题”时，先询问区域、实际表现和期望表现；此时不打开 Chrome。
-3. 用户识别具体偏差后，才用 Chrome 检查该区域的尺寸、盒模型、计算样式、父级布局、资源加载和对应源码。
+1. 用文本、角色或稳定选择器定位与 Figma 目标区域对应的真实页面 DOM；不能建立可靠对应关系时说明缺口，不猜测映射。
+2. 将 Figma 结构化证据与真实页面的 DOM、边界尺寸和计算样式对比，覆盖层级、尺寸行为、间距、对齐、字体、颜色、圆角、边框、阴影、资源和可见状态。Chrome 不支持所需读取能力时跳过对应项并说明原因。
+3. 输出已匹配项、差异项和无法比较项，明确标记为“结构化对比”，不得据此声称视觉一致或视觉复核完成。
+4. 向用户提供可查看的 Figma 参考和真实页面入口，请用户完成视觉判断。用户指出具体偏差后，再用 Chrome 定点检查相关盒模型、计算样式、父级布局、资源加载和源码；用户只说“有问题”时，先询问区域、实际表现和期望表现。
 
 ## 修正与边界
 
