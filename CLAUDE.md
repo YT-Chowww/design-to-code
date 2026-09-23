@@ -20,7 +20,7 @@ The URL must contain a concrete `node-id`. The target defaults to the current wo
 
 1. Validate the Figma node scope and target project.
 2. Select a usable Figma Provider and obtain structured design context.
-3. Read the project-root `D2C.md`, or prepare it on first use.
+3. Read applicable `D2C.md` rules from the target directory up to the repository root, or prepare them if absent.
 4. Inspect only task-relevant components, Tokens, resources, business behavior, routes, and validation commands.
 5. Show an ASCII structure and implementation preview; wait for confirmation.
 6. Modify only the confirmed files and impact surface.
@@ -39,7 +39,7 @@ The URL must contain a concrete `node-id`. The target defaults to the current wo
 
 ## Project `D2C.md` and approvals
 
-`D2C.md` lives at the target project root and contains stable project rules: stack, component usage, Tokens and theme, layout, resources, data conventions, code boundaries, and validation entrypoints.
+Search for applicable `D2C.md` files from the target project directory up to the current Git repository root; without Git, check only the target directory. Read applicable parent rules before child rules, with nearer rules taking precedence for the same item. Ask when scope is unclear. New files belong at the target project root and contain stable rules: stack, components, Tokens, theme and style utilities, layout, resources, data conventions, code boundaries, and validation entrypoints.
 
 On first use there are two distinct approvals:
 
@@ -53,7 +53,7 @@ Do not update an existing `D2C.md` without the user's request. Page-specific rou
 - Use validation commands from `D2C.md`, then package scripts and project guidance, then ask the user if still unclear.
 - Run the applicable type, Lint, test, and build checks for the changed surface.
 - Review the target project's real route at the Figma Frame viewport; do not substitute a standalone daily preview project.
-- Use Chrome MCP only after a concrete visual mismatch has been identified. Inspect only the affected element, layout, resource, and source code.
+- When both screenshots can be inspected, use Chrome MCP to investigate identified mismatches. Otherwise compare Figma structure with DOM/computed styles and leave visual judgment to the user; structured agreement does not prove visual fidelity.
 - If the real page cannot be opened because of authentication, permissions, data, startup, or environment limits, report it as not visually verified.
 
 ## Repository commands
