@@ -9,7 +9,7 @@ description: Use when a user wants to preview the current model's Figma-to-code 
 
 一次把固定四个节点生成到隔离的 `.d2c-benchmark/latest/`，向用户提供一个 Figma 原稿与真实页面并排查看的入口。它是日常 `d2c` 之外的可选能力：不修改业务项目，不逐场景请求实现确认，也不评分、排名、分类或判断模型是否通过。
 
-开始前必须读取[固定场景](references/scenarios.md)。Provider 选择与设计读取沿用日常 `d2c` 的规则；不执行项目分析、`D2C.md`、实现预览确认、业务项目合入或业务路由验证。
+开始前必须读取[固定场景](references/scenarios.md)及[日常 D2C](../d2c/SKILL.md)的 Provider 与 Design context 规则，沿用其设计读取和系统 UI 排除边界；并排查看按[视觉复核指南](../d2c/references/visual-review.md)的应用内容区域对齐原则解释差异，保留原始参考图。不执行项目分析、`D2C.md`、实现预览确认、业务项目合入或业务路由验证。
 
 ## 一次执行流程
 
