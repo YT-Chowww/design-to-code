@@ -9,7 +9,7 @@ npm test
 npm run check:d2c-skill
 ```
 
-检查内容包括：主 Skill 与五个 Reference、项目规则模板、无凭据 MCP 模板、链接有效性、模板中立性、旧入口清理、当前文档表述、框架范围、Provider 行为场景和 Code Connect 边界。
+检查内容包括：主 Skill 与 Reference、项目规则与调试模板、无凭据 MCP 模板、链接有效性、模板中立性、旧入口清理、当前文档表述、框架范围、Provider 行为场景和 Code Connect 边界。
 
 日常 Skill 使用 `check:d2c-skill`，可选 Benchmark 使用 `check:d2c-benchmark`。旧工件校验入口和样本不再保留，也不作为当前能力证据。
 

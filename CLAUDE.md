@@ -50,6 +50,8 @@ Do not update an existing `D2C.md` without the user's request. Page-specific rou
 
 ## Validation boundaries
 
+Debug is off by default. On explicit request, follow `.claude/skills/d2c/references/debug.md` and maintain only the latest task in the target project's `d2c-debug.md`. This optional record does not change approval gates or serve as execution state; when off, do not read or modify it.
+
 - Use validation commands from `D2C.md`, then package scripts and project guidance, then ask the user if still unclear.
 - Run the applicable type, Lint, test, and build checks for the changed surface.
 - Review the target project's real route at the Figma Frame viewport; do not substitute a standalone daily preview project.

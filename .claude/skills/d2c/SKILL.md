@@ -14,13 +14,15 @@ description: Use when implementing a web frontend page or component from a Figma
 这个 Skill 只编排当前会话中的读取、判断、写入和验证：
 
 - 不安装、启动或认证 MCP。仅在目标项目缺少 `.mcp.json` 时，可从随 Skill 分发的无凭据模板创建该文件；不覆盖已有配置。允许检查配置是否存在、Provider 是否配置及认证状态；不得读取、输出或保存 OAuth、Token、环境变量等凭据值。
-- 不创建运行脚本、状态机、`.d2c` 工作区、manifest、normalized JSON、阶段报告或独立日常预览工程。
+- 不创建运行脚本、状态机、`.d2c` 工作区、manifest、normalized JSON、阶段报告链或独立日常预览工程；仅明确开启 Debug 时允许下述单文件调试记录。
 - 除“未显式指定 Provider 且默认官方 Provider 返回 OAuth 未授权、授权被拒绝或授权已过期”外，不自动切换 Provider；任何切换都不混用两个 Provider 的结果。不自动评分或循环收敛。
 - 不支持从 Figma Desktop 当前选择推断目标，也不允许只看截图猜代码。
 
 Provider 指取得 Figma 证据的工具来源。本 Skill 仅支持当前会话中实际可调用的官方 Figma MCP 或 Figma-Context-MCP。
 
 ## 固定流程
+
+Debug 默认关闭，关闭时不读取或修改 `d2c-debug.md`。用户明确要求开启（可在执行中途）时，读取 [Debug 指南](references/debug.md)，按[调试模板](templates/d2c-debug.md)记录；在设计读取、项目分析、实现取舍和验证产生关键结果或遇到阻塞时更新，交付或停止时附文件链接及保存情况。Debug 不改变下述执行顺序与确认点。
 
 每次向用户显示并遵守这个顺序：
 
@@ -99,7 +101,7 @@ MCP config → preflight → provider → design context → project rules → p
 
 1. 按[项目分析指南](references/project-analysis-guide.md)对稳定项目规则做有界取证。
 2. 以[D2C.md 模板](templates/D2C.md)在对话中展示候选内容；只写有证据的稳定规则，对无法确认的组织规则询问用户。
-3. 等待用户明确确认。确认前不创建文件，不进入业务实现。
+3. 等待用户明确确认。确认前不创建 `D2C.md`，不进入业务实现；已开启的 Debug 记录可继续更新。
 4. 确认后把内容写入项目根目录 `D2C.md`，再继续当前任务。
 
 这是首次使用的第一次确认。后面的实现预览仍需要单独确认。页面细节、临时兼容、API、路由、权限和埋点不写入 `D2C.md`。

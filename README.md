@@ -52,6 +52,10 @@ Skill 发现配置缺失时可创建无凭据模板，但不会覆盖已有配�
 
 能直接查看 Figma 与真实页面截图时，只在发现具体偏差后使用 Chrome MCP 定位；不能直接查看两张截图时，用它做 Figma 结构与 DOM/计算样式的结构化对比，但不据此声称视觉一致。页面无法打开或能力不足时，交付结果会明确标注未验证范围和原因。
 
+## 可选 Debug
+
+日常 D2C 可明确要求“开启 Debug”。默认关闭；开启后在目标项目根目录维护单个 `d2c-debug.md`，记录设计证据、项目适配、实现取舍和验证结果，只保留最新一次。支持中途开启；记录失败会提示，不阻断原流程。详见 [Debug 指南](.claude/skills/d2c/references/debug.md)。
+
 ## 可选 Benchmark
 
 `d2c-benchmark` 与日常 `d2c` 相互独立。它一次使用四个固定节点生成 PC 数据、PC 图表、移动内容和移动表单场景，只写入每轮重建的 `.d2c-benchmark/latest/`，不修改业务项目。PC 使用 React + Ant Design + ECharts，移动端使用 Vue 3 + Vant，场景数据均为本地模拟数据。
